@@ -164,12 +164,12 @@ import Nav from "../../components/Nav.astro";
 
       <div class="bench-note">
         <p>
-          <span class="fg-full">Reading it straight:</span> ~1.7&times; off Rust on tight
-          integer work, ~2.6&times; off on allocation &mdash; checked
+          <span class="fg-full">Reading it straight:</span> Curios lands within 1.7&times; of Rust
+          on tight integer work and within 2.6&times; on allocation &mdash; with checked
           <span class="fg-full">Nat</span>/<span class="fg-full">Int</span> arithmetic
-          included. The interesting part wasn't curios &mdash; Lean 4, its closest relative,
-          beat native Rust outright on allocation, which says the gap here is fixable rather
-          than fundamental.
+          included, work Rust isn't doing. That's close company for a young,
+          dependently-typed language sharing a track with hand-tuned systems code, and the
+          remaining distance looks like a tuning problem, not a ceiling.
         </p>
       </div>
     </div>
