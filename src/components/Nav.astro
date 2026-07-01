@@ -1,4 +1,6 @@
 ---
+import { GITHUB_URL } from "../data/site";
+
 interface Props {
   crumb?: string;
 }
@@ -23,7 +25,7 @@ const { crumb } = Astro.props;
       }
       <a href="/curios/#benchmarks" class="navlink">benchmarks</a>
       <a
-        href="https://github.com/valmirjunior0088/curios"
+        href={GITHUB_URL}
         target="_blank"
         rel="noopener"
         class="navlink">github<span class="visually-hidden"> (opens in new tab)</span></a

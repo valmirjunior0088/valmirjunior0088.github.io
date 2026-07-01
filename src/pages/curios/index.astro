@@ -4,6 +4,8 @@ import Nav from "../../components/Nav.astro";
 import CodeCard from "../../components/CodeCard.astro";
 import Editor from "../../components/Editor.astro";
 import { PREVIEW_KEYS, HERO_SNIPPET } from "../../data/examples";
+import { FEATURES, BENCHMARKS } from "../../data/home";
+import { GITHUB_URL } from "../../data/site";
 ---
 
 <Base title="curios — a language for the curious">
@@ -69,26 +71,15 @@ import { PREVIEW_KEYS, HERO_SNIPPET } from "../../data/examples";
         <h2 class="h-serif">Built for people who like their code checked twice.</h2>
       </div>
       <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-glyph">&Pi; &Sigma;</div>
-          <div class="feature-title">Dependent by design</div>
-          <div class="feature-body">Function and tuple types are &Pi;/&Sigma; types &mdash; a type can mention a value that came before it, like a vector indexed by its own length.</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-glyph">&equiv;</div>
-          <div class="feature-title">Proofs, not comments</div>
-          <div class="feature-body">A proof-irrelevant Prop sort, propositional equality, and the refl / sym / trans / cong toolkit, ready in the standard library.</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-glyph">&mu;</div>
-          <div class="feature-title">Indexed inductive types</div>
-          <div class="feature-body">Declare your own data and proof families with index telescopes and per-constructor targets.</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-glyph">@</div>
-          <div class="feature-title">Erased at runtime</div>
-          <div class="feature-body">Mark an argument @ and it vanishes after type-checking &mdash; zero-cost, with no trace left in the compiled WebAssembly.</div>
-        </div>
+        {
+          FEATURES.map((feature) => (
+            <div class="feature-card">
+              <div class="feature-glyph">{feature.glyph}</div>
+              <div class="feature-title">{feature.title}</div>
+              <div class="feature-body">{feature.body}</div>
+            </div>
+          ))
+        }
       </div>
     </div>
 
@@ -105,25 +96,22 @@ import { PREVIEW_KEYS, HERO_SNIPPET } from "../../data/examples";
       </div>
 
       <div class="bench-grid">
-        <CodeCard filename="lcg — integer loop, N=100,000,000">
-          <div class="bench-table">
-            <div class="bench-row bench-head"><span>language</span><span>mean &middot; vs best</span></div>
-            <div class="bench-row"><span>Rust &rarr; wasm</span><span>268.3 ms &middot; 1.00&times;</span></div>
-            <div class="bench-row"><span>AssemblyScript</span><span>315.0 ms &middot; 1.17&times;</span></div>
-            <div class="bench-row bench-highlight"><span>Curios</span><span>444.6 ms &middot; 1.66&times;</span></div>
-            <div class="bench-row bench-faint"><span>Grain</span><span>29,684 ms &middot; 110.6&times;</span></div>
-          </div>
-        </CodeCard>
-
-        <CodeCard filename="trees — allocation, D=21">
-          <div class="bench-table">
-            <div class="bench-row bench-head"><span>language</span><span>mean &middot; vs best</span></div>
-            <div class="bench-row"><span>Rust &rarr; wasm</span><span>123.8 ms &middot; 1.00&times;</span></div>
-            <div class="bench-row"><span>AssemblyScript</span><span>226.4 ms &middot; 1.83&times;</span></div>
-            <div class="bench-row bench-highlight"><span>Curios</span><span>322.2 ms &middot; 2.60&times;</span></div>
-            <div class="bench-row bench-faint"><span>Grain</span><span>1,781.8 ms &middot; 14.4&times;</span></div>
-          </div>
-        </CodeCard>
+        {
+          BENCHMARKS.map((bench) => (
+            <CodeCard filename={bench.filename}>
+              <div class="bench-table">
+                {
+                  bench.rows.map((row) => (
+                    <div class:list={["bench-row", row.variant && `bench-${row.variant}`]}>
+                      <span>{row.lang}</span>
+                      <span>{row.value}</span>
+                    </div>
+                  ))
+                }
+              </div>
+            </CodeCard>
+          ))
+        }
       </div>
 
       <div class="bench-note">
@@ -157,7 +145,7 @@ import { PREVIEW_KEYS, HERO_SNIPPET } from "../../data/examples";
           <div class="github-title">Open source, early, and still finding its shape.</div>
           <div class="github-sub">github.com/valmirjunior0088/curios</div>
         </div>
-        <a href="https://github.com/valmirjunior0088/curios" target="_blank" rel="noopener" class="btn btn-outline"
+        <a href={GITHUB_URL} target="_blank" rel="noopener" class="btn btn-outline"
           >View on GitHub &uarr;<span class="visually-hidden"> (opens in new tab)</span></a
         >
       </div>

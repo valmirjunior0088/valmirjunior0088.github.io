@@ -97,6 +97,10 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
   let running = false;
   let downloadUrl = null;
 
+  // No-op in "preview" (which has no status chip) so call sites don't need
+  // their own variant check.
+  const setStatus = variant === "full" ? (text) => (el.status.textContent = text) : () => {};
+
   function renderGutter(code) {
     const lines = code.split("\n").length;
     el.gutter.innerHTML = "";
@@ -128,7 +132,7 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
     if (variant === "full") {
       el.editor.value = example.code;
       el.filename.hidden = false;
-      el.status.textContent = "";
+      setStatus("");
       renderGutter(example.code);
       autosize();
     } else {
@@ -153,6 +157,47 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
     el.reset.addEventListener("click", () => setActiveTab(active));
   }
 
+  function renderFullSuccess(result) {
+    downloadUrl = URL.createObjectURL(new Blob([result.bytes], { type: "application/wasm" }));
+    el.output.innerHTML = "";
+    const line1 = document.createElement("div");
+    line1.textContent = formatSummary(result);
+    el.output.appendChild(line1);
+
+    const { run } = result;
+    if (run.stdout || run.stderr || run.trap) {
+      const programOutput = document.createElement("pre");
+      programOutput.className = "program-output";
+      programOutput.textContent = run.stdout + run.stderr;
+      el.output.appendChild(programOutput);
+    }
+    if (run.trap) {
+      const trapLine = document.createElement("div");
+      trapLine.className = "trap-line";
+      trapLine.textContent = `✗ ${run.trap}`;
+      el.output.appendChild(trapLine);
+    } else if (run.exitCode) {
+      const exitLine = document.createElement("div");
+      exitLine.textContent = `process exited with code ${run.exitCode}`;
+      el.output.appendChild(exitLine);
+    }
+
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = (el.filename.textContent || "output.crs").replace(/\.crs$/, ".wasm");
+    link.textContent = "Download .wasm →";
+    link.className = "download-link";
+    el.output.appendChild(link);
+    setStatus(run.trap ? "✓ compiled · ✗ run failed" : "✓ compiled & ran");
+  }
+
+  function renderPreviewSuccess(result) {
+    const summary = formatSummary(result);
+    el.output.textContent = result.run.trap
+      ? `${summary}\n✗ ${result.run.trap}`
+      : `${summary}\n${result.run.stdout}${result.run.stderr}`.trimEnd();
+  }
+
   el.run.addEventListener("click", async () => {
     if (running) return;
     running = true;
@@ -162,8 +207,8 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
       URL.revokeObjectURL(downloadUrl);
       downloadUrl = null;
     }
-    if (variant === "full") el.status.textContent = "compiling…";
-    else el.output.hidden = true;
+    setStatus("compiling…");
+    if (variant === "preview") el.output.hidden = true;
 
     const code = variant === "full" ? el.editor.value : examples[active].code;
     const result = await compileAndReport(code);
@@ -171,51 +216,12 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
     el.output.hidden = false;
     if (result.ok) {
       el.output.className = "output ok-output";
-
-      if (variant === "full") {
-        downloadUrl = URL.createObjectURL(new Blob([result.bytes], { type: "application/wasm" }));
-        el.output.innerHTML = "";
-        const line1 = document.createElement("div");
-        line1.textContent = formatSummary(result);
-        el.output.appendChild(line1);
-
-        const { run } = result;
-        if (run.stdout || run.stderr || run.trap) {
-          const programOutput = document.createElement("pre");
-          programOutput.className = "program-output";
-          programOutput.textContent = run.stdout + run.stderr;
-          el.output.appendChild(programOutput);
-        }
-        if (run.trap) {
-          const trapLine = document.createElement("div");
-          trapLine.className = "trap-line";
-          trapLine.textContent = `✗ ${run.trap}`;
-          el.output.appendChild(trapLine);
-        } else if (run.exitCode) {
-          const exitLine = document.createElement("div");
-          exitLine.textContent = `process exited with code ${run.exitCode}`;
-          el.output.appendChild(exitLine);
-        }
-
-        const link = document.createElement("a");
-        link.href = downloadUrl;
-        link.download = (el.filename.textContent || "output.crs").replace(/\.crs$/, ".wasm");
-        link.textContent = "Download .wasm →";
-        link.className = "download-link";
-        el.output.appendChild(link);
-        el.status.textContent = run.trap ? "✓ compiled · ✗ run failed" : "✓ compiled & ran";
-      } else {
-        const summary = formatSummary(result);
-        el.output.textContent = result.run.trap
-          ? `${summary}\n✗ ${result.run.trap}`
-          : `${summary}\n${result.run.stdout}${result.run.stderr}`.trimEnd();
-      }
+      if (variant === "full") renderFullSuccess(result);
+      else renderPreviewSuccess(result);
     } else {
       el.output.className = "output err-output";
       el.output.textContent = result.error;
-      if (variant === "full") {
-        el.status.textContent = result.phase === "typecheck" ? "✗ type error" : "✗ compile error";
-      }
+      setStatus(result.phase === "typecheck" ? "✗ type error" : "✗ compile error");
     }
 
     running = false;
