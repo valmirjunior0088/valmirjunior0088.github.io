@@ -1,0 +1,10 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# editor/OS cruft
+.DS_Store
+.claude/

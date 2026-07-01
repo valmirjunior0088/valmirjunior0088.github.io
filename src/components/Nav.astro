@@ -1,0 +1,107 @@
+---
+interface Props {
+  crumb?: string;
+}
+
+const { crumb } = Astro.props;
+---
+
+<div class="nav">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <a href="/curios/" class="nav-brand">
+        <div class="nav-mark">&lambda;</div>
+        <span class="nav-name">curios</span>
+      </a>
+      {crumb && <span class="nav-crumb">/ {crumb}</span>}
+    </div>
+    <div class="nav-right">
+      {
+        !crumb && (
+          <a href="/curios/playground" class="navlink">playground</a>
+        )
+      }
+      <a href="/curios/#docs" class="navlink">docs</a>
+      <a
+        href="https://github.com/valmirjunior0088/curios"
+        target="_blank"
+        rel="noopener"
+        class="navlink">github</a
+      >
+      {
+        !crumb && (
+          <a href="/curios/playground" class="btn btn-primary nav-cta">open playground</a>
+        )
+      }
+    </div>
+  </div>
+</div>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(14px);
+    background: oklch(15% 0.004 285 / 85%);
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .nav-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 14px clamp(20px, 4vw, 64px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .nav-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 55%, black) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 17px;
+    color: oklch(15% 0.01 300);
+    flex-shrink: 0;
+  }
+  .nav-name {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-style: italic;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .nav-crumb {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--fg-faint);
+    border-left: 1px solid var(--border-strong);
+    padding-left: 14px;
+  }
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: clamp(16px, 3vw, 32px);
+  }
+  .nav-cta {
+    font-size: 13.5px;
+    padding: 9px 16px;
+  }
+</style>
