@@ -31,14 +31,14 @@ import Nav from "../../components/Nav.astro";
             <div class="code-card-dot"></div>
             <div class="code-card-dot"></div>
             <div class="code-card-dot"></div>
-            <span class="code-card-filename">sym.crs</span>
+            <span class="code-card-filename">vec.crs</span>
           </div>
           <div class="code-body">
-            <div class="code-line"><span class="ln">1</span><span class="cm">// symmetry of equality</span></div>
-            <div class="code-line"><span class="ln">2</span><span><span class="kw">pub let</span> sym(@A : <span class="ty">Type</span>, @x : A, @y : A, p : <span class="ty">Eq</span>(x, y)) -&gt; Eq(y, x) =</span></div>
-            <div class="code-line"><span class="ln">3</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">match</span> p : (q : Eq(A, s, t)) =&gt; Eq(t, s)</span></div>
-            <div class="code-line"><span class="ln">4</span><span>&nbsp;&nbsp;&nbsp;&nbsp;| refl(z) =&gt; Eq/refl()</span></div>
-            <div class="code-line"><span class="ln">5</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">end</span>;</span></div>
+            <div class="code-line"><span class="ln">1</span><span class="cm">// a vector indexed by its own length</span></div>
+            <div class="code-line"><span class="ln">2</span><span><span class="kw">pub induct</span> <span class="ty">Vec</span>(T : <span class="ty">Type</span>) : (n : <span class="ty">Nat</span>) -&gt; Type</span></div>
+            <div class="code-line"><span class="ln">3</span><span>| nil() : (0)</span></div>
+            <div class="code-line"><span class="ln">4</span><span>| cons(@m : Nat, x : T, xs : Vec(T, m)) : (m + 1)</span></div>
+            <div class="code-line"><span class="ln">5</span><span><span class="kw">end</span></span></div>
           </div>
         </div>
       </div>
@@ -91,12 +91,18 @@ import Nav from "../../components/Nav.astro";
           cover every pass, type, and internal API, generated straight from source.
         </p>
         <div class="chip-row">
-          <span class="chip chip-outline">curios-pipeline</span>
-          <span class="chip chip-outline">curios-core</span>
+          <span class="chip chip-outline">curios-abi</span>
+          <span class="chip chip-outline">curios-base</span>
           <span class="chip chip-outline">curios-text</span>
+          <span class="chip chip-outline">curios-core</span>
           <span class="chip chip-outline">curios-ersd</span>
           <span class="chip chip-outline">curios-cont</span>
           <span class="chip chip-outline">curios-wasm</span>
+          <span class="chip chip-outline">curios-pipeline</span>
+          <span class="chip chip-outline">curios-js</span>
+          <span class="chip chip-outline">curios-binaryen</span>
+          <span class="chip chip-outline">curios-rt</span>
+          <span class="chip chip-outline">curios</span>
         </div>
       </div>
       <div class="docs-card">
@@ -111,7 +117,7 @@ import Nav from "../../components/Nav.astro";
           Twelve crates, from the shared ABI foundations up through the CLI facade &mdash;
           browse types, traits, and functions the way the compiler team does.
         </p>
-        <a href="https://github.com/valmirjunior0088/curios" target="_blank" rel="noopener" class="btn btn-primary">Browse the Rust docs &nearr;</a>
+        <a href="https://github.com/valmirjunior0088/curios" target="_blank" rel="noopener" class="btn btn-primary docs-cta">Browse the Rust docs &nearr;</a>
       </div>
     </div>
 
@@ -290,6 +296,11 @@ import Nav from "../../components/Nav.astro";
     font-size: 15px;
     padding: 14px 26px;
   }
+  .docs-cta {
+    display: inline-block;
+    font-size: 15px;
+    padding: 14px 26px;
+  }
 
   .code-body {
     padding: 22px 24px;
@@ -361,6 +372,7 @@ import Nav from "../../components/Nav.astro";
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    margin-top: 20px;
   }
 
   .output {
