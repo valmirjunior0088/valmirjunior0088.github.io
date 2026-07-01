@@ -101,6 +101,13 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
   // their own variant check.
   const setStatus = variant === "full" ? (text) => (el.status.textContent = text) : () => {};
 
+  function revokeDownload() {
+    if (downloadUrl) {
+      URL.revokeObjectURL(downloadUrl);
+      downloadUrl = null;
+    }
+  }
+
   function renderGutter(code) {
     const lines = code.split("\n").length;
     el.gutter.innerHTML = "";
@@ -120,41 +127,6 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
 
   function formatSummary(result) {
     return `✓ typechecked in ${result.typeMs.toFixed(1)}ms · compiled to wasm in ${result.wasmMs.toFixed(1)}ms (${result.bytes.length} bytes)`;
-  }
-
-  function setActiveTab(key) {
-    active = key;
-    const example = examples[key];
-    el.filename.textContent = example.label;
-    el.output.hidden = true;
-    el.tabs.forEach((btn) => btn.classList.toggle("tab-active", btn.dataset.example === key));
-
-    if (variant === "full") {
-      el.editor.value = example.code;
-      el.filename.hidden = false;
-      setStatus("");
-      renderGutter(example.code);
-      autosize();
-    } else {
-      el.code.textContent = example.code;
-      renderGutter(example.code);
-    }
-  }
-
-  el.tabs.forEach((btn) => {
-    btn.addEventListener("click", () => setActiveTab(btn.dataset.example));
-  });
-
-  if (variant === "full") {
-    el.editor.addEventListener("input", () => {
-      el.tabs.forEach((btn) => btn.classList.remove("tab-active"));
-      el.filename.textContent = "";
-      el.filename.hidden = true;
-      renderGutter(el.editor.value);
-      autosize();
-    });
-
-    el.reset.addEventListener("click", () => setActiveTab(active));
   }
 
   function renderFullSuccess(result) {
@@ -198,26 +170,75 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
       : `${summary}\n${result.run.stdout}${result.run.stderr}`.trimEnd();
   }
 
+  // Everything that differs between the two variants lives in one of these
+  // two objects — the tab/gutter/run-button plumbing below is
+  // variant-agnostic and just calls into `strategy`.
+  const strategies = {
+    full: {
+      init() {
+        el.editor.addEventListener("input", () => {
+          el.tabs.forEach((btn) => btn.classList.remove("tab-active"));
+          el.filename.textContent = "";
+          el.filename.hidden = true;
+          renderGutter(el.editor.value);
+          autosize();
+        });
+        el.reset.addEventListener("click", () => setActiveTab(active));
+      },
+      showExample(example) {
+        el.editor.value = example.code;
+        el.filename.hidden = false;
+        setStatus("");
+        autosize();
+      },
+      sourceCode: () => el.editor.value,
+      beforeRun: revokeDownload,
+      onSuccess: renderFullSuccess,
+    },
+    preview: {
+      init() {},
+      showExample(example) {
+        el.code.textContent = example.code;
+      },
+      sourceCode: () => examples[active].code,
+      beforeRun() {
+        el.output.hidden = true;
+      },
+      onSuccess: renderPreviewSuccess,
+    },
+  };
+  const strategy = strategies[variant];
+
+  function setActiveTab(key) {
+    revokeDownload();
+    active = key;
+    const example = examples[key];
+    el.filename.textContent = example.label;
+    el.output.hidden = true;
+    el.tabs.forEach((btn) => btn.classList.toggle("tab-active", btn.dataset.example === key));
+    renderGutter(example.code);
+    strategy.showExample(example);
+  }
+
+  el.tabs.forEach((btn) => {
+    btn.addEventListener("click", () => setActiveTab(btn.dataset.example));
+  });
+  strategy.init();
+
   el.run.addEventListener("click", async () => {
     if (running) return;
     running = true;
     el.run.disabled = true;
     el.run.textContent = "Running…";
-    if (variant === "full" && downloadUrl) {
-      URL.revokeObjectURL(downloadUrl);
-      downloadUrl = null;
-    }
+    strategy.beforeRun();
     setStatus("compiling…");
-    if (variant === "preview") el.output.hidden = true;
 
-    const code = variant === "full" ? el.editor.value : examples[active].code;
-    const result = await compileAndReport(code);
+    const result = await compileAndReport(strategy.sourceCode());
 
     el.output.hidden = false;
     if (result.ok) {
       el.output.className = "output ok-output";
-      if (variant === "full") renderFullSuccess(result);
-      else renderPreviewSuccess(result);
+      strategy.onSuccess(result);
     } else {
       el.output.className = "output err-output";
       el.output.textContent = result.error;
