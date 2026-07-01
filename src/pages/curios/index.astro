@@ -1,6 +1,9 @@
 ---
 import Base from "../../layouts/Base.astro";
 import Nav from "../../components/Nav.astro";
+import CodeCard from "../../components/CodeCard.astro";
+import Editor from "../../components/Editor.astro";
+import { PREVIEW_KEYS, HERO_SNIPPET } from "../../data/examples";
 ---
 
 <Base title="curios — a language for the curious">
@@ -25,27 +28,24 @@ import Nav from "../../components/Nav.astro";
       </div>
 
       <div class="hero-snippet">
-        <div class="code-card">
-          <div class="code-card-topbar">
-            <div class="code-card-dot"></div>
-            <div class="code-card-dot"></div>
-            <div class="code-card-dot"></div>
-            <span class="code-card-filename">vec.crs</span>
-          </div>
+        <CodeCard filename={HERO_SNIPPET.filename}>
           <div class="code-body">
-            <div class="code-line"><span class="ln">1</span><span class="cm">// a vector indexed by its own length</span></div>
-            <div class="code-line"><span class="ln">2</span><span><span class="kw">pub induct</span> <span class="ty">Vec</span>(T : <span class="ty">Type</span>) : (n : <span class="ty">Nat</span>) -&gt; Type</span></div>
-            <div class="code-line"><span class="ln">3</span><span>| nil() : (0)</span></div>
-            <div class="code-line"><span class="ln">4</span><span>| cons(@m : Nat, x : T, xs : Vec(T, m)) : (m + 1)</span></div>
-            <div class="code-line"><span class="ln">5</span><span><span class="kw">end</span></span></div>
+            {
+              HERO_SNIPPET.lines.map((line, i) => (
+                <div class="code-line">
+                  <span class="ln">{i + 1}</span>
+                  <span set:html={line} />
+                </div>
+              ))
+            }
           </div>
-        </div>
+        </CodeCard>
       </div>
     </div>
 
     <!-- PLAYGROUND PREVIEW -->
     <div id="playground-preview" class="section">
-      <div class="section-intro" style="max-width:640px;">
+      <div class="section-intro">
         <div class="eyebrow">// the whole point</div>
         <h2>This is curios. Pick an example, hit run.</h2>
         <p class="section-lede">
@@ -55,40 +55,16 @@ import Nav from "../../components/Nav.astro";
         </p>
       </div>
 
-      <div class="tabs">
-        <button class="tab" data-example="hello">hello world</button>
-        <button class="tab" data-example="vec">vec append</button>
-        <button class="tab" data-example="sym">sym proof</button>
-        <button class="tab" data-example="error">type error</button>
-      </div>
+      <Editor variant="preview" exampleKeys={PREVIEW_KEYS} preload />
 
-      <div class="code-card">
-        <div class="code-card-topbar" style="justify-content:space-between;">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div style="display:flex; gap:8px;">
-              <div class="code-card-dot"></div>
-              <div class="code-card-dot"></div>
-              <div class="code-card-dot"></div>
-            </div>
-            <span class="chip" id="preview-filename">hello.crs</span>
-          </div>
-          <button id="preview-run" class="btn btn-primary" style="font-size:13px; padding:8px 18px;">Run &#9654;</button>
-        </div>
-        <div class="preview-editor">
-          <div id="preview-gutter" class="gutter"></div>
-          <pre id="preview-code" class="preview-code"></pre>
-        </div>
-        <div id="preview-output" class="output" hidden></div>
-      </div>
-
-      <div style="margin-top:20px;">
+      <div class="preview-cta">
         <a href="/curios/playground" class="link-cta">Open the full playground &rarr;</a>
       </div>
     </div>
 
     <!-- FEATURES -->
     <div class="section">
-      <div class="section-intro" style="max-width:640px;">
+      <div class="section-intro">
         <div class="eyebrow">// under the hood</div>
         <h2>Built for people who like their code checked twice.</h2>
       </div>
@@ -118,7 +94,7 @@ import Nav from "../../components/Nav.astro";
 
     <!-- BENCHMARKS -->
     <div id="benchmarks" class="section">
-      <div class="section-intro" style="max-width:640px;">
+      <div class="section-intro">
         <div class="eyebrow">// how it performs</div>
         <h2>Benchmarked against the languages it keeps company with.</h2>
         <p class="section-lede">
@@ -129,13 +105,7 @@ import Nav from "../../components/Nav.astro";
       </div>
 
       <div class="bench-grid">
-        <div class="code-card">
-          <div class="code-card-topbar">
-            <div class="code-card-dot"></div>
-            <div class="code-card-dot"></div>
-            <div class="code-card-dot"></div>
-            <span class="code-card-filename">lcg &mdash; integer loop, N=100,000,000</span>
-          </div>
+        <CodeCard filename="lcg — integer loop, N=100,000,000">
           <div class="bench-table">
             <div class="bench-row bench-head"><span>language</span><span>mean &middot; vs best</span></div>
             <div class="bench-row"><span>Rust &rarr; wasm</span><span>268.3 ms &middot; 1.00&times;</span></div>
@@ -143,15 +113,9 @@ import Nav from "../../components/Nav.astro";
             <div class="bench-row bench-highlight"><span>Curios</span><span>444.6 ms &middot; 1.66&times;</span></div>
             <div class="bench-row bench-faint"><span>Grain</span><span>29,684 ms &middot; 110.6&times;</span></div>
           </div>
-        </div>
+        </CodeCard>
 
-        <div class="code-card">
-          <div class="code-card-topbar">
-            <div class="code-card-dot"></div>
-            <div class="code-card-dot"></div>
-            <div class="code-card-dot"></div>
-            <span class="code-card-filename">trees &mdash; allocation, D=21</span>
-          </div>
+        <CodeCard filename="trees — allocation, D=21">
           <div class="bench-table">
             <div class="bench-row bench-head"><span>language</span><span>mean &middot; vs best</span></div>
             <div class="bench-row"><span>Rust &rarr; wasm</span><span>123.8 ms &middot; 1.00&times;</span></div>
@@ -159,7 +123,7 @@ import Nav from "../../components/Nav.astro";
             <div class="bench-row bench-highlight"><span>Curios</span><span>322.2 ms &middot; 2.60&times;</span></div>
             <div class="bench-row bench-faint"><span>Grain</span><span>1,781.8 ms &middot; 14.4&times;</span></div>
           </div>
-        </div>
+        </CodeCard>
       </div>
 
       <div class="bench-note">
@@ -176,7 +140,7 @@ import Nav from "../../components/Nav.astro";
 
     <!-- INSTALL -->
     <div class="section install-section">
-      <div class="eyebrow" style="justify-content:center; display:flex;">// get started</div>
+      <div class="eyebrow eyebrow-center">// get started</div>
       <h2>Up and running in under a minute.</h2>
       <div class="install-card">
         <div><span class="fainter">$</span> cargo install curios</div>
@@ -193,7 +157,9 @@ import Nav from "../../components/Nav.astro";
           <div class="github-title">Open source, early, and still finding its shape.</div>
           <div class="github-sub">github.com/valmirjunior0088/curios</div>
         </div>
-        <a href="https://github.com/valmirjunior0088/curios" target="_blank" rel="noopener" class="btn btn-outline">View on GitHub &uarr;</a>
+        <a href="https://github.com/valmirjunior0088/curios" target="_blank" rel="noopener" class="btn btn-outline"
+          >View on GitHub &uarr;<span class="visually-hidden"> (opens in new tab)</span></a
+        >
       </div>
     </div>
 
@@ -210,114 +176,6 @@ import Nav from "../../components/Nav.astro";
     </div>
   </div>
 </Base>
-
-<script type="module" is:inline src="/curios/loader.js"></script>
-<script type="module" is:inline>
-  import { compileAndReport } from "/curios/loader.js";
-
-  const EXAMPLES = {
-    hello: {
-      label: "hello.crs",
-      code: 'use /std/{Io};\n\nIo/print("Hello, world!\\n")',
-    },
-    vec: {
-      label: "vec.crs",
-      code:
-        "use /std/{Io, Nat};\n\n" +
-        "pub induct Vec(T : Type) : (n : Nat) -> Type\n" +
-        "| nil() : (0)\n" +
-        "| cons(@m : Nat, x : T, xs : Vec(T, m)) : (m + 1)\n" +
-        "end\n\n" +
-        "pub rec append(@T : Type, @n : Nat, @m : Nat, v : Vec(T, n), w : Vec(T, m)) -> Vec(T, n + m) =\n" +
-        "    match v : (v : Vec(T, k)) => Vec(T, k + m)\n" +
-        "    | nil()          => w\n" +
-        "    | cons(j, x, xs) => Vec/cons(x, append(xs, w))\n" +
-        "    end;\n\n" +
-        'Io/print("typechecks: Vec/append\\n")',
-    },
-    sym: {
-      label: "sym.crs",
-      code:
-        "use /std/{Io, Eq};\n\n" +
-        "pub let sym(@A : Type, @x : A, @y : A, p : Eq(x, y)) -> Eq(y, x) =\n" +
-        "    match p : (q : Eq(A, s, t)) => Eq(t, s)\n" +
-        "    | refl(z) => Eq/refl()\n" +
-        "    end;\n\n" +
-        'Io/print("typechecks: sym\\n")',
-    },
-    error: {
-      label: "broken.crs",
-      code:
-        "use /std/{Io, Nat, Vec};\n\n" +
-        "pub let broken(@n : Nat) -> Vec(Nat, n) =\n" +
-        "    Vec/cons(0, Vec/nil());\n\n" +
-        'Io/print("unreachable\\n")',
-    },
-  };
-
-  const el = {
-    tabs: document.querySelectorAll("#playground-preview .tab"),
-    filename: document.getElementById("preview-filename"),
-    gutter: document.getElementById("preview-gutter"),
-    code: document.getElementById("preview-code"),
-    run: document.getElementById("preview-run"),
-    output: document.getElementById("preview-output"),
-  };
-
-  let active = "hello";
-  let running = false;
-
-  function renderGutter(lineCount) {
-    el.gutter.innerHTML = "";
-    for (let i = 1; i <= lineCount; i++) {
-      const row = document.createElement("div");
-      row.textContent = String(i);
-      el.gutter.appendChild(row);
-    }
-  }
-
-  function setActiveTab(key) {
-    active = key;
-    const ex = EXAMPLES[key];
-    el.filename.textContent = ex.label;
-    el.code.textContent = ex.code;
-    el.output.hidden = true;
-    el.tabs.forEach((btn) => btn.classList.toggle("tab-active", btn.dataset.example === key));
-    renderGutter(ex.code.split("\n").length);
-  }
-
-  el.tabs.forEach((btn) => {
-    btn.addEventListener("click", () => setActiveTab(btn.dataset.example));
-  });
-
-  el.run.addEventListener("click", async () => {
-    if (running) return;
-    running = true;
-    el.run.disabled = true;
-    el.run.textContent = "Running…";
-    el.output.hidden = true;
-
-    const result = await compileAndReport(EXAMPLES[active].code);
-
-    el.output.hidden = false;
-    if (result.ok) {
-      el.output.className = "output ok-output";
-      const summary = `✓ typechecked in ${result.typeMs.toFixed(1)}ms · compiled to wasm in ${result.wasmMs.toFixed(1)}ms (${result.bytes.length} bytes)`;
-      el.output.textContent = result.run.trap
-        ? `${summary}\n✗ ${result.run.trap}`
-        : `${summary}\n${result.run.stdout}${result.run.stderr}`.trimEnd();
-    } else {
-      el.output.className = "output err-output";
-      el.output.textContent = result.error;
-    }
-
-    running = false;
-    el.run.disabled = false;
-    el.run.textContent = "Run again ▶";
-  });
-
-  setActiveTab("hello");
-</script>
 
 <style>
   .page {
@@ -430,6 +288,7 @@ import Nav from "../../components/Nav.astro";
     padding: 0 clamp(20px, 4vw, 64px) 110px;
   }
   .section-intro {
+    max-width: 640px;
     margin-bottom: 44px;
   }
   .section h2 {
@@ -447,82 +306,9 @@ import Nav from "../../components/Nav.astro";
     text-wrap: pretty;
   }
 
-  .chip {
-    font-family: var(--mono);
-    font-size: 12.5px;
-    color: var(--fg-dim);
-    background: var(--bg-chip);
-    padding: 4px 10px;
-    border-radius: 6px;
+  .preview-cta {
+    margin-top: 20px;
   }
-
-  .tabs {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 14px;
-  }
-  .tab {
-    font-family: var(--mono);
-    font-size: 13px;
-    font-weight: 500;
-    padding: 9px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--fg-dimmer);
-  }
-  .tab-active {
-    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-    background: color-mix(in srgb, var(--accent) 16%, transparent);
-    color: var(--fg);
-  }
-
-  .preview-editor {
-    display: flex;
-    padding: 22px 0;
-  }
-  .gutter {
-    width: 38px;
-    flex-shrink: 0;
-    text-align: right;
-    font-family: var(--mono);
-    font-size: 15px;
-    line-height: 1.9;
-    color: var(--fg-fainter);
-    padding-right: 14px;
-    border-right: 1px solid var(--border-soft);
-    user-select: none;
-  }
-  .preview-code {
-    flex: 1;
-    margin: 0;
-    padding: 0 24px;
-    font-family: var(--mono);
-    font-size: 15px;
-    line-height: 1.9;
-    white-space: pre;
-    color: var(--fg);
-    overflow-x: auto;
-  }
-
-  .output {
-    border-top: 1px solid var(--border-soft);
-    background: var(--bg-output);
-    padding: 20px 28px;
-    font-family: var(--mono);
-    font-size: 14.5px;
-    line-height: 1.8;
-    white-space: pre-wrap;
-  }
-  .ok-output {
-    color: var(--fg-faint);
-  }
-  .err-output {
-    color: var(--red);
-  }
-
   .link-cta {
     font-family: var(--mono);
     font-size: 14px;
@@ -614,6 +400,10 @@ import Nav from "../../components/Nav.astro";
   .install-section {
     max-width: 760px;
     text-align: center;
+  }
+  .eyebrow-center {
+    display: flex;
+    justify-content: center;
   }
   .install-card {
     background: var(--bg-card);

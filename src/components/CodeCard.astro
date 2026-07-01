@@ -1,0 +1,50 @@
+---
+// The "traffic-light" card chrome reused for the hero snippet, the benchmark
+// tables, and the playground/preview editor. `filename` renders the plain
+// label used by the static cards; pass an `actions` slot (and optionally
+// `topbar-extra`, e.g. an id-bound chip) for the interactive editor topbars.
+interface Props {
+  filename?: string;
+}
+
+const { filename } = Astro.props;
+const hasActions = Astro.slots.has("actions");
+---
+
+<div class="code-card">
+  <div class="code-card-topbar" class:list={{ "code-card-topbar-split": hasActions }}>
+    <div class="code-card-topbar-left">
+      <div class="code-card-dots" aria-hidden="true">
+        <div class="code-card-dot"></div>
+        <div class="code-card-dot"></div>
+        <div class="code-card-dot"></div>
+      </div>
+      {filename && <span class="code-card-filename">{filename}</span>}
+      <slot name="topbar-extra" />
+    </div>
+    {
+      hasActions && (
+        <div class="code-card-topbar-right">
+          <slot name="actions" />
+        </div>
+      )
+    }
+  </div>
+  <slot />
+</div>
+
+<style>
+  .code-card-topbar-split {
+    justify-content: space-between;
+  }
+  .code-card-topbar-left,
+  .code-card-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .code-card-dots {
+    display: flex;
+    gap: 8px;
+  }
+</style>

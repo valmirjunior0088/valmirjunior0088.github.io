@@ -1,0 +1,375 @@
+---
+import CodeCard from "./CodeCard.astro";
+import { EXAMPLES, type CuriosExample } from "../data/examples";
+
+// The curios playground widget: example tabs + a code-card editor that
+// compiles/runs via /curios/loader.js. Two variants share this component:
+//   - "full"    the standalone /curios/playground page — editable textarea,
+//               reset button, structured run output with a wasm download link.
+//   - "preview" the homepage teaser — read-only code, no reset, plain-text
+//               run summary. Shows a curated subset of examples.
+interface Props {
+  variant: "full" | "preview";
+  exampleKeys?: string[];
+  preload?: boolean;
+}
+
+const { variant, exampleKeys = Object.keys(EXAMPLES), preload = false } = Astro.props;
+
+const examples: Record<string, CuriosExample> = Object.fromEntries(
+  exampleKeys.map((key) => [key, EXAMPLES[key]])
+);
+const defaultKey = exampleKeys[0];
+
+const widgetId = variant === "full" ? "editor-full" : "editor-preview";
+const ids =
+  variant === "full"
+    ? {
+        filename: "filename",
+        status: "status",
+        reset: "reset",
+        run: "run",
+        gutter: "gutter",
+        editor: "editor",
+        output: "output",
+      }
+    : {
+        filename: "preview-filename",
+        run: "preview-run",
+        gutter: "preview-gutter",
+        code: "preview-code",
+        output: "preview-output",
+      };
+---
+
+{preload && <script type="module" is:inline src="/curios/loader.js"></script>}
+
+<div id={widgetId} class="editor-widget" data-variant={variant}>
+  <div class="tabs">
+    {
+      exampleKeys.map((key) => (
+        <button class="tab" data-example={key}>
+          {examples[key].tab}
+        </button>
+      ))
+    }
+  </div>
+
+  <CodeCard>
+    <Fragment slot="topbar-extra">
+      <span class="chip" id={ids.filename}>{examples[defaultKey].label}</span>
+    </Fragment>
+    <Fragment slot="actions">
+      {variant === "full" && <span class="status" id={ids.status} aria-live="polite" />}
+      {variant === "full" && (
+        <button id={ids.reset} class="btn btn-outline btn-reset">
+          Reset
+        </button>
+      )}
+      <button id={ids.run} class="btn btn-primary btn-run">
+        Run &#9654;
+      </button>
+    </Fragment>
+
+    {
+      variant === "full" ? (
+        <div class="editor">
+          <div id={ids.gutter} class="gutter" />
+          <textarea id={ids.editor} spellcheck="false" />
+        </div>
+      ) : (
+        <div class="preview-editor">
+          <div id={ids.gutter} class="gutter" />
+          <pre id={ids.code} class="preview-code" />
+        </div>
+      )
+    }
+
+    <div id={ids.output} class="output" hidden aria-live="polite" />
+  </CodeCard>
+</div>
+
+<script type="module" define:vars={{ variant, examples, defaultKey, ids, widgetId }}>
+  import { compileAndReport } from "/curios/loader.js";
+
+  const widget = document.getElementById(widgetId);
+  const el = {
+    tabs: widget.querySelectorAll(".tab"),
+    filename: document.getElementById(ids.filename),
+    run: document.getElementById(ids.run),
+    gutter: document.getElementById(ids.gutter),
+    output: document.getElementById(ids.output),
+    ...(variant === "full"
+      ? {
+          status: document.getElementById(ids.status),
+          reset: document.getElementById(ids.reset),
+          editor: document.getElementById(ids.editor),
+        }
+      : { code: document.getElementById(ids.code) }),
+  };
+
+  let active = defaultKey;
+  let running = false;
+  let downloadUrl = null;
+
+  function renderGutter(code) {
+    const lines = code.split("\n").length;
+    el.gutter.innerHTML = "";
+    for (let i = 1; i <= lines; i++) {
+      const row = document.createElement("div");
+      row.textContent = String(i);
+      el.gutter.appendChild(row);
+    }
+  }
+
+  function autosize() {
+    el.editor.style.height = "auto";
+    const height = Math.max(340, el.editor.scrollHeight);
+    el.editor.style.height = height + "px";
+    el.gutter.style.height = height + "px";
+  }
+
+  function setActiveTab(key) {
+    active = key;
+    const example = examples[key];
+    el.filename.textContent = example.label;
+    el.output.hidden = true;
+    el.tabs.forEach((btn) => btn.classList.toggle("tab-active", btn.dataset.example === key));
+
+    if (variant === "full") {
+      el.editor.value = example.code;
+      el.filename.hidden = false;
+      el.status.textContent = "";
+      renderGutter(example.code);
+      autosize();
+    } else {
+      el.code.textContent = example.code;
+      renderGutter(example.code);
+    }
+  }
+
+  el.tabs.forEach((btn) => {
+    btn.addEventListener("click", () => setActiveTab(btn.dataset.example));
+  });
+
+  if (variant === "full") {
+    el.editor.addEventListener("input", () => {
+      el.tabs.forEach((btn) => btn.classList.remove("tab-active"));
+      el.filename.textContent = "";
+      el.filename.hidden = true;
+      renderGutter(el.editor.value);
+      autosize();
+    });
+
+    el.reset.addEventListener("click", () => setActiveTab(active));
+  }
+
+  el.run.addEventListener("click", async () => {
+    if (running) return;
+    running = true;
+    el.run.disabled = true;
+    el.run.textContent = "Running…";
+    if (variant === "full" && downloadUrl) {
+      URL.revokeObjectURL(downloadUrl);
+      downloadUrl = null;
+    }
+    if (variant === "full") el.status.textContent = "compiling…";
+    else el.output.hidden = true;
+
+    const code = variant === "full" ? el.editor.value : examples[active].code;
+    const result = await compileAndReport(code);
+
+    el.output.hidden = false;
+    if (result.ok) {
+      el.output.className = "output ok-output";
+
+      if (variant === "full") {
+        downloadUrl = URL.createObjectURL(new Blob([result.bytes], { type: "application/wasm" }));
+        el.output.innerHTML = "";
+        const line1 = document.createElement("div");
+        line1.textContent = `✓ typechecked in ${result.typeMs.toFixed(1)}ms · compiled to wasm in ${result.wasmMs.toFixed(1)}ms (${result.bytes.length} bytes)`;
+        el.output.appendChild(line1);
+
+        const { run } = result;
+        if (run.stdout || run.stderr || run.trap) {
+          const programOutput = document.createElement("pre");
+          programOutput.className = "program-output";
+          programOutput.textContent = run.stdout + run.stderr;
+          el.output.appendChild(programOutput);
+        }
+        if (run.trap) {
+          const trapLine = document.createElement("div");
+          trapLine.className = "trap-line";
+          trapLine.textContent = `✗ ${run.trap}`;
+          el.output.appendChild(trapLine);
+        } else if (run.exitCode) {
+          const exitLine = document.createElement("div");
+          exitLine.textContent = `process exited with code ${run.exitCode}`;
+          el.output.appendChild(exitLine);
+        }
+
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = (el.filename.textContent || "output.crs").replace(/\.crs$/, ".wasm");
+        link.textContent = "Download .wasm →";
+        link.className = "download-link";
+        el.output.appendChild(link);
+        el.status.textContent = run.trap ? "✓ compiled · ✗ run failed" : "✓ compiled & ran";
+      } else {
+        const summary = `✓ typechecked in ${result.typeMs.toFixed(1)}ms · compiled to wasm in ${result.wasmMs.toFixed(1)}ms (${result.bytes.length} bytes)`;
+        el.output.textContent = result.run.trap
+          ? `${summary}\n✗ ${result.run.trap}`
+          : `${summary}\n${result.run.stdout}${result.run.stderr}`.trimEnd();
+      }
+    } else {
+      el.output.className = "output err-output";
+      el.output.textContent = result.error;
+      if (variant === "full") {
+        el.status.textContent = result.phase === "typecheck" ? "✗ type error" : "✗ compile error";
+      }
+    }
+
+    running = false;
+    el.run.disabled = false;
+    el.run.textContent = "Run again ▶";
+  });
+
+  setActiveTab(defaultKey);
+</script>
+
+<style>
+  .tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .tab {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 9px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--fg-dimmer);
+  }
+  .tab-active {
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    color: var(--fg);
+  }
+
+  .btn-run {
+    font-size: 13px;
+    padding: 8px 18px;
+  }
+  .btn-reset {
+    font-size: 13px;
+    padding: 8px 14px;
+  }
+
+  .status {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--fg-faint);
+  }
+
+  .gutter {
+    flex-shrink: 0;
+    box-sizing: border-box;
+    text-align: right;
+    font-family: var(--mono);
+    color: var(--fg-fainter);
+    user-select: none;
+  }
+
+  .editor-widget[data-variant="full"] .gutter {
+    width: 52px;
+    padding: 20px 8px 20px 16px;
+    font-size: 14.5px;
+    line-height: 1.7;
+    border-right: 1px solid var(--border-soft);
+  }
+  .editor-widget[data-variant="full"] .editor {
+    display: flex;
+    align-items: flex-start;
+    min-height: 340px;
+  }
+  .editor-widget[data-variant="full"] textarea#editor {
+    flex: 1;
+    box-sizing: border-box;
+    min-height: 340px;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    color: oklch(94% 0.006 285);
+    font-family: var(--mono);
+    font-size: 14.5px;
+    line-height: 1.7;
+    padding: 20px 24px;
+    overflow: hidden;
+  }
+
+  .editor-widget[data-variant="preview"] .gutter {
+    width: 38px;
+    font-size: 15px;
+    line-height: 1.9;
+    padding-right: 14px;
+    border-right: 1px solid var(--border-soft);
+  }
+  .editor-widget[data-variant="preview"] .preview-editor {
+    display: flex;
+    padding: 22px 0;
+  }
+  .editor-widget[data-variant="preview"] .preview-code {
+    flex: 1;
+    margin: 0;
+    padding: 0 24px;
+    font-family: var(--mono);
+    font-size: 15px;
+    line-height: 1.9;
+    white-space: pre;
+    color: var(--fg);
+    overflow-x: auto;
+  }
+
+  .output {
+    border-top: 1px solid var(--border-soft);
+    background: var(--bg-output);
+    padding: 20px 28px;
+    font-family: var(--mono);
+    font-size: 14.5px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+  }
+  .ok-output {
+    color: var(--fg-faint);
+  }
+  .err-output {
+    color: var(--red);
+  }
+  .download-link {
+    display: block;
+    margin-top: 10px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .program-output {
+    margin: 12px 0;
+    padding: 12px 14px;
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    color: var(--fg);
+    white-space: pre-wrap;
+    font: inherit;
+  }
+  .trap-line {
+    color: var(--red);
+    margin-bottom: 6px;
+  }
+</style>
