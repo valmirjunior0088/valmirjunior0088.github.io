@@ -16,7 +16,7 @@ import { PREVIEW_KEYS, HERO_SNIPPET } from "../../data/examples";
 
       <div class="hero-copy">
         <div class="eyebrow">// a small language, fully dependent</div>
-        <h1>A language for<br /><em>the curious.</em></h1>
+        <h1 class="h-serif">A language for<br /><em>the curious.</em></h1>
         <p class="lede">
           curios is a small, dependently-typed language that compiles straight to WebAssembly.
           Types can depend on values, proofs live right alongside ordinary code, and the
@@ -47,7 +47,7 @@ import { PREVIEW_KEYS, HERO_SNIPPET } from "../../data/examples";
     <div id="playground-preview" class="section">
       <div class="section-intro">
         <div class="eyebrow">// the whole point</div>
-        <h2>This is curios. Pick an example, hit run.</h2>
+        <h2 class="h-serif">This is curios. Pick an example, hit run.</h2>
         <p class="section-lede">
           Nothing to install, nothing to read first &mdash; the playground typechecks and
           compiles straight to WebAssembly using the same pipeline as the CLI, entirely in
@@ -66,7 +66,7 @@ import { PREVIEW_KEYS, HERO_SNIPPET } from "../../data/examples";
     <div class="section">
       <div class="section-intro">
         <div class="eyebrow">// under the hood</div>
-        <h2>Built for people who like their code checked twice.</h2>
+        <h2 class="h-serif">Built for people who like their code checked twice.</h2>
       </div>
       <div class="features-grid">
         <div class="feature-card">
@@ -96,7 +96,7 @@ import { PREVIEW_KEYS, HERO_SNIPPET } from "../../data/examples";
     <div id="benchmarks" class="section">
       <div class="section-intro">
         <div class="eyebrow">// how it performs</div>
-        <h2>Benchmarked against the languages it keeps company with.</h2>
+        <h2 class="h-serif">Benchmarked against the languages it keeps company with.</h2>
         <p class="section-lede">
           A single-machine snapshot (wasmtime on Cranelift, one pinned core) &mdash;
           orientation, not a leaderboard. Curios only targets WebAssembly, so this is the
@@ -141,7 +141,7 @@ import { PREVIEW_KEYS, HERO_SNIPPET } from "../../data/examples";
     <!-- INSTALL -->
     <div class="section install-section">
       <div class="eyebrow eyebrow-center">// get started</div>
-      <h2>Up and running in under a minute.</h2>
+      <h2 class="h-serif">Up and running in under a minute.</h2>
       <div class="install-card">
         <div><span class="fainter">$</span> cargo install curios</div>
         <div><span class="fainter">$</span> curios run hello.crs</div>
@@ -220,12 +220,9 @@ import { PREVIEW_KEYS, HERO_SNIPPET } from "../../data/examples";
     z-index: 1;
   }
   h1 {
-    font-family: var(--serif);
     font-size: clamp(42px, 5.5vw, 70px);
     line-height: 1.04;
-    font-weight: 600;
     margin: 0 0 24px;
-    letter-spacing: -0.01em;
   }
   h1 em {
     font-weight: 500;
@@ -292,11 +289,8 @@ import { PREVIEW_KEYS, HERO_SNIPPET } from "../../data/examples";
     margin-bottom: 44px;
   }
   .section h2 {
-    font-family: var(--serif);
     font-size: clamp(30px, 3.4vw, 42px);
-    font-weight: 600;
     margin: 0 0 16px;
-    letter-spacing: -0.01em;
   }
   .section-lede {
     font-size: 17px;

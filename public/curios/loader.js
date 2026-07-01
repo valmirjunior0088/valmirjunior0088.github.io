@@ -98,6 +98,7 @@ function makeBrowserHost(bridge, { onStdout, onStderr }) {
     throw new Error(`${label} is not supported in the browser playground`);
   };
   const deniedWithHandle = () => [STATUS.PERMISSION_DENIED, bridge.bin_new(0)];
+  const denied = () => STATUS.PERMISSION_DENIED;
 
   return {
     io_write(io, bytesRef) {
@@ -138,15 +139,15 @@ function makeBrowserHost(bridge, { onStdout, onStderr }) {
     io_socket: deniedWithHandle,
     io_tls_server_config: deniedWithHandle,
     io_accept: deniedWithHandle,
-    io_connect: () => STATUS.PERMISSION_DENIED,
-    io_bind: () => STATUS.PERMISSION_DENIED,
-    io_listen: () => STATUS.PERMISSION_DENIED,
-    io_start_tls: () => STATUS.PERMISSION_DENIED,
-    io_start_tls_server: () => STATUS.PERMISSION_DENIED,
-    io_set_nonblocking: () => STATUS.PERMISSION_DENIED,
-    io_set_recv_timeout: () => STATUS.PERMISSION_DENIED,
-    io_set_send_timeout: () => STATUS.PERMISSION_DENIED,
-    io_set_reuseaddr: () => STATUS.PERMISSION_DENIED,
+    io_connect: denied,
+    io_bind: denied,
+    io_listen: denied,
+    io_start_tls: denied,
+    io_start_tls_server: denied,
+    io_set_nonblocking: denied,
+    io_set_recv_timeout: denied,
+    io_set_send_timeout: denied,
+    io_set_reuseaddr: denied,
     io_close() {},
     io_resolve: unsupported("network access"),
     io_poll: unsupported("network access"),

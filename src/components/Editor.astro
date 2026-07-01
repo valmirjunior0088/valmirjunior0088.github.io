@@ -22,24 +22,6 @@ const examples: Record<string, CuriosExample> = Object.fromEntries(
 const defaultKey = exampleKeys[0];
 
 const widgetId = variant === "full" ? "editor-full" : "editor-preview";
-const ids =
-  variant === "full"
-    ? {
-        filename: "filename",
-        status: "status",
-        reset: "reset",
-        run: "run",
-        gutter: "gutter",
-        editor: "editor",
-        output: "output",
-      }
-    : {
-        filename: "preview-filename",
-        run: "preview-run",
-        gutter: "preview-gutter",
-        code: "preview-code",
-        output: "preview-output",
-      };
 ---
 
 {preload && <script type="module" is:inline src="/curios/loader.js"></script>}
@@ -57,16 +39,16 @@ const ids =
 
   <CodeCard>
     <Fragment slot="topbar-extra">
-      <span class="chip" id={ids.filename}>{examples[defaultKey].label}</span>
+      <span class="chip filename">{examples[defaultKey].label}</span>
     </Fragment>
     <Fragment slot="actions">
-      {variant === "full" && <span class="status" id={ids.status} aria-live="polite" />}
+      {variant === "full" && <span class="status" aria-live="polite" />}
       {variant === "full" && (
-        <button id={ids.reset} class="btn btn-outline btn-reset">
+        <button class="btn btn-outline btn-reset">
           Reset
         </button>
       )}
-      <button id={ids.run} class="btn btn-primary btn-run">
+      <button class="btn btn-primary btn-run">
         Run &#9654;
       </button>
     </Fragment>
@@ -74,38 +56,41 @@ const ids =
     {
       variant === "full" ? (
         <div class="editor">
-          <div id={ids.gutter} class="gutter" />
-          <textarea id={ids.editor} spellcheck="false" />
+          <div class="gutter" />
+          <textarea class="editor-input" spellcheck="false" />
         </div>
       ) : (
         <div class="preview-editor">
-          <div id={ids.gutter} class="gutter" />
-          <pre id={ids.code} class="preview-code" />
+          <div class="gutter" />
+          <pre class="preview-code" />
         </div>
       )
     }
 
-    <div id={ids.output} class="output" hidden aria-live="polite" />
+    <div class="output" hidden aria-live="polite" />
   </CodeCard>
 </div>
 
-<script type="module" define:vars={{ variant, examples, defaultKey, ids, widgetId }}>
+<script type="module" define:vars={{ variant, examples, defaultKey, widgetId }}>
   import { compileAndReport } from "/curios/loader.js";
 
+  // Elements are looked up by the classes each already carries for styling
+  // (rather than parallel id maps per variant) — safe because only one
+  // variant of this widget is ever mounted on a given page.
   const widget = document.getElementById(widgetId);
   const el = {
     tabs: widget.querySelectorAll(".tab"),
-    filename: document.getElementById(ids.filename),
-    run: document.getElementById(ids.run),
-    gutter: document.getElementById(ids.gutter),
-    output: document.getElementById(ids.output),
+    filename: widget.querySelector(".filename"),
+    run: widget.querySelector(".btn-run"),
+    gutter: widget.querySelector(".gutter"),
+    output: widget.querySelector(".output"),
     ...(variant === "full"
       ? {
-          status: document.getElementById(ids.status),
-          reset: document.getElementById(ids.reset),
-          editor: document.getElementById(ids.editor),
+          status: widget.querySelector(".status"),
+          reset: widget.querySelector(".btn-reset"),
+          editor: widget.querySelector(".editor-input"),
         }
-      : { code: document.getElementById(ids.code) }),
+      : { code: widget.querySelector(".preview-code") }),
   };
 
   let active = defaultKey;
@@ -127,6 +112,10 @@ const ids =
     const height = Math.max(340, el.editor.scrollHeight);
     el.editor.style.height = height + "px";
     el.gutter.style.height = height + "px";
+  }
+
+  function formatSummary(result) {
+    return `✓ typechecked in ${result.typeMs.toFixed(1)}ms · compiled to wasm in ${result.wasmMs.toFixed(1)}ms (${result.bytes.length} bytes)`;
   }
 
   function setActiveTab(key) {
@@ -187,7 +176,7 @@ const ids =
         downloadUrl = URL.createObjectURL(new Blob([result.bytes], { type: "application/wasm" }));
         el.output.innerHTML = "";
         const line1 = document.createElement("div");
-        line1.textContent = `✓ typechecked in ${result.typeMs.toFixed(1)}ms · compiled to wasm in ${result.wasmMs.toFixed(1)}ms (${result.bytes.length} bytes)`;
+        line1.textContent = formatSummary(result);
         el.output.appendChild(line1);
 
         const { run } = result;
@@ -216,7 +205,7 @@ const ids =
         el.output.appendChild(link);
         el.status.textContent = run.trap ? "✓ compiled · ✗ run failed" : "✓ compiled & ran";
       } else {
-        const summary = `✓ typechecked in ${result.typeMs.toFixed(1)}ms · compiled to wasm in ${result.wasmMs.toFixed(1)}ms (${result.bytes.length} bytes)`;
+        const summary = formatSummary(result);
         el.output.textContent = result.run.trap
           ? `${summary}\n✗ ${result.run.trap}`
           : `${summary}\n${result.run.stdout}${result.run.stderr}`.trimEnd();
@@ -297,7 +286,7 @@ const ids =
     align-items: flex-start;
     min-height: 340px;
   }
-  .editor-widget[data-variant="full"] textarea#editor {
+  .editor-widget[data-variant="full"] .editor-input {
     flex: 1;
     box-sizing: border-box;
     min-height: 340px;

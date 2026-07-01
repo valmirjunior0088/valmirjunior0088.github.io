@@ -10,7 +10,7 @@ import Editor from "../../components/Editor.astro";
 
     <div class="main">
       <div class="intro">
-        <h1>Playground</h1>
+        <h1 class="h-serif">Playground</h1>
         <p>Pick an example or write your own curios — it typechecks and compiles to WebAssembly right here, nothing leaves your browser.</p>
       </div>
 
@@ -29,11 +29,8 @@ import Editor from "../../components/Editor.astro";
     margin-bottom: 28px;
   }
   .intro h1 {
-    font-family: var(--serif);
     font-size: clamp(28px, 3.4vw, 38px);
-    font-weight: 600;
     margin: 0 0 10px;
-    letter-spacing: -0.01em;
   }
   .intro p {
     font-size: 15.5px;
