@@ -21,7 +21,6 @@ import Nav from "../../components/Nav.astro";
         </p>
         <div class="hero-actions">
           <a href="/curios/playground" class="btn btn-primary hero-cta">Open the Playground &rarr;</a>
-          <a href="#docs" class="btn btn-outline">Read the Docs</a>
         </div>
       </div>
 
@@ -47,12 +46,20 @@ import Nav from "../../components/Nav.astro";
     <!-- PLAYGROUND PREVIEW -->
     <div id="playground-preview" class="section">
       <div class="section-intro" style="max-width:640px;">
-        <div class="eyebrow">// try it now</div>
-        <h2>Write proofs. Compile to WebAssembly. Right in the browser.</h2>
+        <div class="eyebrow">// the whole point</div>
+        <h2>This is curios. Pick an example, hit run.</h2>
         <p class="section-lede">
-          This preview compiles curios straight to WebAssembly using the same pipeline as the
-          CLI &mdash; no install, no server round-trip.
+          Nothing to install, nothing to read first &mdash; the playground typechecks and
+          compiles straight to WebAssembly using the same pipeline as the CLI, entirely in
+          your browser.
         </p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab" data-example="hello">hello world</button>
+        <button class="tab" data-example="vec">vec append</button>
+        <button class="tab" data-example="sym">sym proof</button>
+        <button class="tab" data-example="error">type error</button>
       </div>
 
       <div class="code-card">
@@ -63,61 +70,19 @@ import Nav from "../../components/Nav.astro";
               <div class="code-card-dot"></div>
               <div class="code-card-dot"></div>
             </div>
-            <span class="chip">hello.crs</span>
+            <span class="chip" id="preview-filename">hello.crs</span>
           </div>
           <button id="preview-run" class="btn btn-primary" style="font-size:13px; padding:8px 18px;">Run &#9654;</button>
         </div>
-        <div class="code-body" style="padding:26px 28px; font-size:15px; line-height:1.9;">
-          <div class="code-line"><span class="ln" style="width:16px;">1</span><span><span class="kw">use</span> /std/{"{"}Io{"}"};</span></div>
-          <div class="code-line"><span class="ln" style="width:16px;">2</span><span>&nbsp;</span></div>
-          <div class="code-line"><span class="ln" style="width:16px;">3</span><span>Io/print(<span class="str">"Hello, world!\n"</span>)</span></div>
+        <div class="preview-editor">
+          <div id="preview-gutter" class="gutter"></div>
+          <pre id="preview-code" class="preview-code"></pre>
         </div>
         <div id="preview-output" class="output" hidden></div>
       </div>
 
       <div style="margin-top:20px;">
         <a href="/curios/playground" class="link-cta">Open the full playground &rarr;</a>
-      </div>
-    </div>
-
-    <!-- DOCS -->
-    <div id="docs" class="section docs-grid">
-      <div>
-        <div class="eyebrow">// go deeper</div>
-        <h2>Every stage of the pipeline, documented.</h2>
-        <p class="section-lede" style="max-width:480px;">
-          curios compiles through a series of typed intermediate representations &mdash;
-          text &rarr; core &rarr; ersd &rarr; cont &rarr; wasm. The Rust docs for the compiler
-          cover every pass, type, and internal API, generated straight from source.
-        </p>
-        <div class="chip-row">
-          <span class="chip chip-outline">curios-abi</span>
-          <span class="chip chip-outline">curios-base</span>
-          <span class="chip chip-outline">curios-text</span>
-          <span class="chip chip-outline">curios-core</span>
-          <span class="chip chip-outline">curios-ersd</span>
-          <span class="chip chip-outline">curios-cont</span>
-          <span class="chip chip-outline">curios-wasm</span>
-          <span class="chip chip-outline">curios-pipeline</span>
-          <span class="chip chip-outline">curios-js</span>
-          <span class="chip chip-outline">curios-binaryen</span>
-          <span class="chip chip-outline">curios-rt</span>
-          <span class="chip chip-outline">curios</span>
-        </div>
-      </div>
-      <div class="docs-card">
-        <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
-          <div class="docs-icon">{"{}"}</div>
-          <div>
-            <div class="docs-title">rustdoc reference</div>
-            <div class="docs-subtitle">generated from source</div>
-          </div>
-        </div>
-        <p class="section-lede" style="margin:0 0 24px;">
-          Twelve crates, from the shared ABI foundations up through the CLI facade &mdash;
-          browse types, traits, and functions the way the compiler team does.
-        </p>
-        <a href="https://github.com/valmirjunior0088/curios" target="_blank" rel="noopener" class="btn btn-primary docs-cta">Browse the Rust docs &nearr;</a>
       </div>
     </div>
 
@@ -148,6 +113,64 @@ import Nav from "../../components/Nav.astro";
           <div class="feature-title">Erased at runtime</div>
           <div class="feature-body">Mark an argument @ and it vanishes after type-checking &mdash; zero-cost, with no trace left in the compiled WebAssembly.</div>
         </div>
+      </div>
+    </div>
+
+    <!-- BENCHMARKS -->
+    <div id="benchmarks" class="section">
+      <div class="section-intro" style="max-width:640px;">
+        <div class="eyebrow">// how it performs</div>
+        <h2>Benchmarked against the languages it keeps company with.</h2>
+        <p class="section-lede">
+          A single-machine snapshot (wasmtime on Cranelift, one pinned core) &mdash;
+          orientation, not a leaderboard. Curios only targets WebAssembly, so this is the
+          fair fight: same engine, same workloads.
+        </p>
+      </div>
+
+      <div class="bench-grid">
+        <div class="code-card">
+          <div class="code-card-topbar">
+            <div class="code-card-dot"></div>
+            <div class="code-card-dot"></div>
+            <div class="code-card-dot"></div>
+            <span class="code-card-filename">lcg &mdash; integer loop, N=100,000,000</span>
+          </div>
+          <div class="bench-table">
+            <div class="bench-row bench-head"><span>language</span><span>mean &middot; vs best</span></div>
+            <div class="bench-row"><span>Rust &rarr; wasm</span><span>268.3 ms &middot; 1.00&times;</span></div>
+            <div class="bench-row"><span>AssemblyScript</span><span>315.0 ms &middot; 1.17&times;</span></div>
+            <div class="bench-row bench-highlight"><span>Curios</span><span>444.6 ms &middot; 1.66&times;</span></div>
+            <div class="bench-row bench-faint"><span>Grain</span><span>29,684 ms &middot; 110.6&times;</span></div>
+          </div>
+        </div>
+
+        <div class="code-card">
+          <div class="code-card-topbar">
+            <div class="code-card-dot"></div>
+            <div class="code-card-dot"></div>
+            <div class="code-card-dot"></div>
+            <span class="code-card-filename">trees &mdash; allocation, D=21</span>
+          </div>
+          <div class="bench-table">
+            <div class="bench-row bench-head"><span>language</span><span>mean &middot; vs best</span></div>
+            <div class="bench-row"><span>Rust &rarr; wasm</span><span>123.8 ms &middot; 1.00&times;</span></div>
+            <div class="bench-row"><span>AssemblyScript</span><span>226.4 ms &middot; 1.83&times;</span></div>
+            <div class="bench-row bench-highlight"><span>Curios</span><span>322.2 ms &middot; 2.60&times;</span></div>
+            <div class="bench-row bench-faint"><span>Grain</span><span>1,781.8 ms &middot; 14.4&times;</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bench-note">
+        <p>
+          <span class="fg-full">Reading it straight:</span> ~1.7&times; off Rust on tight
+          integer work, ~2.6&times; off on allocation &mdash; checked
+          <span class="fg-full">Nat</span>/<span class="fg-full">Int</span> arithmetic
+          included. The interesting part wasn't curios &mdash; Lean 4, its closest relative,
+          beat native Rust outright on allocation, which says the gap here is fixable rather
+          than fundamental.
+        </p>
       </div>
     </div>
 
@@ -192,33 +215,108 @@ import Nav from "../../components/Nav.astro";
 <script type="module" is:inline>
   import { compileAndReport } from "/curios/loader.js";
 
-  const HELLO = 'use /std/{Io};\n\nIo/print("Hello, world!\\n")';
+  const EXAMPLES = {
+    hello: {
+      label: "hello.crs",
+      code: 'use /std/{Io};\n\nIo/print("Hello, world!\\n")',
+    },
+    vec: {
+      label: "vec.crs",
+      code:
+        "use /std/{Io, Nat};\n\n" +
+        "pub induct Vec(T : Type) : (n : Nat) -> Type\n" +
+        "| nil() : (0)\n" +
+        "| cons(@m : Nat, x : T, xs : Vec(T, m)) : (m + 1)\n" +
+        "end\n\n" +
+        "pub rec append(@T : Type, @n : Nat, @m : Nat, v : Vec(T, n), w : Vec(T, m)) -> Vec(T, n + m) =\n" +
+        "    match v : (v : Vec(T, k)) => Vec(T, k + m)\n" +
+        "    | nil()          => w\n" +
+        "    | cons(j, x, xs) => Vec/cons(x, append(xs, w))\n" +
+        "    end;\n\n" +
+        'Io/print("typechecks: Vec/append\\n")',
+    },
+    sym: {
+      label: "sym.crs",
+      code:
+        "use /std/{Io, Eq};\n\n" +
+        "pub let sym(@A : Type, @x : A, @y : A, p : Eq(x, y)) -> Eq(y, x) =\n" +
+        "    match p : (q : Eq(A, s, t)) => Eq(t, s)\n" +
+        "    | refl(z) => Eq/refl()\n" +
+        "    end;\n\n" +
+        'Io/print("typechecks: sym\\n")',
+    },
+    error: {
+      label: "broken.crs",
+      code:
+        "use /std/{Io, Nat, Vec};\n\n" +
+        "pub let broken(@n : Nat) -> Vec(Nat, n) =\n" +
+        "    Vec/cons(0, Vec/nil());\n\n" +
+        'Io/print("unreachable\\n")',
+    },
+  };
 
-  const button = document.getElementById("preview-run");
-  const output = document.getElementById("preview-output");
+  const el = {
+    tabs: document.querySelectorAll("#playground-preview .tab"),
+    filename: document.getElementById("preview-filename"),
+    gutter: document.getElementById("preview-gutter"),
+    code: document.getElementById("preview-code"),
+    run: document.getElementById("preview-run"),
+    output: document.getElementById("preview-output"),
+  };
 
-  button.addEventListener("click", async () => {
-    button.disabled = true;
-    button.textContent = "Running…";
-    output.hidden = true;
+  let active = "hello";
+  let running = false;
 
-    const result = await compileAndReport(HELLO);
+  function renderGutter(lineCount) {
+    el.gutter.innerHTML = "";
+    for (let i = 1; i <= lineCount; i++) {
+      const row = document.createElement("div");
+      row.textContent = String(i);
+      el.gutter.appendChild(row);
+    }
+  }
 
-    output.hidden = false;
+  function setActiveTab(key) {
+    active = key;
+    const ex = EXAMPLES[key];
+    el.filename.textContent = ex.label;
+    el.code.textContent = ex.code;
+    el.output.hidden = true;
+    el.tabs.forEach((btn) => btn.classList.toggle("tab-active", btn.dataset.example === key));
+    renderGutter(ex.code.split("\n").length);
+  }
+
+  el.tabs.forEach((btn) => {
+    btn.addEventListener("click", () => setActiveTab(btn.dataset.example));
+  });
+
+  el.run.addEventListener("click", async () => {
+    if (running) return;
+    running = true;
+    el.run.disabled = true;
+    el.run.textContent = "Running…";
+    el.output.hidden = true;
+
+    const result = await compileAndReport(EXAMPLES[active].code);
+
+    el.output.hidden = false;
     if (result.ok) {
-      output.className = "output ok-output";
+      el.output.className = "output ok-output";
       const summary = `✓ typechecked in ${result.typeMs.toFixed(1)}ms · compiled to wasm in ${result.wasmMs.toFixed(1)}ms (${result.bytes.length} bytes)`;
-      output.textContent = result.run.trap
+      el.output.textContent = result.run.trap
         ? `${summary}\n✗ ${result.run.trap}`
         : `${summary}\n${result.run.stdout}${result.run.stderr}`.trimEnd();
     } else {
-      output.className = "output err-output";
-      output.textContent = result.error;
+      el.output.className = "output err-output";
+      el.output.textContent = result.error;
     }
 
-    button.disabled = false;
-    button.textContent = "Run again ▶";
+    running = false;
+    el.run.disabled = false;
+    el.run.textContent = "Run again ▶";
   });
+
+  setActiveTab("hello");
 </script>
 
 <style>
@@ -296,11 +394,6 @@ import Nav from "../../components/Nav.astro";
     font-size: 15px;
     padding: 14px 26px;
   }
-  .docs-cta {
-    display: inline-block;
-    font-size: 15px;
-    padding: 14px 26px;
-  }
 
   .code-body {
     padding: 22px 24px;
@@ -362,17 +455,56 @@ import Nav from "../../components/Nav.astro";
     padding: 4px 10px;
     border-radius: 6px;
   }
-  .chip-outline {
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .tab {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 9px 16px;
+    border-radius: 8px;
+    cursor: pointer;
     border: 1px solid var(--border);
     background: transparent;
-    padding: 6px 12px;
-    border-radius: 999px;
+    color: var(--fg-dimmer);
   }
-  .chip-row {
+  .tab-active {
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    color: var(--fg);
+  }
+
+  .preview-editor {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 20px;
+    padding: 22px 0;
+  }
+  .gutter {
+    width: 38px;
+    flex-shrink: 0;
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 15px;
+    line-height: 1.9;
+    color: var(--fg-fainter);
+    padding-right: 14px;
+    border-right: 1px solid var(--border-soft);
+    user-select: none;
+  }
+  .preview-code {
+    flex: 1;
+    margin: 0;
+    padding: 0 24px;
+    font-family: var(--mono);
+    font-size: 15px;
+    line-height: 1.9;
+    white-space: pre;
+    color: var(--fg);
+    overflow-x: auto;
   }
 
   .output {
@@ -399,41 +531,56 @@ import Nav from "../../components/Nav.astro";
     text-decoration: none;
   }
 
-  .docs-grid {
+  .bench-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 56px;
-    align-items: center;
+    gap: 24px;
   }
-  .docs-card {
+  .bench-table {
+    padding: 8px 26px 22px;
+    font-family: var(--mono);
+    font-size: 14px;
+  }
+  .bench-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border-soft);
+    color: var(--fg-dim);
+  }
+  .bench-head {
+    color: var(--fg-faint);
+    font-size: 12px;
+  }
+  .bench-highlight {
+    color: var(--accent);
+    font-weight: 600;
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    margin: 0 -14px;
+    padding-left: 14px;
+    padding-right: 14px;
+    border-radius: 8px;
+  }
+  .bench-faint {
+    color: var(--fg-faint);
+    border-bottom: none;
+  }
+  .bench-note {
+    margin-top: 24px;
     background: var(--bg-card-alt);
     border: 1px solid var(--border);
     border-radius: var(--radius-card);
-    padding: 34px;
-    box-shadow: 0 20px 60px oklch(8% 0.01 285 / 45%);
+    padding: 22px 28px;
   }
-  .docs-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    background: oklch(24% 0.01 285);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--mono);
-    font-size: 15px;
+  .bench-note p {
+    font-size: 15.5px;
+    line-height: 1.65;
     color: var(--fg-dim);
+    margin: 0;
   }
-  .docs-title {
-    font-family: var(--mono);
-    font-size: 14px;
+  .fg-full {
     color: var(--fg);
-    font-weight: 600;
-  }
-  .docs-subtitle {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--fg-faint);
   }
 
   .features-grid {
@@ -552,7 +699,7 @@ import Nav from "../../components/Nav.astro";
 
   @media (max-width: 860px) {
     .hero,
-    .docs-grid {
+    .bench-grid {
       grid-template-columns: 1fr;
     }
     .features-grid {

@@ -17,6 +17,8 @@ import Nav from "../../components/Nav.astro";
         <button class="tab" data-example="hello">hello world</button>
         <button class="tab" data-example="vec">vec append</button>
         <button class="tab" data-example="sym">sym proof</button>
+        <button class="tab" data-example="cong">cong proof</button>
+        <button class="tab" data-example="erased">erased arg</button>
         <button class="tab" data-example="error">type error</button>
       </div>
 
@@ -80,6 +82,25 @@ import Nav from "../../components/Nav.astro";
         "    | refl(z) => Eq/refl()\n" +
         "    end;\n\n" +
         'Io/print("typechecks: sym\\n")',
+    },
+    cong: {
+      label: "cong.crs",
+      code:
+        "use /std/{Io, Nat, Eq};\n\n" +
+        "let bump(n : Nat) -> Nat = Nat/add(n, 1);\n\n" +
+        "pub let addOneCong(@x : Nat, @y : Nat, p : Eq(x, y)) -> Eq(bump(x), bump(y)) =\n" +
+        "    Eq/cong(bump, p);\n\n" +
+        'Io/print("typechecks: cong\\n")',
+    },
+    erased: {
+      label: "erased.crs",
+      code:
+        "use /std/{Io, Nat, Vec};\n\n" +
+        "pub let head(@T : Type, @n : Nat, xs : Vec(T, n + 1)) -> T =\n" +
+        "    match xs : (xs : Vec(T, k)) => T\n" +
+        "    | cons(_, x, _) => x\n" +
+        "    end;\n\n" +
+        'Io/print("typechecks: head, n erased\\n")',
     },
     error: {
       label: "broken.crs",
