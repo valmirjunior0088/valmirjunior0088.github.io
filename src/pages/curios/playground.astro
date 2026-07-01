@@ -131,10 +131,12 @@ import Nav from "../../components/Nav.astro";
     active = key;
     el.editor.value = EXAMPLES[key].code;
     el.filename.textContent = EXAMPLES[key].label;
+    el.filename.hidden = false;
     el.status.textContent = "";
     el.output.hidden = true;
     el.tabs.forEach((btn) => btn.classList.toggle("tab-active", btn.dataset.example === key));
     renderGutter();
+    autosize();
   }
 
   function renderGutter() {
@@ -147,9 +149,19 @@ import Nav from "../../components/Nav.astro";
     }
   }
 
-  el.editor.addEventListener("input", renderGutter);
-  el.editor.addEventListener("scroll", () => {
-    el.gutter.scrollTop = el.editor.scrollTop;
+  function autosize() {
+    el.editor.style.height = "auto";
+    const height = Math.max(340, el.editor.scrollHeight);
+    el.editor.style.height = height + "px";
+    el.gutter.style.height = height + "px";
+  }
+
+  el.editor.addEventListener("input", () => {
+    el.tabs.forEach((btn) => btn.classList.remove("tab-active"));
+    el.filename.textContent = "";
+    el.filename.hidden = true;
+    renderGutter();
+    autosize();
   });
 
   el.tabs.forEach((btn) => {
@@ -200,7 +212,7 @@ import Nav from "../../components/Nav.astro";
 
       const link = document.createElement("a");
       link.href = downloadUrl;
-      link.download = el.filename.textContent.replace(/\.crs$/, ".wasm");
+      link.download = (el.filename.textContent || "output.crs").replace(/\.crs$/, ".wasm");
       link.textContent = "Download .wasm →";
       link.className = "download-link";
       el.output.appendChild(link);
@@ -265,6 +277,15 @@ import Nav from "../../components/Nav.astro";
     color: var(--fg);
   }
 
+  .chip {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--fg-dim);
+    background: var(--bg-chip);
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
   .status {
     font-family: var(--mono);
     font-size: 12.5px;
@@ -273,13 +294,15 @@ import Nav from "../../components/Nav.astro";
 
   .editor {
     display: flex;
-    height: 340px;
+    align-items: flex-start;
+    min-height: 340px;
   }
   .gutter {
-    width: 48px;
+    width: 52px;
     flex-shrink: 0;
     overflow: hidden;
-    padding: 20px 0;
+    box-sizing: border-box;
+    padding: 20px 8px 20px 16px;
     text-align: right;
     font-family: var(--mono);
     font-size: 14.5px;
@@ -288,11 +311,10 @@ import Nav from "../../components/Nav.astro";
     user-select: none;
     border-right: 1px solid var(--border-soft);
   }
-  .gutter div {
-    padding-right: 14px;
-  }
   textarea#editor {
     flex: 1;
+    box-sizing: border-box;
+    min-height: 340px;
     background: transparent;
     border: none;
     outline: none;
@@ -302,7 +324,7 @@ import Nav from "../../components/Nav.astro";
     font-size: 14.5px;
     line-height: 1.7;
     padding: 20px 24px;
-    overflow: auto;
+    overflow: hidden;
   }
 
   .output {
