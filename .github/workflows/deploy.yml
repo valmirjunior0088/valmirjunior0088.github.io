@@ -8,7 +8,7 @@ on:
 env:
   # Pinned curios release tag to pull the wasm playground bundle and rustdoc
   # API docs from. Bump this deliberately when a new curios release is ready.
-  CURIOS_TAG: release/0.2.2
+  CURIOS_TAG: release/0.2.3
 
 permissions:
   contents: read
@@ -34,10 +34,6 @@ jobs:
           mkdir -p public/curios/docs
           tar -xzf /tmp/curios-release/curios-wasm.tar.gz -C public/curios
           tar -xzf /tmp/curios-release/curios-docs.tar.gz -C public/curios/docs
-          # `cargo doc --workspace` has no root index.html (rust-lang/cargo#1016,
-          # #8229 — still open) — redirect to the main facade crate's docs.
-          echo '<!DOCTYPE html><meta http-equiv="refresh" content="0; url=curios/index.html">' \
-            > public/curios/docs/index.html
       - uses: actions/setup-node@v4
         with:
           node-version: 20
