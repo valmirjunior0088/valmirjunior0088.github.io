@@ -33,7 +33,7 @@ export const FEATURES: Feature[] = [
   {
     glyph: "⇒",
     title: "Ad-hoc polymorphism",
-    body: "concept / witness declarations give you typeclass-style interfaces — every operator (+, ==, <) dispatches through one, and postfix ! sequences any Monad witness as do-notation.",
+    body: "concept and satisfy declarations give you typeclass-style interfaces — every operator (+, ==, <) dispatches through one, and postfix ! sequences any Monad witness as do-notation.",
   },
 ];
 

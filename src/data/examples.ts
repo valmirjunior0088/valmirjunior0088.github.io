@@ -48,7 +48,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "    x : Nat,\n" +
       "    y : Nat,\n" +
       "}\n\n" +
-      "witness : Add(Point) {\n" +
+      "satisfy Add(Point) {\n" +
       "    add(a, b) = Point { x = a.x + b.x, y = a.y + b.y }\n" +
       "}\n\n" +
       "let p : Point = Point { x = 1, y = 2 } + Point { x = 3, y = 4 };\n\n" +
