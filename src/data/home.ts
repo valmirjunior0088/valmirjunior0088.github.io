@@ -30,6 +30,11 @@ export const FEATURES: Feature[] = [
     title: "Erased at runtime",
     body: "Mark an argument @ and it vanishes after type-checking — zero-cost, with no trace left in the compiled WebAssembly.",
   },
+  {
+    glyph: "⇒",
+    title: "Ad-hoc polymorphism",
+    body: "concept / witness declarations give you typeclass-style interfaces — every operator (+, ==, <) dispatches through one, and postfix ! sequences any Monad witness as do-notation.",
+  },
 ];
 
 export interface BenchmarkRow {

@@ -39,15 +39,20 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "    end;\n\n" +
       'Io/print("typechecks: sym\\n")',
   },
-  cong: {
-    tab: "cong proof",
-    label: "cong.crs",
+  concepts: {
+    tab: "ad-hoc polymorphism",
+    label: "point.crs",
     code:
-      "use /std/{Io, Nat, Eq};\n\n" +
-      "let bump(n : Nat) -> Nat = Nat/add(n, 1);\n\n" +
-      "pub let addOneCong(@x : Nat, @y : Nat, p : Eq(x, y)) -> Eq(bump(x), bump(y)) =\n" +
-      "    Eq/cong(bump, p);\n\n" +
-      'Io/print("typechecks: cong\\n")',
+      "use /std/{Io, Nat, Str, Add};\n\n" +
+      "pub record Point : Type {\n" +
+      "    x : Nat,\n" +
+      "    y : Nat,\n" +
+      "}\n\n" +
+      "witness : Add(Point) {\n" +
+      "    add(a, b) = Point { x = a.x + b.x, y = a.y + b.y }\n" +
+      "}\n\n" +
+      "let p : Point = Point { x = 1, y = 2 } + Point { x = 3, y = 4 };\n\n" +
+      'Io/print(Str/concat("p.x + p.y = ", Str/concat(Nat/to_str(p.x + p.y), "\\n")))',
   },
   erased: {
     tab: "erased arg",
@@ -72,7 +77,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
 };
 
 // Which examples the homepage preview shows (a subset of the full playground).
-export const PREVIEW_KEYS = ["hello", "vec", "sym", "error"];
+export const PREVIEW_KEYS = ["hello", "vec", "concepts", "error"];
 
 // The syntax-highlighted excerpt shown in the homepage hero. It's a trimmed,
 // hand-highlighted subset of the `vec` example above (just the type

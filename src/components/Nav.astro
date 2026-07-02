@@ -23,7 +23,13 @@ const { crumb } = Astro.props;
           <a href="/curios/#playground-preview" class="navlink">preview</a>
         )
       }
+      {
+        !crumb && (
+          <a href="/curios/#features" class="navlink">features</a>
+        )
+      }
       <a href="/curios/#benchmarks" class="navlink">benchmarks</a>
+      <a href="/curios/docs/" class="navlink">docs</a>
       <a
         href={GITHUB_URL}
         target="_blank"

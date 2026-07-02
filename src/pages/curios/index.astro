@@ -65,7 +65,7 @@ import { GITHUB_URL } from "../../data/site";
     </div>
 
     <!-- FEATURES -->
-    <div class="section">
+    <div id="features" class="section">
       <div class="section-intro">
         <div class="eyebrow">// under the hood</div>
         <h2 class="h-serif">Built for people who like their code checked twice.</h2>
@@ -131,11 +131,11 @@ import { GITHUB_URL } from "../../data/site";
       <div class="eyebrow eyebrow-center">// get started</div>
       <h2 class="h-serif">Up and running in under a minute.</h2>
       <div class="install-card">
-        <div><span class="fainter">$</span> cargo install curios</div>
-        <div><span class="fainter">$</span> curios run hello.crs</div>
+        <div class="fainter">// grab the curios binary for your platform</div>
+        <div><span class="fainter">$</span> chmod +x curios &amp;&amp; ./curios run hello.crs</div>
         <div class="ok">Hello, world!</div>
       </div>
-      <p class="install-note">No Rust toolchain handy? Grab a prebuilt binary from the releases page, or just open the playground above.</p>
+      <p class="install-note">Prebuilt binaries for Linux (x86_64/aarch64) and macOS (aarch64) live on the <a href={`${GITHUB_URL}/releases`} target="_blank" rel="noopener">releases page</a>. Prefer building from source? <code>git clone</code> the repo and follow the README. Or just open the playground above &mdash; nothing to install.</p>
     </div>
 
     <!-- GITHUB -->
@@ -353,7 +353,7 @@ import { GITHUB_URL } from "../../data/site";
 
   .features-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 20px;
   }
   .feature-card {
