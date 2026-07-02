@@ -60,6 +60,9 @@ const {
 
     --mono: "JetBrains Mono", monospace;
     --serif: "Newsreader", serif;
+
+    --code-fs: 14.5px;
+    --code-lh: 1.8;
   }
 
   * {
@@ -185,6 +188,42 @@ const {
     font-size: 12.5px;
     color: var(--fg-faint);
     margin-left: 6px;
+  }
+
+  /* Shared code body: a bordered line-number gutter beside a scrolling code
+     area, with identical metrics across the hero snippet and both editor
+     variants. The gutter and area share --code-lh so the numbers always line up
+     with their lines; neither wraps (long lines scroll), so a one-number-per-
+     line gutter can never drift. */
+  .code-scroll {
+    display: flex;
+    align-items: flex-start;
+    font-family: var(--mono);
+    font-size: var(--code-fs);
+    line-height: var(--code-lh);
+  }
+  .code-gutter {
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: 46px;
+    padding: 20px 10px 20px 0;
+    text-align: right;
+    color: var(--fg-fainter);
+    user-select: none;
+    border-right: 1px solid var(--border-soft);
+  }
+  .code-area {
+    flex: 1 1 auto;
+    min-width: 0;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 20px 22px;
+    font-family: var(--mono);
+    font-size: var(--code-fs);
+    line-height: var(--code-lh);
+    color: var(--fg);
+    white-space: pre;
+    overflow-x: auto;
   }
 
   .chip {

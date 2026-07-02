@@ -55,14 +55,14 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
 
     {
       variant === "full" ? (
-        <div class="editor">
-          <div class="gutter" />
-          <textarea class="editor-input" spellcheck="false" />
+        <div class="code-scroll editor">
+          <div class="code-gutter gutter" />
+          <textarea class="code-area editor-input" spellcheck="false" wrap="off" />
         </div>
       ) : (
-        <div class="preview-editor">
-          <div class="gutter" />
-          <pre class="preview-code" />
+        <div class="code-scroll">
+          <div class="code-gutter gutter" />
+          <pre class="code-area preview-code" />
         </div>
       )
     }
@@ -292,64 +292,20 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
     color: var(--fg-faint);
   }
 
-  .gutter {
-    flex-shrink: 0;
-    box-sizing: border-box;
-    text-align: right;
-    font-family: var(--mono);
-    color: var(--fg-fainter);
-    user-select: none;
-  }
-
-  .editor-widget[data-variant="full"] .gutter {
-    width: 52px;
-    padding: 20px 8px 20px 16px;
-    font-size: 14.5px;
-    line-height: 1.7;
-    border-right: 1px solid var(--border-soft);
-  }
-  .editor-widget[data-variant="full"] .editor {
-    display: flex;
-    align-items: flex-start;
+  /* The editor's line-number gutter and code area come from the shared
+     .code-scroll / .code-gutter / .code-area recipe in Base.astro; only the
+     textarea's field reset and the min-height are editor-specific. */
+  .editor,
+  .editor-input {
     min-height: 340px;
   }
-  .editor-widget[data-variant="full"] .editor-input {
-    flex: 1;
-    box-sizing: border-box;
-    min-height: 340px;
+  .editor-input {
     background: transparent;
     border: none;
     outline: none;
     resize: none;
+    overflow-y: hidden;
     color: oklch(94% 0.006 285);
-    font-family: var(--mono);
-    font-size: 14.5px;
-    line-height: 1.7;
-    padding: 20px 24px;
-    overflow: hidden;
-  }
-
-  .editor-widget[data-variant="preview"] .gutter {
-    width: 38px;
-    font-size: 15px;
-    line-height: 1.9;
-    padding-right: 14px;
-    border-right: 1px solid var(--border-soft);
-  }
-  .editor-widget[data-variant="preview"] .preview-editor {
-    display: flex;
-    padding: 22px 0;
-  }
-  .editor-widget[data-variant="preview"] .preview-code {
-    flex: 1;
-    margin: 0;
-    padding: 0 24px;
-    font-family: var(--mono);
-    font-size: 15px;
-    line-height: 1.9;
-    white-space: pre;
-    color: var(--fg);
-    overflow-x: auto;
   }
 
   .output {
