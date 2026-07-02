@@ -81,7 +81,7 @@ export const PREVIEW_KEYS = ["hello", "vec", "sym", "error"];
 export const HERO_SNIPPET = {
   filename: "vec.crs",
   lines: [
-    '<span class="cm">// a vector indexed by its own length</span>',
+    '<span class="cm">-- a vector indexed by its own length</span>',
     '<span class="kw">pub induct</span> <span class="ty">Vec</span>(T : <span class="ty">Type</span>) : (n : <span class="ty">Nat</span>) -&gt; Type',
     "| nil() : (0)",
     "| cons(@m : Nat, x : T, xs : Vec(T, m)) : (m + 1)",
