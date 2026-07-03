@@ -43,7 +43,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     tab: "ad-hoc polymorphism",
     label: "point.crs",
     code:
-      "use /std/{Io, Nat, Str, Add};\n\n" +
+      "use /std/{Nat, Fmt, Add};\n\n" +
       "pub record Point : Type {\n" +
       "    x : Nat,\n" +
       "    y : Nat,\n" +
@@ -52,7 +52,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "    add(a, b) = Point { x = a.x + b.x, y = a.y + b.y }\n" +
       "}\n\n" +
       "let p : Point = Point { x = 1, y = 2 } + Point { x = 3, y = 4 };\n\n" +
-      'Io/print(Str/concat("p.x + p.y = ", Str/concat(Nat/to_str(p.x + p.y), "\\n")))',
+      'Fmt/print("p.x + p.y = %d\\n")(p.x + p.y)',
   },
   erased: {
     tab: "erased arg",
