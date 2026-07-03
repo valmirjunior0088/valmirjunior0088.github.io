@@ -5,11 +5,6 @@ on:
     branches: [main]
   workflow_dispatch:
 
-env:
-  # Pinned curios release tag to pull the wasm playground bundle and rustdoc
-  # API docs from. Bump this deliberately when a new curios release is ready.
-  CURIOS_TAG: release/0.2.6
-
 permissions:
   contents: read
   pages: write
@@ -27,13 +22,7 @@ jobs:
       - name: Fetch curios release assets
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release download "$CURIOS_TAG" --repo valmirjunior0088/curios \
-            --pattern 'curios-wasm.tar.gz' --pattern 'curios-docs.tar.gz' \
-            --dir /tmp/curios-release --clobber
-          mkdir -p public/curios/docs
-          tar -xzf /tmp/curios-release/curios-wasm.tar.gz -C public/curios
-          tar -xzf /tmp/curios-release/curios-docs.tar.gz -C public/curios/docs
+        run: ./scripts/fetch.sh
       - uses: actions/setup-node@v4
         with:
           node-version: 20

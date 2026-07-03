@@ -4,27 +4,37 @@
 //
 // This file is hand-written and lives outside Astro's build graph on
 // purpose: it's served as-is from /curios/loader.js, and it dynamically
-// imports /curios/curios_js.js — the ES module wasm-pack generates —
-// which itself fetches /curios/curios_js_bg.wasm at runtime. None of
+// imports /curios/wasm/curios_js.js — the ES module wasm-pack generates —
+// which itself fetches /curios/wasm/curios_js_bg.wasm at runtime. None of
 // that needs a bundler; it's exactly how `wasm-pack build --target web`
 // output is meant to be used.
 //
-// curios_js.js/curios_js_bg.wasm are NOT produced by this repo's build.
-// They're built from the curios repo (`wasm-pack build curios-js --target
-// web --release`) and copied in by hand — see curios-js/build-web.sh over
-// there. If you're seeing "failed to fetch" errors below, that step hasn't
-// been done yet.
+// Everything under /curios/wasm/ is NOT produced by this repo's build.
+// It's fetched from the curios repo's release assets — see scripts/fetch.sh
+// (`npm run fetch`) to populate it for local dev; the deploy workflow runs
+// the same script. If you're seeing "failed to load the compiler" errors
+// below, that step hasn't been done yet.
 
+// Memoized so the ~multi-MB compiler wasm is only fetched once per page
+// load. `loadModule()` reports whether *this* call is the one that kicked
+// off the fetch (`startedNow`), so callers can time and annotate just the
+// first, slow load and stay silent on the instant cache hits after it.
 let modulePromise = null;
 
 function loadModule() {
-  if (!modulePromise) {
-    modulePromise = import("/curios/curios_js.js").then(async (mod) => {
-      await mod.default();
-      return mod;
-    });
+  const startedNow = !modulePromise;
+  if (startedNow) {
+    modulePromise = import("/curios/wasm/curios_js.js")
+      .then(async (mod) => {
+        await mod.default();
+        return mod;
+      })
+      .catch((error) => {
+        modulePromise = null; // let the next Run click retry instead of staying stuck
+        throw error;
+      });
   }
-  return modulePromise;
+  return { promise: modulePromise, startedNow };
 }
 
 // The compiler emits programs against the GC proposal: strings/byte strings
@@ -40,7 +50,11 @@ function loadBridge() {
     bridgePromise = fetch("/curios/bridge.wasm")
       .then((response) => response.arrayBuffer())
       .then((bytes) => WebAssembly.instantiate(bytes, {}))
-      .then((result) => result.instance.exports);
+      .then((result) => result.instance.exports)
+      .catch((error) => {
+        bridgePromise = null; // let the next Run click retry instead of staying stuck
+        throw error;
+      });
   }
   return bridgePromise;
 }
@@ -161,12 +175,30 @@ function makeBrowserHost(bridge, { onStdout, onStderr }) {
  * prefix of `compile_entrypoint`; running instantiates and calls the
  * compiled module's `func/main` directly, no server round-trip).
  *
+ * The compiler itself is a multi-MB wasm download fetched lazily on the
+ * first call anywhere on the page; `loadMs` reports how long that first
+ * load took (network + wasm instantiation) so the caller can surface it as
+ * its own step, and is omitted once the module's already cached.
+ *
  * Returns one of:
- *   { ok: true, typeMs, wasmMs, bytes: Uint8Array, run: { stdout, stderr, exitCode, trap } }
- *   { ok: false, phase: "typecheck" | "compile", ms, error: string }
+ *   { ok: true, loadMs?, typeMs, wasmMs, bytes: Uint8Array, run: { stdout, stderr, exitCode, trap } }
+ *   { ok: false, phase: "load" | "typecheck" | "compile", ms, error: string }
  */
 export async function compileAndReport(source) {
-  const mod = await loadModule();
+  const { promise, startedNow } = loadModule();
+  const loadStart = performance.now();
+  let mod;
+  try {
+    mod = await promise;
+  } catch (error) {
+    return {
+      ok: false,
+      phase: "load",
+      ms: performance.now() - loadStart,
+      error: `Couldn't load the curios compiler: ${error.message || error}`,
+    };
+  }
+  const loadMs = startedNow ? performance.now() - loadStart : undefined;
 
   const t0 = performance.now();
   try {
@@ -187,12 +219,22 @@ export async function compileAndReport(source) {
 
   const run = await runCompiled(bytes);
 
-  return { ok: true, typeMs, wasmMs, bytes, run };
+  return { ok: true, loadMs, typeMs, wasmMs, bytes, run };
 }
 
 /** Instantiate and run compiled `bytes`, capturing stdio and the outcome. */
 async function runCompiled(bytes) {
-  const bridge = await loadBridge();
+  let bridge;
+  try {
+    bridge = await loadBridge();
+  } catch (error) {
+    return {
+      stdout: "",
+      stderr: "",
+      exitCode: null,
+      trap: `failed to load the runtime bridge: ${error.message || error}`,
+    };
+  }
 
   let stdout = "";
   let stderr = "";

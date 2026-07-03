@@ -126,7 +126,9 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
   }
 
   function formatSummary(result) {
-    return `✓ typechecked in ${result.typeMs.toFixed(1)}ms · compiled to wasm in ${result.wasmMs.toFixed(1)}ms (${result.bytes.length} bytes)`;
+    const loadLine =
+      result.loadMs !== undefined ? `↓ downloaded compiler in ${result.loadMs.toFixed(0)}ms\n` : "";
+    return `${loadLine}✓ typechecked in ${result.typeMs.toFixed(1)}ms · compiled to wasm in ${result.wasmMs.toFixed(1)}ms (${result.bytes.length} bytes)`;
   }
 
   function renderFullSuccess(result) {
@@ -209,6 +211,12 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
   };
   const strategy = strategies[variant];
 
+  const PHASE_STATUS = {
+    load: "✗ failed to load compiler",
+    typecheck: "✗ type error",
+    compile: "✗ compile error",
+  };
+
   function setActiveTab(key) {
     revokeDownload();
     active = key;
@@ -242,7 +250,7 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
     } else {
       el.output.className = "output err-output";
       el.output.textContent = result.error;
-      setStatus(result.phase === "typecheck" ? "✗ type error" : "✗ compile error");
+      setStatus(PHASE_STATUS[result.phase] ?? "✗ error");
     }
 
     running = false;

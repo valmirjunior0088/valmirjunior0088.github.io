@@ -5,11 +5,8 @@ dist/
 # dependencies
 node_modules/
 
-# fetched from the pinned curios release at deploy time (see deploy.yml)
-public/curios/curios_js.js
-public/curios/curios_js.d.ts
-public/curios/curios_js_bg.wasm
-public/curios/curios_js_bg.wasm.d.ts
+# fetched from the pinned curios release (see scripts/fetch.sh)
+public/curios/wasm/
 public/curios/docs/
 
 # editor/OS cruft
