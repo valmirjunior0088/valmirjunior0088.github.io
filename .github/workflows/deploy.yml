@@ -8,7 +8,7 @@ on:
 env:
   # Pinned curios release tag to pull the wasm playground bundle and rustdoc
   # API docs from. Bump this deliberately when a new curios release is ready.
-  CURIOS_TAG: release/0.2.4
+  CURIOS_TAG: release/0.2.5
 
 permissions:
   contents: read
