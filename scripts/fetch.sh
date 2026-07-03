@@ -11,7 +11,7 @@
 # so bumping the tag here is the only place a release bump needs to happen.
 set -euo pipefail
 
-CURIOS_TAG="release/0.2.6"
+CURIOS_TAG="release/0.2.7"
 CURIOS_REPO="valmirjunior0088/curios"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
