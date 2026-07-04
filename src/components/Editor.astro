@@ -3,30 +3,30 @@ import CodeCard from "./CodeCard.astro";
 import { EXAMPLES, type CuriosExample } from "../data/examples";
 
 // The curios playground widget: example tabs + a code-card editor that
-// compiles/runs via /curios/loader.js. Two variants share this component:
-//   - "full"    the standalone /curios/playground page — editable textarea,
-//               reset button, structured run output with a wasm download link.
-//   - "preview" the homepage teaser — read-only code, no reset, plain-text
-//               run summary. Shows a curated subset of examples.
+// compiles/runs via /curios/loader.js. The same widget serves both the
+// standalone /curios/playground page and the /curios landing-page teaser;
+// the teaser just passes editable={false}, which makes the code read-only,
+// drops the Reset button, and lets the code area shrink to its content
+// instead of the editor's 340px minimum.
 interface Props {
-  variant: "full" | "preview";
+  editable?: boolean;
   exampleKeys?: string[];
   preload?: boolean;
 }
 
-const { variant, exampleKeys = Object.keys(EXAMPLES), preload = false } = Astro.props;
+const { editable = true, exampleKeys = Object.keys(EXAMPLES), preload = false } = Astro.props;
 
 const examples: Record<string, CuriosExample> = Object.fromEntries(
   exampleKeys.map((key) => [key, EXAMPLES[key]])
 );
 const defaultKey = exampleKeys[0];
 
-const widgetId = variant === "full" ? "editor-full" : "editor-preview";
+const widgetId = editable ? "editor" : "editor-readonly";
 ---
 
 {preload && <script type="module" is:inline src="/curios/loader.js"></script>}
 
-<div id={widgetId} class="editor-widget" data-variant={variant}>
+<div id={widgetId} class="editor-widget" data-editable={String(editable)}>
   <div class="tabs">
     {
       exampleKeys.map((key) => (
@@ -42,64 +42,69 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
       <span class="chip filename">{examples[defaultKey].label}</span>
     </Fragment>
     <Fragment slot="actions">
-      {variant === "full" && <span class="status" aria-live="polite" />}
-      {variant === "full" && (
+      <span class="status" aria-live="polite" />
+      {editable && (
         <button class="btn btn-outline btn-reset">
           Reset
         </button>
       )}
       <button class="btn btn-primary btn-run">
-        Run &#9654;
+        <span class="run-label">Run</span>
+        <span class="run-icon">&#9654;</span>
       </button>
     </Fragment>
 
-    {
-      variant === "full" ? (
-        <div class="code-scroll editor">
-          <div class="code-gutter gutter" />
-          <textarea class="code-area editor-input" spellcheck="false" wrap="off" />
-        </div>
-      ) : (
-        <div class="code-scroll">
-          <div class="code-gutter gutter" />
-          <pre class="code-area preview-code" />
-        </div>
-      )
-    }
+    <div class="code-scroll editor">
+      <div class="code-gutter gutter" />
+      <textarea class="code-area editor-input" spellcheck="false" wrap="off" readonly={!editable} />
+    </div>
 
     <div class="output" hidden aria-live="polite" />
   </CodeCard>
 </div>
 
-<script type="module" define:vars={{ variant, examples, defaultKey, widgetId }}>
+<script type="module" define:vars={{ editable, examples, defaultKey, widgetId }}>
   import { compileAndReport } from "/curios/loader.js";
 
   // Elements are looked up by the classes each already carries for styling
-  // (rather than parallel id maps per variant) — safe because only one
-  // variant of this widget is ever mounted on a given page.
+  // (rather than parallel id maps) — safe because only one instance of this
+  // widget is ever mounted on a given page.
   const widget = document.getElementById(widgetId);
   const el = {
     tabs: widget.querySelectorAll(".tab"),
     filename: widget.querySelector(".filename"),
+    status: widget.querySelector(".status"),
     run: widget.querySelector(".btn-run"),
+    runLabel: widget.querySelector(".run-label"),
+    runIcon: widget.querySelector(".run-icon"),
+    reset: widget.querySelector(".btn-reset"), // absent when not editable
     gutter: widget.querySelector(".gutter"),
+    editor: widget.querySelector(".editor-input"),
     output: widget.querySelector(".output"),
-    ...(variant === "full"
-      ? {
-          status: widget.querySelector(".status"),
-          reset: widget.querySelector(".btn-reset"),
-          editor: widget.querySelector(".editor-input"),
-        }
-      : { code: widget.querySelector(".preview-code") }),
   };
 
   let active = defaultKey;
   let running = false;
   let downloadUrl = null;
 
-  // No-op in "preview" (which has no status chip) so call sites don't need
-  // their own variant check.
-  const setStatus = variant === "full" ? (text) => (el.status.textContent = text) : () => {};
+  const setStatus = (text) => (el.status.textContent = text);
+
+  // The shared spinner, used by both the pending row and the Run button: a
+  // border ring styled by the .spin rule below. A ring spins exactly around
+  // its own center, unlike a rotated font glyph whose visual center rarely
+  // matches its box center.
+  function spinnerEl() {
+    const spinner = document.createElement("span");
+    spinner.className = "spin";
+    return spinner;
+  }
+
+  // The button keeps a permanent icon slot: ▶ when idle, the spinner while
+  // a run is in flight. `icon` is a string or an element.
+  function setRunButton(label, icon) {
+    el.runLabel.textContent = label;
+    el.runIcon.replaceChildren(icon);
+  }
 
   function revokeDownload() {
     if (downloadUrl) {
@@ -120,96 +125,114 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
 
   function autosize() {
     el.editor.style.height = "auto";
-    const height = Math.max(340, el.editor.scrollHeight);
+    const height = Math.max(editable ? 340 : 0, el.editor.scrollHeight);
     el.editor.style.height = height + "px";
     el.gutter.style.height = height + "px";
   }
 
-  function formatSummary(result) {
-    const loadLine =
-      result.loadMs !== undefined ? `↓ downloaded compiler in ${result.loadMs.toFixed(0)}ms\n` : "";
-    return `${loadLine}✓ typechecked in ${result.typeMs.toFixed(1)}ms · compiled to wasm in ${result.wasmMs.toFixed(1)}ms (${result.bytes.length} bytes)`;
+  // The output is laid out as a two-column grid — icons in a centered left
+  // column, text left-aligned in the right one — so the phase lines read
+  // like a table. Rows are appended as the loader reports each completed
+  // phase, so on a cold run the download/typecheck/compile lines show up
+  // one by one instead of all at once.
+  function makeRows() {
+    const rows = document.createElement("div");
+    rows.className = "output-rows";
+    return rows;
   }
 
-  function renderFullSuccess(result) {
+  // `before` inserts the row above an existing cell (used to keep the
+  // pending row last); omitted, the row goes at the end.
+  function addRow(rows, icon, text, className, before = null) {
+    const iconCell = document.createElement("span");
+    iconCell.className = "row-icon";
+    iconCell.textContent = icon;
+    const textCell = document.createElement("span");
+    textCell.textContent = text;
+    if (className) {
+      iconCell.classList.add(className);
+      textCell.classList.add(className);
+    }
+    rows.insertBefore(iconCell, before);
+    rows.insertBefore(textCell, before);
+    return { iconCell, textCell };
+  }
+
+  // While a run is in flight, the grid's last row is a "compiling…"
+  // placeholder with a spinning icon. Completed phase rows are inserted
+  // above it, and it goes away once the whole sequence settles.
+  let pendingRow = null;
+
+  function showPending(rows) {
+    pendingRow = addRow(rows, "", "compiling…");
+    pendingRow.iconCell.appendChild(spinnerEl());
+  }
+
+  function clearPending() {
+    if (pendingRow) {
+      pendingRow.iconCell.remove();
+      pendingRow.textCell.remove();
+      pendingRow = null;
+    }
+  }
+
+  // One row per pipeline phase as the loader reports it, each with its own
+  // icon: ↓ download, ⊢ typecheck, ✓ compile (✗ marks failures below).
+  function addPhaseRow(rows, event) {
+    const before = pendingRow && pendingRow.iconCell;
+    if (event.phase === "load") {
+      addRow(
+        rows,
+        "↓",
+        `downloaded compiler in ${event.loadMs.toFixed(0)}ms · warmed it up in ${event.warmMs.toFixed(0)}ms`,
+        undefined,
+        before
+      );
+    } else if (event.phase === "typecheck") {
+      addRow(rows, "⊢", `typechecked in ${event.typeMs.toFixed(1)}ms`, undefined, before);
+    } else if (event.phase === "compile") {
+      addRow(
+        rows,
+        "✓",
+        `compiled to wasm in ${event.wasmMs.toFixed(1)}ms (${event.byteLength} bytes)`,
+        undefined,
+        before
+      );
+    }
+  }
+
+  function renderSuccess(rows, result) {
     downloadUrl = URL.createObjectURL(new Blob([result.bytes], { type: "application/wasm" }));
-    el.output.innerHTML = "";
-    const line1 = document.createElement("div");
-    line1.textContent = formatSummary(result);
-    el.output.appendChild(line1);
 
-    const { run } = result;
-    if (run.stdout || run.stderr || run.trap) {
-      const programOutput = document.createElement("pre");
-      programOutput.className = "program-output";
-      programOutput.textContent = run.stdout + run.stderr;
-      el.output.appendChild(programOutput);
-    }
-    if (run.trap) {
-      const trapLine = document.createElement("div");
-      trapLine.className = "trap-line";
-      trapLine.textContent = `✗ ${run.trap}`;
-      el.output.appendChild(trapLine);
-    } else if (run.exitCode) {
-      const exitLine = document.createElement("div");
-      exitLine.textContent = `process exited with code ${run.exitCode}`;
-      el.output.appendChild(exitLine);
-    }
-
+    // The compile phase row is always the last one appended before success
+    // is rendered, so its text cell is the grid's last child — the download
+    // link rides at the end of that line, after a separator dot.
     const link = document.createElement("a");
     link.href = downloadUrl;
     link.download = (el.filename.textContent || "output.crs").replace(/\.crs$/, ".wasm");
-    link.textContent = "Download .wasm →";
+    link.textContent = "Download .wasm";
     link.className = "download-link";
-    el.output.appendChild(link);
-    setStatus(run.trap ? "✓ compiled · ✗ run failed" : "✓ compiled & ran");
-  }
+    rows.lastElementChild.append(" · ", link);
 
-  function renderPreviewSuccess(result) {
-    const summary = formatSummary(result);
-    el.output.textContent = result.run.trap
-      ? `${summary}\n✗ ${result.run.trap}`
-      : `${summary}\n${result.run.stdout}${result.run.stderr}`.trimEnd();
-  }
+    const { run } = result;
 
-  // Everything that differs between the two variants lives in one of these
-  // two objects — the tab/gutter/run-button plumbing below is
-  // variant-agnostic and just calls into `strategy`.
-  const strategies = {
-    full: {
-      init() {
-        el.editor.addEventListener("input", () => {
-          el.tabs.forEach((btn) => btn.classList.remove("tab-active"));
-          el.filename.textContent = "";
-          el.filename.hidden = true;
-          renderGutter(el.editor.value);
-          autosize();
-        });
-        el.reset.addEventListener("click", () => setActiveTab(active));
-      },
-      showExample(example) {
-        el.editor.value = example.code;
-        el.filename.hidden = false;
-        setStatus("");
-        autosize();
-      },
-      sourceCode: () => el.editor.value,
-      beforeRun: revokeDownload,
-      onSuccess: renderFullSuccess,
-    },
-    preview: {
-      init() {},
-      showExample(example) {
-        el.code.textContent = example.code;
-      },
-      sourceCode: () => examples[active].code,
-      beforeRun() {
-        el.output.hidden = true;
-      },
-      onSuccess: renderPreviewSuccess,
-    },
-  };
-  const strategy = strategies[variant];
+    // Whatever the program printed goes in its own card — a merged,
+    // full-width row of the grid — followed by how the run ended.
+    const stdout = `${run.stdout}${run.stderr}`.trimEnd();
+    if (stdout) {
+      const programOutput = document.createElement("pre");
+      programOutput.className = "program-output";
+      programOutput.textContent = stdout;
+      rows.appendChild(programOutput);
+    }
+    addRow(rows, "▶", `ran in ${result.runMs.toFixed(1)}ms`);
+    if (run.trap) {
+      addRow(rows, "✗", run.trap, "err-line");
+    } else if (run.exitCode) {
+      addRow(rows, "", `process exited with code ${run.exitCode}`);
+    }
+    setStatus(run.trap ? "✓ compiled · ✗ run failed" : "");
+  }
 
   const PHASE_STATUS = {
     load: "✗ failed to load compiler",
@@ -222,40 +245,65 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
     active = key;
     const example = examples[key];
     el.filename.textContent = example.label;
+    el.filename.hidden = false;
     el.output.hidden = true;
+    setStatus("");
     el.tabs.forEach((btn) => btn.classList.toggle("tab-active", btn.dataset.example === key));
+    el.editor.value = example.code;
     renderGutter(example.code);
-    strategy.showExample(example);
+    autosize();
   }
 
   el.tabs.forEach((btn) => {
     btn.addEventListener("click", () => setActiveTab(btn.dataset.example));
   });
-  strategy.init();
+
+  if (editable) {
+    // Typing detaches the buffer from the example tabs: no tab is active
+    // and the filename chip disappears until a tab (or Reset) restores one.
+    el.editor.addEventListener("input", () => {
+      el.tabs.forEach((btn) => btn.classList.remove("tab-active"));
+      el.filename.textContent = "";
+      el.filename.hidden = true;
+      renderGutter(el.editor.value);
+      autosize();
+    });
+    el.reset.addEventListener("click", () => setActiveTab(active));
+  }
 
   el.run.addEventListener("click", async () => {
     if (running) return;
     running = true;
     el.run.disabled = true;
-    el.run.textContent = "Running…";
-    strategy.beforeRun();
+    setRunButton("Running…", spinnerEl());
+    revokeDownload();
     setStatus("compiling…");
 
-    const result = await compileAndReport(strategy.sourceCode());
-
+    // Show the grid right away with just the "compiling…" placeholder in
+    // it; each phase event inserts its row above the placeholder as the
+    // pipeline progresses.
+    const rows = makeRows();
+    el.output.className = "output ok-output";
+    el.output.innerHTML = "";
+    el.output.appendChild(rows);
     el.output.hidden = false;
-    if (result.ok) {
-      el.output.className = "output ok-output";
-      strategy.onSuccess(result);
-    } else {
-      el.output.className = "output err-output";
-      el.output.textContent = result.error;
-      setStatus(PHASE_STATUS[result.phase] ?? "✗ error");
-    }
+    showPending(rows);
 
-    running = false;
-    el.run.disabled = false;
-    el.run.textContent = "Run again ▶";
+    try {
+      const result = await compileAndReport(el.editor.value, (event) => addPhaseRow(rows, event));
+      clearPending();
+      if (result.ok) {
+        renderSuccess(rows, result);
+      } else {
+        addRow(rows, "✗", result.error, "err-line");
+        setStatus(PHASE_STATUS[result.phase] ?? "✗ error");
+      }
+    } finally {
+      clearPending();
+      running = false;
+      el.run.disabled = false;
+      setRunButton("Run again", "▶");
+    }
   });
 
   setActiveTab(defaultKey);
@@ -288,6 +336,35 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
   .btn-run {
     font-size: 13px;
     padding: 8px 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  /* Fixed-width icon slot so swapping the idle ▶ for the spinner can't
+     resize the button (same reason the table's icon column is a fixed 2ch). */
+  .btn-run .run-icon {
+    display: inline-block;
+    width: 1.2em;
+    text-align: center;
+  }
+
+  /* One spinner definition for the whole widget: a border ring rather than
+     a rotated glyph, so it spins exactly around its own center. Created at
+     runtime (pending row + Run button), hence :global. */
+  .editor-widget :global(.spin) {
+    display: inline-block;
+    width: 0.85em;
+    height: 0.85em;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    vertical-align: -0.125em;
+    animation: editor-spin 0.9s linear infinite;
+  }
+  @keyframes editor-spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
   .btn-reset {
     font-size: 13px;
@@ -306,6 +383,11 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
   .editor,
   .editor-input {
     min-height: 340px;
+  }
+  /* The read-only teaser sizes to its content instead. */
+  .editor-widget[data-editable="false"] .editor,
+  .editor-widget[data-editable="false"] .editor-input {
+    min-height: 0;
   }
   .editor-input {
     background: transparent;
@@ -328,17 +410,31 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
   .ok-output {
     color: var(--fg-faint);
   }
-  .err-output {
-    color: var(--red);
+  /* Everything inside .output is created by the script at runtime, so those
+     elements never get Astro's scoping attribute — reach them with :global()
+     anchored on the (template-rendered, scoped) .output container. */
+  .output :global(.output-rows) {
+    display: grid;
+    /* Fixed icon column: max-content would resize with whichever icons are
+       currently present (the ◐ placeholder is wider than the ↓/⊢/✓ glyphs),
+       making the text column drift mid-run. */
+    grid-template-columns: 2ch 1fr;
+    column-gap: 10px;
+    align-items: baseline;
   }
-  .download-link {
-    display: block;
-    margin-top: 10px;
+  .output :global(.row-icon) {
+    text-align: center;
+  }
+  .output :global(.download-link) {
     color: var(--accent);
     text-decoration: none;
     font-weight: 600;
   }
-  .program-output {
+  .output :global(.program-output) {
+    /* A merged row: the card spans both grid columns. It always sits
+       between text rows, whose built-in half-leading keeps the spacing
+       around it (and the section's edges) balanced with no compensation. */
+    grid-column: 1 / -1;
     margin: 12px 0;
     padding: 12px 14px;
     background: var(--bg-card-alt);
@@ -346,10 +442,11 @@ const widgetId = variant === "full" ? "editor-full" : "editor-preview";
     border-radius: 8px;
     color: var(--fg);
     white-space: pre-wrap;
-    font: inherit;
+    font-family: var(--mono);
+    font-size: inherit;
+    line-height: inherit;
   }
-  .trap-line {
+  .output :global(.err-line) {
     color: var(--red);
-    margin-bottom: 6px;
   }
 </style>

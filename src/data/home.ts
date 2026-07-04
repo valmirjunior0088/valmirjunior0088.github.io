@@ -6,6 +6,7 @@
 export interface Feature {
   glyph: string;
   title: string;
+  // Backtick-wrapped `terms` render as inline <code> on the landing page.
   body: string;
 }
 
@@ -18,22 +19,22 @@ export const FEATURES: Feature[] = [
   {
     glyph: "≡",
     title: "Proofs, not comments",
-    body: "A proof-irrelevant Prop sort, propositional equality, and the refl / sym / trans / cong toolkit, ready in the standard library.",
+    body: "A proof-irrelevant `Prop` sort, propositional equality, and the `refl` / `sym` / `trans` / `cong` toolkit, ready in the standard library.",
   },
   {
     glyph: "μ",
     title: "Indexed inductive types",
-    body: "Declare your own data and proof families with index telescopes and per-constructor targets.",
+    body: "Declare your own data and proof families with index telescopes and per-constructor targets — the same machinery `Vec` and `Eq` are built from.",
   },
   {
     glyph: "@",
     title: "Erased at runtime",
-    body: "Mark an argument @ and it vanishes after type-checking — zero-cost, with no trace left in the compiled WebAssembly.",
+    body: "Mark an argument `@` and it vanishes after type-checking — type parameters, lengths, and proofs steer the checker, then leave no trace in the compiled WebAssembly. Zero runtime cost.",
   },
   {
     glyph: "⇒",
     title: "Ad-hoc polymorphism",
-    body: "concept and satisfy declarations give you typeclass-style interfaces — every operator (+, ==, <) dispatches through one, and postfix ! sequences any Monad witness as do-notation.",
+    body: "`concept` and `satisfy` declarations give you typeclass-style interfaces — every operator (`+`, `==`, `<`) dispatches through one, and postfix `!` sequences any `Monad` witness as do-notation.",
   },
 ];
 

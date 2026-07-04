@@ -6,6 +6,10 @@ import Editor from "../../components/Editor.astro";
 import { PREVIEW_KEYS, HERO_SNIPPET } from "../../data/examples";
 import { FEATURES, BENCHMARKS } from "../../data/home";
 import { GITHUB_URL } from "../../data/site";
+
+// Feature bodies mark code terms with `backticks` (see home.ts); render
+// them as inline <code>. The text is our own data, not user input.
+const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1</code>");
 ---
 
 <Base title="curios — a language for the curious">
@@ -45,7 +49,7 @@ import { GITHUB_URL } from "../../data/site";
     <div id="playground-preview" class="section">
       <div class="section-intro">
         <div class="eyebrow">// the whole point</div>
-        <h2 class="h-serif">This is curios. Pick an example, hit run.</h2>
+        <h2 class="h-serif">This is Curios. Pick an example, hit run.</h2>
         <p class="section-lede">
           Nothing to install, nothing to read first &mdash; the playground typechecks and
           compiles straight to WebAssembly using the same pipeline as the CLI, entirely in
@@ -53,7 +57,7 @@ import { GITHUB_URL } from "../../data/site";
         </p>
       </div>
 
-      <Editor variant="preview" exampleKeys={PREVIEW_KEYS} preload />
+      <Editor editable={false} exampleKeys={PREVIEW_KEYS} preload />
 
       <div class="preview-cta">
         <a href="/curios/playground" class="link-cta">Open the full playground &rarr;</a>
@@ -72,7 +76,7 @@ import { GITHUB_URL } from "../../data/site";
             <div class="feature-card">
               <div class="feature-glyph">{feature.glyph}</div>
               <div class="feature-title">{feature.title}</div>
-              <div class="feature-body">{feature.body}</div>
+              <div class="feature-body" set:html={renderInlineCode(feature.body)} />
             </div>
           ))
         }
@@ -253,17 +257,18 @@ import { GITHUB_URL } from "../../data/site";
     padding: 0 clamp(20px, 4vw, 64px) 110px;
   }
   .section-intro {
-    max-width: 640px;
     margin-bottom: 44px;
   }
   .section h2 {
     font-size: clamp(30px, 3.4vw, 42px);
     margin: 0 0 16px;
   }
+  /* Headings run the full row; only the lede is capped for line length. */
   .section-lede {
     font-size: 17px;
     line-height: 1.65;
     color: var(--fg-dim);
+    max-width: 640px;
     margin: 0;
     text-wrap: pretty;
   }
@@ -331,10 +336,22 @@ import { GITHUB_URL } from "../../data/site";
     color: var(--fg);
   }
 
+  /* Five cards as 3 + 2: a 6-track grid with each card spanning two
+     tracks; the two cards on the second row start at tracks 2 and 4 so
+     they sit centered. (Positions assume exactly five cards.) */
   .features-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 20px;
+  }
+  .feature-card {
+    grid-column: span 2;
+  }
+  .feature-card:nth-child(4) {
+    grid-column: 2 / span 2;
+  }
+  .feature-card:nth-child(5) {
+    grid-column: 4 / span 2;
   }
   .feature-card {
     background: var(--bg-card-alt);
@@ -357,6 +374,17 @@ import { GITHUB_URL } from "../../data/site";
     font-size: 14.5px;
     line-height: 1.6;
     color: var(--fg-dimmer);
+  }
+  /* Inline code terms inside feature bodies (rendered via set:html, so the
+     <code> elements need :global to survive Astro's style scoping). */
+  .feature-body :global(code) {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    color: var(--fg);
+    background: color-mix(in srgb, var(--fg) 7%, transparent);
+    border: 1px solid var(--border-soft);
+    border-radius: 5px;
+    padding: 1px 5px;
   }
 
   .install-section {
@@ -456,6 +484,9 @@ import { GITHUB_URL } from "../../data/site";
     }
     .features-grid {
       grid-template-columns: repeat(2, 1fr);
+    }
+    .feature-card:nth-child(n) {
+      grid-column: auto;
     }
   }
 </style>

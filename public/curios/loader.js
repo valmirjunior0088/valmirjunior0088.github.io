@@ -24,13 +24,28 @@
 // first, slow load and stay silent on the instant cache hits after it.
 let modulePromise = null;
 
+// The very first call into the compiler module pays a large one-time cost
+// (lazy wasm compilation / JIT warm-up plus the compiler's own one-time
+// init — empirically ~1.6s where every later call is ~40ms), regardless of
+// which program it's given. Absorb it here with a throwaway compile of a
+// trivial program, timed as `warmMs`, so the user's own typecheck/compile
+// numbers measure only their program.
+const WARM_UP_SOURCE = 'use /std/{Io};\n\nIo/print("")';
+
 function loadModule() {
   const startedNow = !modulePromise;
   if (startedNow) {
     modulePromise = import("/curios/wasm/curios_js.js")
       .then(async (mod) => {
         await mod.default();
-        return mod;
+        const warmStart = performance.now();
+        try {
+          mod.compile(WARM_UP_SOURCE);
+        } catch {
+          // Warm-up is best-effort; a failure here surfaces soon enough on
+          // the user's real program with a proper phase attached.
+        }
+        return { mod, warmMs: performance.now() - warmStart };
       })
       .catch((error) => {
         modulePromise = null; // let the next Run click retry instead of staying stuck
@@ -42,6 +57,15 @@ function loadModule() {
 
 const utf8 = new TextDecoder();
 
+// Reports a completed phase to the caller's `onPhase`, then yields a
+// macrotask so whatever the callback put in the DOM can paint before the
+// next synchronous compiler call blocks the main thread.
+async function notify(onPhase, event) {
+  if (!onPhase) return;
+  await onPhase(event);
+  await new Promise((resolve) => setTimeout(resolve));
+}
+
 /**
  * Typecheck, compile, then run `source` in-browser, reporting timing for
  * each phase — mirrors the three-stage pipeline (`typecheck_entrypoint` is a
@@ -51,19 +75,28 @@ const utf8 = new TextDecoder();
  *
  * The compiler itself is a multi-MB wasm download fetched lazily on the
  * first call anywhere on the page; `loadMs` reports how long that first
- * load took (network + wasm instantiation) so the caller can surface it as
- * its own step, and is omitted once the module's already cached.
+ * load took (network + wasm instantiation) and `warmMs` how long the
+ * one-time first-call warm-up took, so the caller can surface them as their
+ * own steps. Both are omitted once the module's already cached.
+ *
+ * `onPhase`, if given, is called as each phase completes — with
+ * { phase: "load", loadMs, warmMs } (first load only), then
+ * { phase: "typecheck", typeMs }, then { phase: "compile", wasmMs,
+ * byteLength } — so a UI can render progress as it happens rather than all
+ * at once at the end. The callback can just append to the DOM: after each
+ * one, a macrotask yield gives the browser a chance to paint before the
+ * next (synchronous) phase starts. The phase timers exclude that wait.
  *
  * Returns one of:
- *   { ok: true, loadMs?, typeMs, wasmMs, bytes: Uint8Array, run: { stdout, stderr, exitCode, trap } }
+ *   { ok: true, loadMs?, warmMs?, typeMs, wasmMs, runMs, bytes: Uint8Array, run: { stdout, stderr, exitCode, trap } }
  *   { ok: false, phase: "load" | "typecheck" | "compile", ms, error: string }
  */
-export async function compileAndReport(source) {
+export async function compileAndReport(source, onPhase) {
   const { promise, startedNow } = loadModule();
   const loadStart = performance.now();
-  let mod;
+  let mod, warmMs;
   try {
-    mod = await promise;
+    ({ mod, warmMs } = await promise);
   } catch (error) {
     return {
       ok: false,
@@ -72,7 +105,9 @@ export async function compileAndReport(source) {
       error: `Couldn't load the curios compiler: ${error.message || error}`,
     };
   }
-  const loadMs = startedNow ? performance.now() - loadStart : undefined;
+  const loadMs = startedNow ? performance.now() - loadStart - warmMs : undefined;
+  if (!startedNow) warmMs = undefined;
+  if (loadMs !== undefined) await notify(onPhase, { phase: "load", loadMs, warmMs });
 
   const t0 = performance.now();
   try {
@@ -81,6 +116,7 @@ export async function compileAndReport(source) {
     return { ok: false, phase: "typecheck", ms: performance.now() - t0, error: String(error) };
   }
   const typeMs = performance.now() - t0;
+  await notify(onPhase, { phase: "typecheck", typeMs });
 
   const t1 = performance.now();
   let bytes;
@@ -90,10 +126,13 @@ export async function compileAndReport(source) {
     return { ok: false, phase: "compile", ms: performance.now() - t1, error: String(error) };
   }
   const wasmMs = performance.now() - t1;
+  await notify(onPhase, { phase: "compile", wasmMs, byteLength: bytes.length });
 
   // `run`'s stdout/stderr are the raw accumulated bytes; decode them for the
   // plain-text display this page does with them.
+  const t2 = performance.now();
   const outcome = await mod.run(bytes, undefined);
+  const runMs = performance.now() - t2;
   const run = {
     stdout: utf8.decode(outcome.stdout),
     stderr: utf8.decode(outcome.stderr),
@@ -101,5 +140,5 @@ export async function compileAndReport(source) {
     trap: outcome.trap,
   };
 
-  return { ok: true, loadMs, typeMs, wasmMs, bytes, run };
+  return { ok: true, loadMs, warmMs, typeMs, wasmMs, runMs, bytes, run };
 }
