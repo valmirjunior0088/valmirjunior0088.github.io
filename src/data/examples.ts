@@ -67,6 +67,18 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "let (mx, my) = bounds(m);\n\n" +
       'Fmt/print("midpoint = (%d, %d)\\n")(mx)(my)',
   },
+  spread: {
+    tab: "spread syntax",
+    label: "spread.crs",
+    code:
+      "use /std/{Fmt, Nat, Lst};\n\n" +
+      "pub record Point : Type { x : Nat, y : Nat }\n\n" +
+      "let p : Point = Point { x = 1, y = 2 };\n" +
+      "let q : Point = Point { ..p, y = 9 };\n\n" +
+      "let base : Lst(Nat) = [2, 3, 4];\n" +
+      "let padded : Lst(Nat) = [1, ..base, 5];\n\n" +
+      'Fmt/print("q = (%d, %d), padded has %d elems\\n")(q.x)(q.y)(Lst/len(padded))',
+  },
   patterns: {
     tab: "nested match",
     label: "combine.crs",
@@ -80,6 +92,21 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "    | (none(), none())   => 0\n" +
       "    end;\n\n" +
       'Fmt/print("combine = %d\\n")(combine(Option/some(3), Option/some(4)))',
+  },
+  donotation: {
+    tab: "do-notation",
+    label: "sum_all.crs",
+    code:
+      "use /std/{Io, Nat, Option, Fmt};\n\n" +
+      "let sum_all(a : Option(Nat), b : Option(Nat), c : Option(Nat)) -> Option(Nat) =\n" +
+      "    let x = a!;\n" +
+      "    let y = b!;\n" +
+      "    let z = c!;\n" +
+      "    Option/some(x + y + z);\n\n" +
+      "match sum_all(Option/some(3), Option/some(4), Option/some(5))\n" +
+      '| some(n) => Fmt/print("sum = %d\\n")(n)\n' +
+      '| none()  => Io/print("missing a reading\\n")\n' +
+      "end",
   },
   erased: {
     tab: "erased arg",
