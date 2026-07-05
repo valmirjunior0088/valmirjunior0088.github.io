@@ -119,9 +119,9 @@ export async function compileAndReport(source, onPhase) {
   await notify(onPhase, { phase: "typecheck", typeMs });
 
   const t1 = performance.now();
-  let bytes;
+  let bytes, foreignNames;
   try {
-    bytes = mod.compile(source);
+    ({ bytes, foreignNames } = mod.compile(source));
   } catch (error) {
     return { ok: false, phase: "compile", ms: performance.now() - t1, error: String(error) };
   }
@@ -129,9 +129,11 @@ export async function compileAndReport(source, onPhase) {
   await notify(onPhase, { phase: "compile", wasmMs, byteLength: bytes.length });
 
   // `run`'s stdout/stderr are the raw accumulated bytes; decode them for the
-  // plain-text display this page does with them.
+  // plain-text display this page does with them. The playground doesn't
+  // implement `hooks.foreign`, so a program with `foreign` declarations
+  // compiles fine but traps at run time on the missing host import.
   const t2 = performance.now();
-  const outcome = await mod.run(bytes, undefined);
+  const outcome = await mod.run(bytes, foreignNames, undefined);
   const runMs = performance.now() - t2;
   const run = {
     stdout: utf8.decode(outcome.stdout),

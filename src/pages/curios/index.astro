@@ -336,22 +336,11 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     color: var(--fg);
   }
 
-  /* Five cards as 3 + 2: a 6-track grid with each card spanning two
-     tracks; the two cards on the second row start at tracks 2 and 4 so
-     they sit centered. (Positions assume exactly five cards.) */
+  /* Six cards, three per row. */
   .features-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
-  }
-  .feature-card {
-    grid-column: span 2;
-  }
-  .feature-card:nth-child(4) {
-    grid-column: 2 / span 2;
-  }
-  .feature-card:nth-child(5) {
-    grid-column: 4 / span 2;
   }
   .feature-card {
     background: var(--bg-card-alt);
@@ -484,9 +473,6 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     }
     .features-grid {
       grid-template-columns: repeat(2, 1fr);
-    }
-    .feature-card:nth-child(n) {
-      grid-column: auto;
     }
   }
 </style>

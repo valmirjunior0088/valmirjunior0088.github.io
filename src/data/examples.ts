@@ -54,6 +54,33 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "let p : Point = Point { x = 1, y = 2 } + Point { x = 3, y = 4 };\n\n" +
       'Fmt/print("p.x + p.y = %d\\n")(p.x + p.y)',
   },
+  destructure: {
+    tab: "destructuring",
+    label: "midpoint.crs",
+    code:
+      "use /std/{Fmt, Nat};\n\n" +
+      "pub record Point : Type { x : Nat, y : Nat }\n\n" +
+      "let midpoint(Point { x = ax, y = ay } : Point, Point { x = bx, y = by } : Point) -> Point =\n" +
+      "    Point { x = (ax + bx) / 2, y = (ay + by) / 2 };\n\n" +
+      "let bounds(p : Point) -> { Nat, Nat } = (p.x, p.y);\n\n" +
+      "let m : Point = midpoint(Point { x = 0, y = 0 }, Point { x = 4, y = 10 });\n" +
+      "let (mx, my) = bounds(m);\n\n" +
+      'Fmt/print("midpoint = (%d, %d)\\n")(mx)(my)',
+  },
+  patterns: {
+    tab: "nested match",
+    label: "combine.crs",
+    code:
+      "use /std/{Option, Nat, Fmt};\n\n" +
+      "let combine(a : Option(Nat), b : Option(Nat)) -> Nat =\n" +
+      "    match (a, b)\n" +
+      "    | (some(x), some(y)) => x + y\n" +
+      "    | (some(x), none())  => x\n" +
+      "    | (none(), some(y))  => y\n" +
+      "    | (none(), none())   => 0\n" +
+      "    end;\n\n" +
+      'Fmt/print("combine = %d\\n")(combine(Option/some(3), Option/some(4)))',
+  },
   erased: {
     tab: "erased arg",
     label: "erased.crs",
@@ -77,7 +104,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
 };
 
 // Which examples the homepage preview shows (a subset of the full playground).
-export const PREVIEW_KEYS = ["hello", "vec", "concepts", "error"];
+export const PREVIEW_KEYS = ["hello", "vec", "patterns", "concepts", "error"];
 
 // The syntax-highlighted excerpt shown in the homepage hero. It's a trimmed,
 // hand-highlighted subset of the `vec` example above (just the type

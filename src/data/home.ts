@@ -36,6 +36,11 @@ export const FEATURES: Feature[] = [
     title: "Ad-hoc polymorphism",
     body: "`concept` and `satisfy` declarations give you typeclass-style interfaces — every operator (`+`, `==`, `<`) dispatches through one, and postfix `!` sequences any `Monad` witness as do-notation.",
   },
+  {
+    glyph: "▦",
+    title: "Patterns, not just tags",
+    body: "Destructure tuples and structs right in a `let`, lambda, or function parameter — `let (x, y) = pair`, `Point { x, y }` — and match arms nest arbitrarily, dispatch on several scrutinees at once, and mix in `Nat`/`Lst`/`Bin`/`Bln` literals, all checked for overlap and completeness by a matrix pattern compiler.",
+  },
 ];
 
 export interface BenchmarkRow {
