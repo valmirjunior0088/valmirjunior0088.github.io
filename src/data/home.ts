@@ -39,7 +39,7 @@ export const FEATURES: Feature[] = [
   {
     glyph: "▦",
     title: "Patterns, not just tags",
-    body: "Destructure tuples and structs right in a `let`, lambda, or function parameter — `let (x, y) = pair`, `Point { x, y }` — and match arms nest arbitrarily, dispatch on several scrutinees at once, and mix in `Nat`/`Lst`/`Bin`/`Bln` literals, all checked for overlap and completeness by a matrix pattern compiler.",
+    body: "Destructure tuples and structs right in a `let`, lambda, or parameter, and match arms nest arbitrarily — dispatching on several scrutinees at once with `Nat`/`Lst`/`Bin`/`Bln` literals, all checked for overlap and completeness by a matrix compiler.",
   },
 ];
 
