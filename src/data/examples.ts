@@ -79,6 +79,20 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "let padded : Lst(Nat) = [1, ..base, 5];\n\n" +
       'Fmt/print("q = (%d, %d), padded has %d elems\\n")(q.x)(q.y)(Lst/len(padded))',
   },
+  map: {
+    tab: "map lookup",
+    label: "scores.crs",
+    code:
+      "use /std/{Fmt, Io, Nat, Map, Option};\n\n" +
+      "let m0 : Map(Nat) = Map/empty();\n" +
+      'let m1 : Map(Nat) = Map/set(m0, "ada", 92);\n' +
+      'let m2 : Map(Nat) = Map/set(m1, "grace", 87);\n' +
+      'let m3 : Map(Nat) = Map/set(m2, "alan", 95);\n\n' +
+      'match Map/get(m3, "grace")\n' +
+      '| some(score) => Fmt/print("grace scored %d out of %d entries\\n")(score)(Map/len(m3))\n' +
+      '| none()       => Io/print("no such entry\\n")\n' +
+      "end",
+  },
   patterns: {
     tab: "nested match",
     label: "combine.crs",
