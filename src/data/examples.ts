@@ -23,7 +23,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "end\n\n" +
       "pub rec append(@T : Type, @n : Nat, @m : Nat, v : Vec(T, n), w : Vec(T, m)) -> Vec(T, n + m) =\n" +
       "    match v : (v : Vec(T, k)) => Vec(T, k + m)\n" +
-      "    | nil()          => w\n" +
+      "    | nil() => w\n" +
       "    | cons(j, x, xs) => Vec/cons(x, append(xs, w))\n" +
       "    end;\n\n" +
       'Io/print("typechecks: Vec/append\\n")',
@@ -90,7 +90,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       'let m3 : Map(Nat) = Map/set(m2, "alan", 95);\n\n' +
       'match Map/get(m3, "grace")\n' +
       '| some(score) => Fmt/print("grace scored %d out of %d entries\\n")(score)(Map/len(m3))\n' +
-      '| none()       => Io/print("no such entry\\n")\n' +
+      '| none() => Io/print("no such entry\\n")\n' +
       "end",
   },
   patterns: {
@@ -101,9 +101,9 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "let combine(a : Option(Nat), b : Option(Nat)) -> Nat =\n" +
       "    match (a, b)\n" +
       "    | (some(x), some(y)) => x + y\n" +
-      "    | (some(x), none())  => x\n" +
-      "    | (none(), some(y))  => y\n" +
-      "    | (none(), none())   => 0\n" +
+      "    | (some(x), none()) => x\n" +
+      "    | (none(), some(y)) => y\n" +
+      "    | (none(), none()) => 0\n" +
       "    end;\n\n" +
       'Fmt/print("combine = %d\\n")(combine(Option/some(3), Option/some(4)))',
   },
@@ -119,7 +119,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "    Option/some(x + y + z);\n\n" +
       "match sum_all(Option/some(3), Option/some(4), Option/some(5))\n" +
       '| some(n) => Fmt/print("sum = %d\\n")(n)\n' +
-      '| none()  => Io/print("missing a reading\\n")\n' +
+      '| none() => Io/print("missing a reading\\n")\n' +
       "end",
   },
   erased: {
