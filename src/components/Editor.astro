@@ -133,7 +133,7 @@ const widgetId = editable ? "editor" : "editor-readonly";
   // The output is laid out as a two-column grid — icons in a centered left
   // column, text left-aligned in the right one — so the phase lines read
   // like a table. Rows are appended as the loader reports each completed
-  // phase, so on a cold run the download/typecheck/compile lines show up
+  // phase, so on a cold run the download/compile lines show up
   // one by one instead of all at once.
   function makeRows() {
     const rows = document.createElement("div");
@@ -177,7 +177,7 @@ const widgetId = editable ? "editor" : "editor-readonly";
   }
 
   // One row per pipeline phase as the loader reports it, each with its own
-  // icon: ↓ download, ⊢ typecheck, ✓ compile (✗ marks failures below).
+  // icon: ↓ download, ✓ compile (✗ marks failures below).
   function addPhaseRow(rows, event) {
     const before = pendingRow && pendingRow.iconCell;
     if (event.phase === "load") {
@@ -188,8 +188,6 @@ const widgetId = editable ? "editor" : "editor-readonly";
         undefined,
         before
       );
-    } else if (event.phase === "typecheck") {
-      addRow(rows, "⊢", `typechecked in ${event.typeMs.toFixed(1)}ms`, undefined, before);
     } else if (event.phase === "compile") {
       addRow(
         rows,
@@ -236,7 +234,6 @@ const widgetId = editable ? "editor" : "editor-readonly";
 
   const PHASE_STATUS = {
     load: "✗ failed to load compiler",
-    typecheck: "✗ type error",
     compile: "✗ compile error",
   };
 

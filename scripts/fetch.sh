@@ -11,7 +11,7 @@
 # so bumping the tag here is the only place a release bump needs to happen.
 set -euo pipefail
 
-CURIOS_TAG="release/0.3.1"
+CURIOS_TAG="release/0.3.4"
 CURIOS_REPO="valmirjunior0088/curios"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -22,13 +22,13 @@ trap 'rm -rf "$TMP"' EXIT
 fetch_via_gh() {
   command -v gh >/dev/null 2>&1 || return 1
   gh release download "$CURIOS_TAG" --repo "$CURIOS_REPO" \
-    --pattern 'curios-wasm.tar.gz' --pattern 'curios-docs.tar.gz' \
+    --pattern 'curios-js.tar.gz' --pattern 'curios-docs.tar.gz' \
     --dir "$TMP" --clobber
 }
 
 fetch_via_curl() {
   local asset
-  for asset in curios-wasm.tar.gz curios-docs.tar.gz; do
+  for asset in curios-js.tar.gz curios-docs.tar.gz; do
     curl -fsSL -o "$TMP/$asset" \
       "https://github.com/$CURIOS_REPO/releases/download/$CURIOS_TAG/$asset"
   done
@@ -41,7 +41,7 @@ if ! fetch_via_gh; then
 fi
 
 mkdir -p "$DEST/wasm" "$DEST/docs"
-tar -xzf "$TMP/curios-wasm.tar.gz" -C "$DEST/wasm"
+tar -xzf "$TMP/curios-js.tar.gz" -C "$DEST/wasm"
 tar -xzf "$TMP/curios-docs.tar.gz" -C "$DEST/docs"
 
 echo "Done — public/curios now has the wasm playground bundle and docs for $CURIOS_TAG."

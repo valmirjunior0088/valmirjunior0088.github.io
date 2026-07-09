@@ -1,6 +1,6 @@
 // Thin wrapper around the wasm-pack build of `curios-js` (see
 // curios-js/src/lib.rs in the compiler repo: wasm-bindgen exports of the
-// compile pipeline — `compile`/`typecheck` — plus the browser run harness,
+// compile pipeline — `compile` — plus the browser run harness,
 // `run`, which owns instantiating a compiled program against a JS host and
 // everything that host needs to know about the ABI. This file no longer
 // hand-rolls any of that.
@@ -28,8 +28,8 @@ let modulePromise = null;
 // (lazy wasm compilation / JIT warm-up plus the compiler's own one-time
 // init — empirically ~1.6s where every later call is ~40ms), regardless of
 // which program it's given. Absorb it here with a throwaway compile of a
-// trivial program, timed as `warmMs`, so the user's own typecheck/compile
-// numbers measure only their program.
+// trivial program, timed as `warmMs`, so the user's own compile number
+// measures only their program.
 const WARM_UP_SOURCE = 'use /std/{Io};\n\nIo/print("")';
 
 function loadModule() {
@@ -67,11 +67,10 @@ async function notify(onPhase, event) {
 }
 
 /**
- * Typecheck, compile, then run `source` in-browser, reporting timing for
- * each phase — mirrors the three-stage pipeline (`typecheck_entrypoint` is a
- * prefix of `compile_entrypoint`; running delegates to the compiler's own
- * `run` export, which instantiates the module against its browser host and
- * calls the entrypoint directly, no server round-trip).
+ * Compile, then run `source` in-browser, reporting timing for each phase.
+ * Running delegates to the compiler's own `run` export, which instantiates
+ * the module against its browser host and calls the entrypoint directly, no
+ * server round-trip.
  *
  * The compiler itself is a multi-MB wasm download fetched lazily on the
  * first call anywhere on the page; `loadMs` reports how long that first
@@ -81,15 +80,15 @@ async function notify(onPhase, event) {
  *
  * `onPhase`, if given, is called as each phase completes — with
  * { phase: "load", loadMs, warmMs } (first load only), then
- * { phase: "typecheck", typeMs }, then { phase: "compile", wasmMs,
- * byteLength } — so a UI can render progress as it happens rather than all
- * at once at the end. The callback can just append to the DOM: after each
- * one, a macrotask yield gives the browser a chance to paint before the
- * next (synchronous) phase starts. The phase timers exclude that wait.
+ * { phase: "compile", wasmMs, byteLength } — so a UI can render progress as
+ * it happens rather than all at once at the end. The callback can just append
+ * to the DOM: after each one, a macrotask yield gives the browser a chance to
+ * paint before the next synchronous phase starts. The phase timers exclude
+ * that wait.
  *
  * Returns one of:
- *   { ok: true, loadMs?, warmMs?, typeMs, wasmMs, runMs, bytes: Uint8Array, run: { stdout, stderr, exitCode, trap } }
- *   { ok: false, phase: "load" | "typecheck" | "compile", ms, error: string }
+ *   { ok: true, loadMs?, warmMs?, wasmMs, runMs, bytes: Uint8Array, run: { stdout, stderr, exitCode, trap } }
+ *   { ok: false, phase: "load" | "compile", ms, error: string }
  */
 export async function compileAndReport(source, onPhase) {
   const { promise, startedNow } = loadModule();
@@ -109,19 +108,10 @@ export async function compileAndReport(source, onPhase) {
   if (!startedNow) warmMs = undefined;
   if (loadMs !== undefined) await notify(onPhase, { phase: "load", loadMs, warmMs });
 
-  const t0 = performance.now();
-  try {
-    mod.typecheck(source);
-  } catch (error) {
-    return { ok: false, phase: "typecheck", ms: performance.now() - t0, error: String(error) };
-  }
-  const typeMs = performance.now() - t0;
-  await notify(onPhase, { phase: "typecheck", typeMs });
-
   const t1 = performance.now();
-  let bytes, foreignNames;
+  let bytes;
   try {
-    ({ bytes, foreignNames } = mod.compile(source));
+    bytes = mod.compile(source);
   } catch (error) {
     return { ok: false, phase: "compile", ms: performance.now() - t1, error: String(error) };
   }
@@ -133,7 +123,7 @@ export async function compileAndReport(source, onPhase) {
   // implement `hooks.foreign`, so a program with `foreign` declarations
   // compiles fine but traps at run time on the missing host import.
   const t2 = performance.now();
-  const outcome = await mod.run(bytes, foreignNames, undefined);
+  const outcome = await mod.run(bytes, undefined);
   const runMs = performance.now() - t2;
   const run = {
     stdout: utf8.decode(outcome.stdout),
@@ -142,5 +132,5 @@ export async function compileAndReport(source, onPhase) {
     trap: outcome.trap,
   };
 
-  return { ok: true, loadMs, warmMs, typeMs, wasmMs, runMs, bytes, run };
+  return { ok: true, loadMs, warmMs, wasmMs, runMs, bytes, run };
 }

@@ -107,6 +107,19 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "    end;\n\n" +
       'Fmt/print("combine = %d\\n")(combine(Option/some(3), Option/some(4)))',
   },
+  condmatch: {
+    tab: "cond match",
+    label: "choose.crs",
+    code:
+      "use /std/{Bln, Fmt, Nat, Option};\n\n" +
+      "let choose(prefer_fresh : Bln, cached : Option(Nat), fresh : Nat) -> Nat =\n" +
+      "    match\n" +
+      "    | prefer_fresh && fresh > 0 => fresh\n" +
+      "    | some(n) = cached => n\n" +
+      "    | _ => 0\n" +
+      "    end;\n\n" +
+      'Fmt/print("choice = %d\\n")(choose(true, Option/some(21), 5))',
+  },
   donotation: {
     tab: "do-notation",
     label: "sum_all.crs",
@@ -145,7 +158,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
 };
 
 // Which examples the homepage preview shows (a subset of the full playground).
-export const PREVIEW_KEYS = ["hello", "vec", "patterns", "concepts", "error"];
+export const PREVIEW_KEYS = ["hello", "vec", "patterns", "condmatch", "concepts", "error"];
 
 // The syntax-highlighted excerpt shown in the homepage hero. It's a trimmed,
 // hand-highlighted subset of the `vec` example above (just the type
