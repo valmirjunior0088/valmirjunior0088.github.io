@@ -4,8 +4,6 @@ export interface CuriosExample {
   code: string;
 }
 
-// Single source of truth for the curios snippets shown in the playground
-// (full set) and the homepage preview (a curated subset, see PREVIEW_KEYS).
 export const EXAMPLES: Record<string, CuriosExample> = {
   hello: {
     tab: "hello world",
@@ -157,13 +155,8 @@ export const EXAMPLES: Record<string, CuriosExample> = {
   },
 };
 
-// Which examples the homepage preview shows (a subset of the full playground).
 export const PREVIEW_KEYS = ["hello", "vec", "patterns", "condmatch", "concepts", "error"];
 
-// The syntax-highlighted excerpt shown in the homepage hero. It's a trimmed,
-// hand-highlighted subset of the `vec` example above (just the type
-// declaration, not the full append function), so it's kept as its own small
-// dataset rather than derived from EXAMPLES.vec.code.
 export const HERO_SNIPPET = {
   filename: "vec.crs",
   lines: [

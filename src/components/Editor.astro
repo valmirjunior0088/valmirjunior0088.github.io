@@ -2,453 +2,508 @@
 import CodeCard from "./CodeCard.astro";
 import { EXAMPLES, type CuriosExample } from "../data/examples";
 
-// The curios playground widget: example tabs + a code-card editor that
-// compiles/runs via /curios/loader.js. The same widget serves both the
-// standalone /curios/playground page and the /curios landing-page teaser;
-// the teaser just passes editable={false}, which makes the code read-only,
-// drops the Reset button, and lets the code area shrink to its content
-// instead of the editor's 340px minimum.
 interface Props {
-  editable?: boolean;
-  exampleKeys?: string[];
-  preload?: boolean;
+    editable?: boolean;
+    exampleKeys?: string[];
+    preload?: boolean;
 }
 
-const { editable = true, exampleKeys = Object.keys(EXAMPLES), preload = false } = Astro.props;
+const {
+    editable = true,
+    exampleKeys = Object.keys(EXAMPLES),
+    preload = false,
+} = Astro.props;
 
 const examples: Record<string, CuriosExample> = Object.fromEntries(
-  exampleKeys.map((key) => [key, EXAMPLES[key]])
+    exampleKeys.map((key) => [key, EXAMPLES[key]]),
 );
+
 const defaultKey = exampleKeys[0];
 
 const widgetId = editable ? "editor" : "editor-readonly";
+
+const positionalTabCSS = editable
+    ? ""
+    : exampleKeys
+          .map((_, i) => {
+              const n = i + 1;
+              return (
+                  `#${widgetId}:has(.tab-radio:nth-of-type(${n}):checked) .panel-chip:nth-of-type(${n}) { display: inline-block; }\n` +
+                  `#${widgetId}:has(.tab-radio:nth-of-type(${n}):checked) .panel:nth-of-type(${n}) { display: flex; }`
+              );
+          })
+          .join("\n");
 ---
 
-{preload && <script type="module" is:inline src="/curios/loader.js"></script>}
+{preload && <script type="module" is:inline src="/curios/loader.js" />}
 
 <div id={widgetId} class="editor-widget" data-editable={String(editable)}>
-  <div class="tabs">
-    {
-      exampleKeys.map((key) => (
-        <button class="tab" data-example={key}>
-          {examples[key].tab}
-        </button>
-      ))
-    }
-  </div>
-
-  <CodeCard>
-    <Fragment slot="topbar-extra">
-      <span class="chip filename">{examples[defaultKey].label}</span>
-    </Fragment>
-    <Fragment slot="actions">
-      <span class="status" aria-live="polite" />
-      {editable && (
-        <button class="btn btn-outline btn-reset">
-          Reset
-        </button>
-      )}
-      <button class="btn btn-primary btn-run">
-        <span class="run-label">Run</span>
-        <span class="run-icon">&#9654;</span>
-      </button>
-    </Fragment>
-
-    <div class="code-scroll editor">
-      <div class="code-gutter gutter" />
-      <textarea class="code-area editor-input" spellcheck="false" wrap="off" readonly={!editable} />
+    <div class="tabs">
+        {
+            editable
+                ? exampleKeys.map((key) => (
+                      <button class="tab" data-example={key}>
+                          {examples[key].tab}
+                      </button>
+                  ))
+                : exampleKeys.map((key, i) => (
+                      <>
+                          <input
+                              type="radio"
+                              class="tab-radio visually-hidden"
+                              name={`${widgetId}-tab`}
+                              id={`${widgetId}-tab-${i}`}
+                              checked={i === 0}
+                          />
+                          <label class="tab" for={`${widgetId}-tab-${i}`}>
+                              {examples[key].tab}
+                          </label>
+                      </>
+                  ))
+        }
     </div>
 
-    <div class="output" hidden aria-live="polite" />
-  </CodeCard>
+    <CodeCard>
+        <Fragment slot="topbar-extra">
+            {
+                editable ? (
+                    <span class="chip filename">
+                        {examples[defaultKey].label}
+                    </span>
+                ) : (
+                    exampleKeys.map((key) => (
+                        <span class="chip filename panel-chip">
+                            {examples[key].label}
+                        </span>
+                    ))
+                )
+            }
+        </Fragment>
+        <Fragment slot="actions">
+            <span class="status" aria-live="polite"></span>
+            {
+                editable && (
+                    <button class="btn btn-outline btn-reset">Reset</button>
+                )
+            }
+            <button class="btn btn-primary btn-run">
+                <span class="run-label">Run</span>
+                <span class="run-icon">&#9654;</span>
+            </button>
+        </Fragment>
+
+        {
+            editable ? (
+                <div class="code-scroll editor">
+                    <div class="code-gutter gutter" />
+                    <textarea
+                        class="code-area editor-input"
+                        spellcheck="false"
+                        wrap="off"
+                    />
+                </div>
+            ) : (
+                exampleKeys.map((key) => {
+                    const { code, label } = examples[key];
+                    const lines = code.split("\n");
+                    return (
+                        <div
+                            class="code-scroll editor panel"
+                            data-filename={label}
+                        >
+                            <div class="code-gutter">
+                                {lines.map((_, i) => (
+                                    <div>{i + 1}</div>
+                                ))}
+                            </div>
+                            <pre class="code-area">{code}</pre>
+                        </div>
+                    );
+                })
+            )
+        }
+
+        <div class="output" hidden aria-live="polite"></div>
+    </CodeCard>
 </div>
 
-<script type="module" define:vars={{ editable, examples, defaultKey, widgetId }}>
-  import { compileAndReport } from "/curios/loader.js";
+{!editable && <style set:html={positionalTabCSS} />}
 
-  // Elements are looked up by the classes each already carries for styling
-  // (rather than parallel id maps) — safe because only one instance of this
-  // widget is ever mounted on a given page.
-  const widget = document.getElementById(widgetId);
-  const el = {
-    tabs: widget.querySelectorAll(".tab"),
-    filename: widget.querySelector(".filename"),
-    status: widget.querySelector(".status"),
-    run: widget.querySelector(".btn-run"),
-    runLabel: widget.querySelector(".run-label"),
-    runIcon: widget.querySelector(".run-icon"),
-    reset: widget.querySelector(".btn-reset"), // absent when not editable
-    gutter: widget.querySelector(".gutter"),
-    editor: widget.querySelector(".editor-input"),
-    output: widget.querySelector(".output"),
-  };
+<script type="module" define:vars={{ editable, examples, defaultKey, widgetId }}
+>
+    import { compileAndReport } from "/curios/loader.js";
 
-  let active = defaultKey;
-  let running = false;
-  let downloadUrl = null;
+    const widget = document.getElementById(widgetId);
 
-  const setStatus = (text) => (el.status.textContent = text);
+    const el = {
+        tabs: widget.querySelectorAll(".tab"),
+        filename: widget.querySelector(".filename"),
+        status: widget.querySelector(".status"),
+        run: widget.querySelector(".btn-run"),
+        runLabel: widget.querySelector(".run-label"),
+        runIcon: widget.querySelector(".run-icon"),
+        reset: widget.querySelector(".btn-reset"),
+        gutter: widget.querySelector(".gutter"),
+        editor: widget.querySelector(".editor-input"),
+        output: widget.querySelector(".output"),
+    };
 
-  // The shared spinner, used by both the pending row and the Run button: a
-  // border ring styled by the .spin rule below. A ring spins exactly around
-  // its own center, unlike a rotated font glyph whose visual center rarely
-  // matches its box center.
-  function spinnerEl() {
-    const spinner = document.createElement("span");
-    spinner.className = "spin";
-    return spinner;
-  }
+    let active = defaultKey;
+    let running = false;
+    let downloadUrl = null;
 
-  // The button keeps a permanent icon slot: ▶ when idle, the spinner while
-  // a run is in flight. `icon` is a string or an element.
-  function setRunButton(label, icon) {
-    el.runLabel.textContent = label;
-    el.runIcon.replaceChildren(icon);
-  }
+    const setStatus = (text) => (el.status.textContent = text);
 
-  function revokeDownload() {
-    if (downloadUrl) {
-      URL.revokeObjectURL(downloadUrl);
-      downloadUrl = null;
+    function spinnerEl() {
+        const spinner = document.createElement("span");
+        spinner.className = "spin";
+        return spinner;
     }
-  }
 
-  function renderGutter(code) {
-    const lines = code.split("\n").length;
-    el.gutter.innerHTML = "";
-    for (let i = 1; i <= lines; i++) {
-      const row = document.createElement("div");
-      row.textContent = String(i);
-      el.gutter.appendChild(row);
+    function setRunButton(label, icon) {
+        el.runLabel.textContent = label;
+        el.runIcon.replaceChildren(icon);
     }
-  }
 
-  // The output is laid out as a two-column grid — icons in a centered left
-  // column, text left-aligned in the right one — so the phase lines read
-  // like a table. Rows are appended as the loader reports each completed
-  // phase, so on a cold run the download/compile lines show up
-  // one by one instead of all at once.
-  function makeRows() {
-    const rows = document.createElement("div");
-    rows.className = "output-rows";
-    return rows;
-  }
-
-  // `before` inserts the row above an existing cell (used to keep the
-  // pending row last); omitted, the row goes at the end.
-  function addRow(rows, icon, text, className, before = null) {
-    const iconCell = document.createElement("span");
-    iconCell.className = "row-icon";
-    iconCell.textContent = icon;
-    const textCell = document.createElement("span");
-    textCell.textContent = text;
-    if (className) {
-      iconCell.classList.add(className);
-      textCell.classList.add(className);
+    function revokeDownload() {
+        if (downloadUrl) {
+            URL.revokeObjectURL(downloadUrl);
+            downloadUrl = null;
+        }
     }
-    rows.insertBefore(iconCell, before);
-    rows.insertBefore(textCell, before);
-    return { iconCell, textCell };
-  }
 
-  // While a run is in flight, the grid's last row is a "compiling…"
-  // placeholder with a spinning icon. Completed phase rows are inserted
-  // above it, and it goes away once the whole sequence settles.
-  let pendingRow = null;
-
-  function showPending(rows) {
-    pendingRow = addRow(rows, "", "compiling…");
-    pendingRow.iconCell.appendChild(spinnerEl());
-  }
-
-  function clearPending() {
-    if (pendingRow) {
-      pendingRow.iconCell.remove();
-      pendingRow.textCell.remove();
-      pendingRow = null;
+    function renderGutter(code) {
+        const lines = code.split("\n").length;
+        el.gutter.innerHTML = "";
+        for (let i = 1; i <= lines; i++) {
+            const row = document.createElement("div");
+            row.textContent = String(i);
+            el.gutter.appendChild(row);
+        }
     }
-  }
 
-  // One row per pipeline phase as the loader reports it, each with its own
-  // icon: ↓ download, ✓ compile (✗ marks failures below).
-  function addPhaseRow(rows, event) {
-    const before = pendingRow && pendingRow.iconCell;
-    if (event.phase === "load") {
-      addRow(
-        rows,
-        "↓",
-        `downloaded compiler in ${event.loadMs.toFixed(0)}ms · warmed it up in ${event.warmMs.toFixed(0)}ms`,
-        undefined,
-        before
-      );
-    } else if (event.phase === "compile") {
-      addRow(
-        rows,
-        "✓",
-        `compiled to wasm in ${event.wasmMs.toFixed(1)}ms (${event.byteLength} bytes)`,
-        undefined,
-        before
-      );
+    function activePanel() {
+        const panels = [...widget.querySelectorAll(".panel")];
+        const radios = [...widget.querySelectorAll(".tab-radio")];
+        return panels[
+            Math.max(
+                0,
+                radios.findIndex((radio) => radio.checked),
+            )
+        ];
     }
-  }
 
-  function renderSuccess(rows, result) {
-    downloadUrl = URL.createObjectURL(new Blob([result.bytes], { type: "application/wasm" }));
-
-    // The compile phase row is always the last one appended before success
-    // is rendered, so its text cell is the grid's last child — the download
-    // link rides at the end of that line, after a separator dot.
-    const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.download = (el.filename.textContent || "output.crs").replace(/\.crs$/, ".wasm");
-    link.textContent = "Download .wasm";
-    link.className = "download-link";
-    rows.lastElementChild.append(" · ", link);
-
-    const { run } = result;
-
-    // Whatever the program printed goes in its own card — a merged,
-    // full-width row of the grid — followed by how the run ended.
-    const stdout = `${run.stdout}${run.stderr}`.trimEnd();
-    if (stdout) {
-      const programOutput = document.createElement("pre");
-      programOutput.className = "program-output";
-      programOutput.textContent = stdout;
-      rows.appendChild(programOutput);
+    function currentSource() {
+        return editable
+            ? el.editor.value
+            : activePanel().querySelector(".code-area").textContent;
     }
-    addRow(rows, "▶", `ran in ${result.runMs.toFixed(1)}ms`);
-    if (run.trap) {
-      addRow(rows, "✗", run.trap, "err-line");
-    } else if (run.exitCode) {
-      addRow(rows, "", `process exited with code ${run.exitCode}`);
+
+    function currentFilename() {
+        return editable
+            ? el.filename.textContent || "output.crs"
+            : activePanel().dataset.filename;
     }
-    setStatus(run.trap ? "✓ compiled · ✗ run failed" : "");
-  }
 
-  const PHASE_STATUS = {
-    load: "✗ failed to load compiler",
-    compile: "✗ compile error",
-  };
+    function makeRows() {
+        const rows = document.createElement("div");
+        rows.className = "output-rows";
+        return rows;
+    }
 
-  function setActiveTab(key) {
-    revokeDownload();
-    active = key;
-    const example = examples[key];
-    el.filename.textContent = example.label;
-    el.filename.hidden = false;
-    el.output.hidden = true;
-    setStatus("");
-    el.tabs.forEach((btn) => btn.classList.toggle("tab-active", btn.dataset.example === key));
-    el.editor.value = example.code;
-    renderGutter(example.code);
-  }
+    function addRow(rows, icon, text, className, before = null) {
+        const iconCell = document.createElement("span");
+        iconCell.className = "row-icon";
+        iconCell.textContent = icon;
+        const textCell = document.createElement("span");
+        textCell.textContent = text;
+        if (className) {
+            iconCell.classList.add(className);
+            textCell.classList.add(className);
+        }
+        rows.insertBefore(iconCell, before);
+        rows.insertBefore(textCell, before);
+        return { iconCell, textCell };
+    }
 
-  el.tabs.forEach((btn) => {
-    btn.addEventListener("click", () => setActiveTab(btn.dataset.example));
-  });
+    let pendingRow = null;
 
-  if (editable) {
-    // Typing detaches the buffer from the example tabs: no tab is active
-    // and the filename chip disappears until a tab (or Reset) restores one.
-    el.editor.addEventListener("input", () => {
-      el.tabs.forEach((btn) => btn.classList.remove("tab-active"));
-      el.filename.textContent = "";
-      el.filename.hidden = true;
-      renderGutter(el.editor.value);
+    function showPending(rows) {
+        pendingRow = addRow(rows, "", "compiling…");
+        pendingRow.iconCell.appendChild(spinnerEl());
+    }
+
+    function clearPending() {
+        if (pendingRow) {
+            pendingRow.iconCell.remove();
+            pendingRow.textCell.remove();
+            pendingRow = null;
+        }
+    }
+
+    function addPhaseRow(rows, event) {
+        const before = pendingRow && pendingRow.iconCell;
+        if (event.phase === "load") {
+            addRow(
+                rows,
+                "↓",
+                `downloaded compiler in ${event.loadMs.toFixed(0)}ms · warmed it up in ${event.warmMs.toFixed(0)}ms`,
+                undefined,
+                before,
+            );
+        } else if (event.phase === "compile") {
+            addRow(
+                rows,
+                "✓",
+                `compiled to wasm in ${event.wasmMs.toFixed(1)}ms (${event.byteLength} bytes)`,
+                undefined,
+                before,
+            );
+        }
+    }
+
+    function renderSuccess(rows, result) {
+        downloadUrl = URL.createObjectURL(
+            new Blob([result.bytes], { type: "application/wasm" }),
+        );
+
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = currentFilename().replace(/\.crs$/, ".wasm");
+        link.textContent = "Download .wasm";
+        link.className = "download-link";
+        rows.lastElementChild.append(" · ", link);
+
+        const { run } = result;
+
+        const stdout = `${run.stdout}${run.stderr}`.trimEnd();
+        if (stdout) {
+            const programOutput = document.createElement("pre");
+            programOutput.className = "program-output";
+            programOutput.textContent = stdout;
+            rows.appendChild(programOutput);
+        }
+        addRow(rows, "▶", `ran in ${result.runMs.toFixed(1)}ms`);
+        if (run.trap) {
+            addRow(rows, "✗", run.trap, "err-line");
+        } else if (run.exitCode) {
+            addRow(rows, "", `process exited with code ${run.exitCode}`);
+        }
+        setStatus(run.trap ? "✓ compiled · ✗ run failed" : "");
+    }
+
+    const PHASE_STATUS = {
+        load: "✗ failed to load compiler",
+        compile: "✗ compile error",
+    };
+
+    if (editable) {
+        function setActiveTab(key) {
+            revokeDownload();
+            active = key;
+            const example = examples[key];
+            el.filename.textContent = example.label;
+            el.filename.hidden = false;
+            el.output.hidden = true;
+            setStatus("");
+            el.tabs.forEach((btn) =>
+                btn.classList.toggle("tab-active", btn.dataset.example === key),
+            );
+            el.editor.value = example.code;
+            renderGutter(example.code);
+        }
+
+        el.tabs.forEach((btn) => {
+            btn.addEventListener("click", () =>
+                setActiveTab(btn.dataset.example),
+            );
+        });
+
+        el.editor.addEventListener("input", () => {
+            el.tabs.forEach((btn) => btn.classList.remove("tab-active"));
+            el.filename.textContent = "";
+            el.filename.hidden = true;
+            renderGutter(el.editor.value);
+        });
+        el.reset.addEventListener("click", () => setActiveTab(active));
+
+        setActiveTab(defaultKey);
+    }
+
+    el.run.addEventListener("click", async () => {
+        if (running) return;
+        running = true;
+        el.run.disabled = true;
+        setRunButton("Running…", spinnerEl());
+        revokeDownload();
+        setStatus("compiling…");
+
+        const rows = makeRows();
+        el.output.className = "output ok-output";
+        el.output.innerHTML = "";
+        el.output.appendChild(rows);
+        el.output.hidden = false;
+        showPending(rows);
+
+        try {
+            const result = await compileAndReport(currentSource(), (event) =>
+                addPhaseRow(rows, event),
+            );
+            clearPending();
+            if (result.ok) {
+                renderSuccess(rows, result);
+            } else {
+                addRow(rows, "✗", result.error, "err-line");
+                setStatus(PHASE_STATUS[result.phase] ?? "✗ error");
+            }
+        } finally {
+            clearPending();
+            running = false;
+            el.run.disabled = false;
+            setRunButton("Run again", "▶");
+        }
     });
-    el.reset.addEventListener("click", () => setActiveTab(active));
-  }
-
-  el.run.addEventListener("click", async () => {
-    if (running) return;
-    running = true;
-    el.run.disabled = true;
-    setRunButton("Running…", spinnerEl());
-    revokeDownload();
-    setStatus("compiling…");
-
-    // Show the grid right away with just the "compiling…" placeholder in
-    // it; each phase event inserts its row above the placeholder as the
-    // pipeline progresses.
-    const rows = makeRows();
-    el.output.className = "output ok-output";
-    el.output.innerHTML = "";
-    el.output.appendChild(rows);
-    el.output.hidden = false;
-    showPending(rows);
-
-    try {
-      const result = await compileAndReport(el.editor.value, (event) => addPhaseRow(rows, event));
-      clearPending();
-      if (result.ok) {
-        renderSuccess(rows, result);
-      } else {
-        addRow(rows, "✗", result.error, "err-line");
-        setStatus(PHASE_STATUS[result.phase] ?? "✗ error");
-      }
-    } finally {
-      clearPending();
-      running = false;
-      el.run.disabled = false;
-      setRunButton("Run again", "▶");
-    }
-  });
-
-  setActiveTab(defaultKey);
 </script>
 
 <style>
-  .tabs {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 14px;
-  }
-  .tab {
-    font-family: var(--mono);
-    font-size: 13px;
-    font-weight: 500;
-    padding: 9px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--fg-dimmer);
-  }
-  .tab-active {
-    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-    background: color-mix(in srgb, var(--accent) 16%, transparent);
-    color: var(--fg);
-  }
-
-  .btn-run {
-    font-size: 13px;
-    padding: 8px 18px;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-  }
-  /* Fixed-width icon slot so swapping the idle ▶ for the spinner can't
-     resize the button (same reason the table's icon column is a fixed 2ch). */
-  .btn-run .run-icon {
-    display: inline-block;
-    width: 1.2em;
-    text-align: center;
-  }
-
-  /* One spinner definition for the whole widget: a border ring rather than
-     a rotated glyph, so it spins exactly around its own center. Created at
-     runtime (pending row + Run button), hence :global. */
-  .editor-widget :global(.spin) {
-    display: inline-block;
-    width: 0.85em;
-    height: 0.85em;
-    border-radius: 50%;
-    border: 2px solid currentColor;
-    border-right-color: transparent;
-    vertical-align: -0.125em;
-    animation: editor-spin 0.9s linear infinite;
-  }
-  @keyframes editor-spin {
-    to {
-      transform: rotate(360deg);
+    .tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
     }
-  }
-  .btn-reset {
-    font-size: 13px;
-    padding: 8px 14px;
-  }
+    .tab {
+        font-family: var(--mono);
+        font-size: 13px;
+        font-weight: 500;
+        padding: 9px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--fg-dimmer);
+    }
+    .tab-active,
+    .tab-radio:checked + .tab {
+        border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+        background: color-mix(in srgb, var(--accent) 16%, transparent);
+        color: var(--fg);
+    }
+    .tab-radio:focus-visible + .tab {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
 
-  .status {
-    font-family: var(--mono);
-    font-size: 12.5px;
-    color: var(--fg-faint);
-  }
+    .panel-chip,
+    .panel {
+        display: none;
+    }
 
-  /* The editor's line-number gutter and code area come from the shared
-     .code-scroll / .code-gutter / .code-area recipe in Base.astro; only the
-     textarea's field reset and the min-height are editor-specific. */
-  .editor,
-  .editor-input {
-    min-height: 340px;
-  }
-  /* The read-only teaser sizes to its content instead. */
-  .editor-widget[data-editable="false"] .editor,
-  .editor-widget[data-editable="false"] .editor-input {
-    min-height: 0;
-  }
-  .editor-input {
-    /* Grows to fit its content natively, so the box is always sized off
-       whatever font is actually active — no JS measurement, so nothing can
-       be measured too early (e.g. before a webfont swap) and freeze wrong. */
-    field-sizing: content;
-    background: transparent;
-    border: none;
-    outline: none;
-    resize: none;
-    overflow-y: auto;
-    color: oklch(94% 0.006 285);
-  }
-  /* Browsers without field-sizing support fall back to a fixed-height
-     scrolling box rather than an auto-growing one. */
-  @supports not (field-sizing: content) {
+    .btn-run {
+        font-size: 13px;
+        padding: 8px 18px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+    }
+    .btn-run .run-icon {
+        display: inline-block;
+        width: 1.2em;
+        text-align: center;
+    }
+
+    .editor-widget :global(.spin) {
+        display: inline-block;
+        width: 0.85em;
+        height: 0.85em;
+        border-radius: 50%;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        vertical-align: -0.125em;
+        animation: editor-spin 0.9s linear infinite;
+    }
+    @keyframes editor-spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+    .btn-reset {
+        font-size: 13px;
+        padding: 8px 14px;
+    }
+
+    .status {
+        font-family: var(--mono);
+        font-size: 12.5px;
+        color: var(--fg-faint);
+    }
+
+    .editor,
     .editor-input {
-      max-height: 340px;
+        min-height: 340px;
     }
+    .editor-widget[data-editable="false"] .editor,
     .editor-widget[data-editable="false"] .editor-input {
-      max-height: none;
+        min-height: 0;
     }
-  }
+    .editor-input {
+        field-sizing: content;
+        background: transparent;
+        border: none;
+        outline: none;
+        resize: none;
+        overflow-y: auto;
+        color: oklch(94% 0.006 285);
+    }
+    @supports not (field-sizing: content) {
+        .editor-input {
+            max-height: 340px;
+        }
+        .editor-widget[data-editable="false"] .editor-input {
+            max-height: none;
+        }
+    }
 
-  .output {
-    border-top: 1px solid var(--border-soft);
-    background: var(--bg-output);
-    padding: 20px 28px;
-    font-family: var(--mono);
-    font-size: 14.5px;
-    line-height: 1.8;
-    white-space: pre-wrap;
-  }
-  .ok-output {
-    color: var(--fg-faint);
-  }
-  /* Everything inside .output is created by the script at runtime, so those
-     elements never get Astro's scoping attribute — reach them with :global()
-     anchored on the (template-rendered, scoped) .output container. */
-  .output :global(.output-rows) {
-    display: grid;
-    /* Fixed icon column: max-content would resize with whichever icons are
-       currently present (the ◐ placeholder is wider than the ↓/⊢/✓ glyphs),
-       making the text column drift mid-run. */
-    grid-template-columns: 2ch 1fr;
-    column-gap: 10px;
-    align-items: baseline;
-  }
-  .output :global(.row-icon) {
-    text-align: center;
-  }
-  .output :global(.download-link) {
-    color: var(--accent);
-    text-decoration: none;
-    font-weight: 600;
-  }
-  .output :global(.program-output) {
-    /* A merged row: the card spans both grid columns. It always sits
-       between text rows, whose built-in half-leading keeps the spacing
-       around it (and the section's edges) balanced with no compensation. */
-    grid-column: 1 / -1;
-    margin: 12px 0;
-    padding: 12px 14px;
-    background: var(--bg-card-alt);
-    border: 1px solid var(--border-soft);
-    border-radius: 8px;
-    color: var(--fg);
-    white-space: pre-wrap;
-    font-family: var(--mono);
-    font-size: inherit;
-    line-height: inherit;
-  }
-  .output :global(.err-line) {
-    color: var(--red);
-  }
+    .output {
+        border-top: 1px solid var(--border-soft);
+        background: var(--bg-output);
+        padding: 20px 28px;
+        font-family: var(--mono);
+        font-size: 14.5px;
+        line-height: 1.8;
+        white-space: pre-wrap;
+    }
+    .ok-output {
+        color: var(--fg-faint);
+    }
+    .output :global(.output-rows) {
+        display: grid;
+        grid-template-columns: 2ch 1fr;
+        column-gap: 10px;
+        align-items: baseline;
+    }
+    .output :global(.row-icon) {
+        text-align: center;
+    }
+    .output :global(.download-link) {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .output :global(.program-output) {
+        grid-column: 1 / -1;
+        margin: 12px 0;
+        padding: 12px 14px;
+        background: var(--bg-card-alt);
+        border: 1px solid var(--border-soft);
+        border-radius: 8px;
+        color: var(--fg);
+        white-space: pre-wrap;
+        font-family: var(--mono);
+        font-size: inherit;
+        line-height: inherit;
+    }
+    .output :global(.err-line) {
+        color: var(--red);
+    }
 </style>

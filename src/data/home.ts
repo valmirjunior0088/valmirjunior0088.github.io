@@ -1,12 +1,6 @@
-// Content for the curios landing page's features grid and benchmarks
-// section — extracted so the markup can map over data instead of
-// repeating near-identical card structure per entry (same rationale as
-// examples.ts for the playground snippets).
-
 export interface Feature {
   glyph: string;
   title: string;
-  // Backtick-wrapped `terms` render as inline <code> on the landing page.
   body: string;
 }
 

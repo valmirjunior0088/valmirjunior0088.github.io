@@ -7,8 +7,6 @@ import { PREVIEW_KEYS, HERO_SNIPPET } from "../../data/examples";
 import { FEATURES, BENCHMARKS } from "../../data/home";
 import { GITHUB_URL } from "../../data/site";
 
-// Feature bodies mark code terms with `backticks` (see home.ts); render
-// them as inline <code>. The text is our own data, not user input.
 const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1</code>");
 ---
 
@@ -16,7 +14,6 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
   <div class="page">
     <Nav />
 
-    <!-- HERO -->
     <div id="top" class="hero">
       <div class="hero-glow" aria-hidden="true"></div>
 
@@ -45,7 +42,6 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
       </div>
     </div>
 
-    <!-- PLAYGROUND PREVIEW -->
     <div id="playground-preview" class="section">
       <div class="section-intro">
         <div class="eyebrow">// the whole point</div>
@@ -64,7 +60,6 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
       </div>
     </div>
 
-    <!-- FEATURES -->
     <div id="features" class="section">
       <div class="section-intro">
         <div class="eyebrow">// under the hood</div>
@@ -83,7 +78,6 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
       </div>
     </div>
 
-    <!-- BENCHMARKS -->
     <div id="benchmarks" class="section">
       <div class="section-intro">
         <div class="eyebrow">// how it performs</div>
@@ -126,7 +120,6 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
       </div>
     </div>
 
-    <!-- INSTALL -->
     <div class="section install-section">
       <div class="eyebrow eyebrow-center">// get started</div>
       <h2 class="h-serif">Up and running in under a minute.</h2>
@@ -138,7 +131,6 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
       <p class="install-note">Prebuilt binaries for Linux (x86_64/aarch64) and macOS (aarch64) live on the <a href={`${GITHUB_URL}/releases`} target="_blank" rel="noopener">releases page</a>. Prefer building from source? <code>git clone</code> the repo and follow the README. Or just open the playground above &mdash; nothing to install.</p>
     </div>
 
-    <!-- GITHUB -->
     <div class="github-band">
       <div class="github-inner">
         <div>
@@ -151,7 +143,6 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
       </div>
     </div>
 
-    <!-- FOOTER -->
     <div class="footer">
       <div class="footer-brand">
         <div class="nav-mark">&lambda;</div>
@@ -263,7 +254,6 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     font-size: clamp(30px, 3.4vw, 42px);
     margin: 0 0 16px;
   }
-  /* Headings run the full row; only the lede is capped for line length. */
   .section-lede {
     font-size: 17px;
     line-height: 1.65;
@@ -336,7 +326,6 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     color: var(--fg);
   }
 
-  /* Six cards, three per row. */
   .features-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -364,8 +353,6 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     line-height: 1.6;
     color: var(--fg-dimmer);
   }
-  /* Inline code terms inside feature bodies (rendered via set:html, so the
-     <code> elements need :global to survive Astro's style scoping). */
   .feature-body :global(code) {
     font-family: var(--mono);
     font-size: 0.88em;
