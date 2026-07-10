@@ -123,13 +123,6 @@ const widgetId = editable ? "editor" : "editor-readonly";
     }
   }
 
-  function autosize() {
-    el.editor.style.height = "auto";
-    const height = Math.max(editable ? 340 : 0, el.editor.scrollHeight);
-    el.editor.style.height = height + "px";
-    el.gutter.style.height = height + "px";
-  }
-
   // The output is laid out as a two-column grid — icons in a centered left
   // column, text left-aligned in the right one — so the phase lines read
   // like a table. Rows are appended as the loader reports each completed
@@ -248,7 +241,6 @@ const widgetId = editable ? "editor" : "editor-readonly";
     el.tabs.forEach((btn) => btn.classList.toggle("tab-active", btn.dataset.example === key));
     el.editor.value = example.code;
     renderGutter(example.code);
-    autosize();
   }
 
   el.tabs.forEach((btn) => {
@@ -263,7 +255,6 @@ const widgetId = editable ? "editor" : "editor-readonly";
       el.filename.textContent = "";
       el.filename.hidden = true;
       renderGutter(el.editor.value);
-      autosize();
     });
     el.reset.addEventListener("click", () => setActiveTab(active));
   }
@@ -387,12 +378,26 @@ const widgetId = editable ? "editor" : "editor-readonly";
     min-height: 0;
   }
   .editor-input {
+    /* Grows to fit its content natively, so the box is always sized off
+       whatever font is actually active — no JS measurement, so nothing can
+       be measured too early (e.g. before a webfont swap) and freeze wrong. */
+    field-sizing: content;
     background: transparent;
     border: none;
     outline: none;
     resize: none;
-    overflow-y: hidden;
+    overflow-y: auto;
     color: oklch(94% 0.006 285);
+  }
+  /* Browsers without field-sizing support fall back to a fixed-height
+     scrolling box rather than an auto-growing one. */
+  @supports not (field-sizing: content) {
+    .editor-input {
+      max-height: 340px;
+    }
+    .editor-widget[data-editable="false"] .editor-input {
+      max-height: none;
+    }
   }
 
   .output {
