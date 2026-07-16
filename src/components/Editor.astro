@@ -22,14 +22,18 @@ const defaultKey = exampleKeys[0];
 
 const widgetId = editable ? "editor" : "editor-readonly";
 
+// nth-of-type counts by tag name among *all* siblings, not just same-class
+// ones — CodeCard always renders a leading topbar div before the slotted
+// panels, which throws off any nth-of-type-based index by one. Each
+// radio/chip/panel instead carries a matching data-index, so the generated
+// rules select by that instead of fragile sibling position.
 const positionalTabCSS = editable
     ? ""
     : exampleKeys
           .map((_, i) => {
-              const n = i + 1;
               return (
-                  `#${widgetId}:has(.tab-radio:nth-of-type(${n}):checked) .panel-chip:nth-of-type(${n}) { display: inline-block; }\n` +
-                  `#${widgetId}:has(.tab-radio:nth-of-type(${n}):checked) .panel:nth-of-type(${n}) { display: flex; }`
+                  `#${widgetId}:has(.tab-radio[data-index="${i}"]:checked) .panel-chip[data-index="${i}"] { display: inline-block; }\n` +
+                  `#${widgetId}:has(.tab-radio[data-index="${i}"]:checked) .panel[data-index="${i}"] { display: flex; }`
               );
           })
           .join("\n");
@@ -53,6 +57,7 @@ const positionalTabCSS = editable
                               class="tab-radio visually-hidden"
                               name={`${widgetId}-tab`}
                               id={`${widgetId}-tab-${i}`}
+                              data-index={i}
                               checked={i === 0}
                           />
                           <label class="tab" for={`${widgetId}-tab-${i}`}>
@@ -71,8 +76,8 @@ const positionalTabCSS = editable
                         {examples[defaultKey].label}
                     </span>
                 ) : (
-                    exampleKeys.map((key) => (
-                        <span class="chip filename panel-chip">
+                    exampleKeys.map((key, i) => (
+                        <span class="chip filename panel-chip" data-index={i}>
                             {examples[key].label}
                         </span>
                     ))
@@ -103,13 +108,14 @@ const positionalTabCSS = editable
                     />
                 </div>
             ) : (
-                exampleKeys.map((key) => {
+                exampleKeys.map((key, i) => {
                     const { code, label } = examples[key];
                     const lines = code.split("\n");
                     return (
                         <div
                             class="code-scroll editor panel"
                             data-filename={label}
+                            data-index={i}
                         >
                             <div class="code-gutter">
                                 {lines.map((_, i) => (
