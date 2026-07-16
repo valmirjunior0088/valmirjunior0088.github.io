@@ -42,7 +42,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     label: "point.crs",
     code:
       "use /std/{Nat, Fmt, Add};\n\n" +
-      "pub record Point : Type {\n" +
+      "pub struct Point : pub Type {\n" +
       "    x : Nat,\n" +
       "    y : Nat,\n" +
       "}\n\n" +
@@ -57,7 +57,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     label: "midpoint.crs",
     code:
       "use /std/{Fmt, Nat};\n\n" +
-      "pub record Point : Type { x : Nat, y : Nat }\n\n" +
+      "pub struct Point : pub Type { x : Nat, y : Nat }\n\n" +
       "let midpoint(Point { x = ax, y = ay } : Point, Point { x = bx, y = by } : Point) -> Point =\n" +
       "    Point { x = (ax + bx) / 2, y = (ay + by) / 2 };\n\n" +
       "let bounds(p : Point) -> { Nat, Nat } = (p.x, p.y);\n\n" +
@@ -70,7 +70,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     label: "spread.crs",
     code:
       "use /std/{Fmt, Nat, Lst};\n\n" +
-      "pub record Point : Type { x : Nat, y : Nat }\n\n" +
+      "pub struct Point : pub Type { x : Nat, y : Nat }\n\n" +
       "let p : Point = Point { x = 1, y = 2 };\n" +
       "let q : Point = Point { ..p, y = 9 };\n\n" +
       "let base : Lst(Nat) = [2, 3, 4];\n" +
@@ -143,6 +143,15 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "    | cons(_, x, _) => x\n" +
       "    end;\n\n" +
       'Io/print("typechecks: head, n erased\\n")',
+  },
+  goal: {
+    tab: "written goal",
+    label: "goal.crs",
+    code:
+      "use /std/{Io};\n\n" +
+      "pub let compose(@A : Type, @B : Type, @C : Type, f : (B) -> C, g : (A) -> B) -> (A) -> C =\n" +
+      "    ?;\n\n" +
+      'Io/print("unreachable\\n")',
   },
   error: {
     tab: "type error",
