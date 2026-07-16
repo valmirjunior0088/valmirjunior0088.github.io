@@ -11,7 +11,7 @@ function warmUp(mod) {
 function loadModule() {
   const startedNow = !modulePromise;
   if (startedNow) {
-    modulePromise = import("/curios/wasm/curios_js.js")
+    modulePromise = import("/curios/web/curios_web.js")
       .then(async (mod) => {
         await mod.default();
         return { mod, warmMs: warmUp(mod) };
