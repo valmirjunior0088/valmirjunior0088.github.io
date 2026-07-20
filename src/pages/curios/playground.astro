@@ -125,6 +125,10 @@ const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
   const placeholder = document.querySelector<HTMLElement>(".cheatsheet-placeholder")!;
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
   const MOTION: KeyframeAnimationOptions = { duration: 240, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" };
+  const edges = (rect: DOMRect) => ({
+    top: `${rect.top}px`,
+    bottom: `${window.innerHeight - rect.bottom}px`,
+  });
   let animating = false;
 
   function setFloating(on: boolean) {
@@ -141,17 +145,12 @@ const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
       backdrop.hidden = false;
       document.documentElement.style.overflow = "hidden";
       backdrop.getAnimations().forEach((animation) => animation.cancel());
+      panel.getAnimations().forEach((animation) => animation.cancel());
       if (!reduceMotion.matches) {
         const last = panel.getBoundingClientRect();
         animating = true;
         backdrop.animate([{ opacity: 0 }, { opacity: 1 }], MOTION);
-        const slide = panel.animate(
-          [
-            { top: `${first.top}px`, height: `${first.height}px` },
-            { top: `${last.top}px`, height: `${last.height}px` },
-          ],
-          MOTION,
-        );
+        const slide = panel.animate([edges(first), edges(last)], MOTION);
         slide.finished.finally(() => {
           animating = false;
           panel.classList.add("show-hint");
@@ -182,13 +181,7 @@ const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
       } else {
         animating = true;
         backdrop.animate([{ opacity: 1 }, { opacity: 0 }], { ...MOTION, fill: "forwards" });
-        const slide = panel.animate(
-          [
-            { top: `${first.top}px`, height: `${first.height}px` },
-            { top: `${target.top}px`, height: `${target.height}px` },
-          ],
-          MOTION,
-        );
+        const slide = panel.animate([edges(first), edges(target)], { ...MOTION, fill: "forwards" });
         slide.finished.then(finish, finish);
       }
     }
@@ -360,6 +353,9 @@ const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
     display: none;
   }
   .cheatsheet-sec-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-family: var(--mono);
     font-size: 11.5px;
     font-weight: 600;
@@ -368,11 +364,16 @@ const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
     color: var(--accent);
     margin: 0 0 2px;
   }
+  .cheatsheet-sec-title::after {
+    content: "";
+    flex: 1;
+    border-top: 2px solid var(--accent);
+  }
   .cheatsheet-row {
     display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 18px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 3px;
     padding: 9px 0;
   }
   .cheatsheet-row:not([hidden]) ~ .cheatsheet-row:not([hidden]) {
@@ -413,13 +414,10 @@ const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
     color: var(--green);
   }
   .cheatsheet-note {
-    flex: 0 1 auto;
-    max-width: 45%;
     font-size: 13.5px;
     font-style: italic;
     line-height: 1.5;
     color: var(--fg-dimmer);
-    text-align: right;
     text-wrap: pretty;
   }
   .cheatsheet-note :global(code) {
@@ -500,15 +498,6 @@ const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
   @media (max-width: 860px) {
     .cheatsheet-cols {
       columns: 1;
-    }
-    .cheatsheet-row {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 4px;
-    }
-    .cheatsheet-note {
-      max-width: none;
-      text-align: left;
     }
     .cheatsheet-head {
       flex-wrap: wrap;
