@@ -208,9 +208,17 @@ for (const section of CHEATSHEET) {
         finish();
       } else {
         animating = true;
-        backdrop.animate([{ opacity: 1 }, { opacity: 0 }], { ...MOTION, fill: "forwards" });
+        // cancel these once done: a lingering forwards-fill animation can be GC'd into a
+        // state where it still applies its styles but no longer shows up in getAnimations(),
+        // permanently overriding the floating position and backdrop opacity
+        const fade = backdrop.animate([{ opacity: 1 }, { opacity: 0 }], { ...MOTION, fill: "forwards" });
         const slide = panel.animate([edges(first), edges(target)], { ...MOTION, fill: "forwards" });
-        slide.finished.then(finish, finish);
+        const settle = () => {
+          finish();
+          fade.cancel();
+          slide.cancel();
+        };
+        slide.finished.then(settle, settle);
       }
     }
     updateFade();
