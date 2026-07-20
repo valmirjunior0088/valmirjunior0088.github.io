@@ -11,5 +11,9 @@
   },
   "dependencies": {
     "astro": "^5.0.0"
+  },
+  "releaseArtifacts": {
+    "repo": "valmirjunior0088/curios",
+    "tag": "release/0.4.2"
   }
 }

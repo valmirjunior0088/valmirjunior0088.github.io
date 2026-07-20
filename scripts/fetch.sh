@@ -6,15 +6,15 @@
 # button and the docs link fail (the site handles that gracefully, but the
 # playground won't work).
 #
-# CURIOS_TAG below is the single source of truth for the pinned release —
-# the deploy workflow (.github/workflows/deploy.yml) invokes this same script,
-# so bumping the tag here is the only place a release bump needs to happen.
+# package.json's "releaseArtifacts" field is the single source of truth for
+# the pinned release — the deploy workflow (.github/workflows/deploy.yml)
+# invokes this same script, so bumping the tag there is the only place a
+# release bump needs to happen.
 set -euo pipefail
 
-CURIOS_TAG="release/0.4.1"
-CURIOS_REPO="valmirjunior0088/curios"
-
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CURIOS_REPO="$(node -p "require('$ROOT_DIR/package.json').releaseArtifacts.repo")"
+CURIOS_TAG="$(node -p "require('$ROOT_DIR/package.json').releaseArtifacts.tag")"
 DEST="$ROOT_DIR/public/curios"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT

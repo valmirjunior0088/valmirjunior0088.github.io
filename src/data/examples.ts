@@ -109,8 +109,8 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     tab: "cond match",
     label: "choose.crs",
     code:
-      "use /std/{Bln, Fmt, Nat, Option};\n\n" +
-      "let choose(prefer_fresh : Bln, cached : Option(Nat), fresh : Nat) -> Nat =\n" +
+      "use /std/{Bool, Fmt, Nat, Option};\n\n" +
+      "let choose(prefer_fresh : Bool, cached : Option(Nat), fresh : Nat) -> Nat =\n" +
       "    match\n" +
       "    | prefer_fresh && fresh > 0 => fresh\n" +
       "    | some(n) = cached => n\n" +
