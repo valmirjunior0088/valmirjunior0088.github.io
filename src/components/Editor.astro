@@ -520,4 +520,15 @@ const positionalTabCSS = editable
     .output :global(.err-line) {
         color: var(--red);
     }
+
+    @media (max-width: 860px) {
+        /* 16px keeps iOS Safari from zooming the page when the textarea is
+           focused; the gutter shares the variable so it stays in sync */
+        .editor-widget[data-editable="true"] {
+            --code-fs: 16px;
+        }
+        .tab {
+            padding: 10px 16px;
+        }
+    }
 </style>

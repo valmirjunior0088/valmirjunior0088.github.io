@@ -20,20 +20,20 @@ const { crumb } = Astro.props;
     <div class="nav-right">
       {
         !crumb && (
-          <a href="/curios/#playground-preview" class="navlink">preview</a>
+          <a href="/curios/#playground-preview" class="navlink navlink-section">preview</a>
         )
       }
       {
         !crumb && (
-          <a href="/curios/#features" class="navlink">features</a>
+          <a href="/curios/#features" class="navlink navlink-section">features</a>
         )
       }
       {
         !crumb && (
-          <a href="/curios/#stdlib" class="navlink">stdlib</a>
+          <a href="/curios/#stdlib" class="navlink navlink-section">stdlib</a>
         )
       }
-      <a href="/curios/#benchmarks" class="navlink">benchmarks</a>
+      <a href="/curios/#benchmarks" class="navlink navlink-section">benchmarks</a>
       <a href="/curios/docs/" class="navlink">docs</a>
       <a
         href={GITHUB_URL}
@@ -116,5 +116,28 @@ const { crumb } = Astro.props;
   .nav-cta {
     font-size: 13.5px;
     padding: 9px 16px;
+  }
+
+  @media (max-width: 720px) {
+    .nav-right {
+      gap: 14px;
+    }
+    .navlink-section {
+      display: none;
+    }
+  }
+  @media (max-width: 420px) {
+    .nav-name {
+      display: none;
+    }
+    .nav-cta {
+      padding: 8px 12px;
+    }
+  }
+  @media (max-width: 360px) {
+    .nav-inner {
+      flex-wrap: wrap;
+      row-gap: 10px;
+    }
   }
 </style>

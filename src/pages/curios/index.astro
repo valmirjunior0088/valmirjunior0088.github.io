@@ -227,6 +227,13 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     position: relative;
     z-index: 1;
   }
+  /* the pre-formatted code snippets would otherwise set the tracks' min
+     width and push the single-column layouts past the viewport on phones */
+  .hero > *,
+  .stdlib-grid > *,
+  .bench-grid > :global(*) {
+    min-width: 0;
+  }
   h1 {
     font-size: clamp(42px, 5.5vw, 70px);
     line-height: 1.04;
@@ -492,6 +499,10 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     font-family: var(--mono);
     font-size: 14.5px;
     line-height: 2;
+    overflow-x: auto;
+  }
+  .install-card > div {
+    white-space: nowrap;
   }
   .fainter {
     color: var(--fg-faint);
@@ -573,6 +584,23 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     }
     .features-grid {
       grid-template-columns: repeat(2, 1fr);
+    }
+    .section {
+      padding-bottom: clamp(64px, 12vw, 110px);
+    }
+  }
+
+  @media (max-width: 720px) {
+    .github-inner {
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .features-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>
