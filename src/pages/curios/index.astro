@@ -141,7 +141,7 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
 
       <div class="bench-note">
         <p>
-          <span class="fg-full">Full disclosure:</span> the same person wrote the compiler and the benchmark, so treat this like a self-graded exam. What survives the bias: every answer is cross-checked against Rust, AssemblyScript, and Grain &mdash; not a line of them ours &mdash; and they all agree. The history is worth owning too: growing the language once cost allocation 42&ndash;47%, and two structural rewrites later (neither aimed at performance) the debt got paid back with interest &mdash; ~4.2M tree nodes in about a quarter of a second, 20% faster than the very first baseline, within 2&times; of Rust on the same engine, with checked <span class="fg-full">Nat</span>/<span class="fg-full">Int</span> arithmetic included &mdash; work Rust isn't doing. The integer loop stayed boring in the best way, holding within a few percent across all three runs while the compiler under it changed twice.
+          <span class="fg-full">Full disclosure:</span> the same person wrote the compiler and the benchmark, so treat this like a self-graded exam. What survives the bias: every answer is cross-checked against Rust, AssemblyScript, and Grain &mdash; three compilers we didn't write &mdash; and they all agree. Allocation runs within 2&times; of Rust on the same engine &mdash; with checked <span class="fg-full">Nat</span>/<span class="fg-full">Int</span> arithmetic included, work Rust isn't doing.
         </p>
       </div>
     </div>
