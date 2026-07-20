@@ -60,6 +60,9 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
       <div class="section-intro">
         <div class="eyebrow">// under the hood</div>
         <h2 class="h-serif">Built for people who like their code checked twice.</h2>
+        <p class="section-lede">
+          Under it all is a small dependent type theory &mdash; &Pi; and &Sigma;, equality proofs, indexed families &mdash; wrapped in the ergonomics of a modern functional language. The compiler does its double-checking up front, then erases the evidence: what ships is plain WebAssembly.
+        </p>
       </div>
       <div class="features-grid">
         {
@@ -246,7 +249,6 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     font-size: 19px;
     line-height: 1.6;
     color: var(--fg-dim);
-    max-width: 520px;
     margin: 0 0 36px;
     text-wrap: pretty;
   }
@@ -294,7 +296,6 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     font-size: 17px;
     line-height: 1.65;
     color: var(--fg-dim);
-    max-width: 640px;
     margin: 0;
     text-wrap: pretty;
   }
