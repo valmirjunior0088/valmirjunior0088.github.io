@@ -535,8 +535,9 @@ for (const section of CHEATSHEET) {
   .cheatsheet-panel.is-floating {
     position: fixed;
     z-index: 80;
-    top: clamp(16px, 3vh, 40px);
-    bottom: clamp(16px, 3vh, 40px);
+    top: 20px;
+    bottom: 20px;
+    max-height: none;
     left: 50%;
     transform: translateX(-50%);
     width: calc(min(1100px, 100vw) - clamp(40px, 8vw, 128px));
