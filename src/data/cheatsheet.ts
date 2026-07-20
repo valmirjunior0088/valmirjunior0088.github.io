@@ -186,11 +186,22 @@ export const CHEATSHEET: CheatsheetSection[] = [
         note: "several scrutinees — checked for overlap and completeness",
       },
       {
-        examples: [['<span class="kw">match</span> option | some(v) =&gt; consume(v) | _ =&gt; fallback <span class="kw">end</span>']],
+        examples: [[
+          '<span class="kw">match</span> option',
+          "| some(v) =&gt; consume(v)",
+          "| _ =&gt; fallback",
+          '<span class="kw">end</span>',
+        ]],
         note: "a final bare `_` covers the constructors not named",
       },
       {
-        examples: [['<span class="kw">match</span> tag | 0 =&gt; first | 1 =&gt; second | _ =&gt; otherwise <span class="kw">end</span>']],
+        examples: [[
+          '<span class="kw">match</span> tag',
+          "| 0 =&gt; first",
+          "| 1 =&gt; second",
+          "| _ =&gt; otherwise",
+          '<span class="kw">end</span>',
+        ]],
         note: "literal dispatch — the `_` default is mandatory",
       },
       {
