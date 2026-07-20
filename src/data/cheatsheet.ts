@@ -125,15 +125,30 @@ export const CHEATSHEET: CheatsheetSection[] = [
     column: 1,
     entries: [
       {
-        examples: [['<span class="kw">pub struct</span> <span class="ty">Point</span> : <span class="kw">pub</span> <span class="ty">Type</span> { x : <span class="ty">Nat</span>, y : <span class="ty">Nat</span> }']],
+        examples: [[
+          '<span class="kw">pub struct</span> <span class="ty">Point</span> : <span class="kw">pub</span> <span class="ty">Type</span> {',
+          '    x : <span class="ty">Nat</span>,',
+          '    y : <span class="ty">Nat</span>,',
+          "}",
+        ]],
         note: "a nominal dependent record",
       },
       {
-        examples: [['<span class="kw">let</span> p : <span class="ty">Point</span> = Point { x = 1, y = 2 };']],
+        examples: [[
+          '<span class="kw">let</span> p : <span class="ty">Point</span> = Point {',
+          "    x = 1,",
+          "    y = 2,",
+          "};",
+        ]],
         note: "construct with labels",
       },
       {
-        examples: [['<span class="kw">let</span> q : <span class="ty">Point</span> = Point { ..p, y = 9 };']],
+        examples: [[
+          '<span class="kw">let</span> q : <span class="ty">Point</span> = Point {',
+          "    ..p,",
+          "    y = 9,",
+          "};",
+        ]],
         note: "`..p` copies the rest, overrides follow",
       },
       {
@@ -268,9 +283,15 @@ export const CHEATSHEET: CheatsheetSection[] = [
       {
         examples: [[
           '<span class="kw">rec</span> even(n : <span class="ty">Nat</span>) -&gt; <span class="ty">Bool</span> =',
-          '    <span class="kw">match</span> n | 0 =&gt; true | p + 1; _ =&gt; odd(p) <span class="kw">end</span>',
+          '    <span class="kw">match</span> n',
+          "    | 0 =&gt; true",
+          "    | p + 1; _ =&gt; odd(p)",
+          '    <span class="kw">end</span>',
           '<span class="kw">and</span> odd(n : <span class="ty">Nat</span>) -&gt; <span class="ty">Bool</span> =',
-          '    <span class="kw">match</span> n | 0 =&gt; false | p + 1; _ =&gt; even(p) <span class="kw">end</span>;',
+          '    <span class="kw">match</span> n',
+          "    | 0 =&gt; false",
+          "    | p + 1; _ =&gt; even(p)",
+          '    <span class="kw">end</span>;',
           "even(input)",
         ]],
         note: "`rec` members need types; `and` joins a mutual group, one `;` ends it",
@@ -290,7 +311,11 @@ export const CHEATSHEET: CheatsheetSection[] = [
         note: "a typeclass-style interface",
       },
       {
-        examples: [['<span class="kw">satisfy</span> <span class="ty">Show</span>(<span class="ty">Nat</span>) { show(n) = Nat/to_str(n) }']],
+        examples: [[
+          '<span class="kw">satisfy</span> <span class="ty">Show</span>(<span class="ty">Nat</span>) {',
+          "    show(n) = Nat/to_str(n),",
+          "}",
+        ]],
         note: "one witness per key, program-wide",
       },
       {
@@ -321,8 +346,9 @@ export const CHEATSHEET: CheatsheetSection[] = [
       },
       {
         examples: [[
-          '<span class="kw">let</span> reverse : <span class="ty">Ord</span>(<span class="ty">Nat</span>) =',
-          "    Ord { cmp(a, b) = compare_reverse(a, b) };",
+          '<span class="kw">let</span> reverse : <span class="ty">Ord</span>(<span class="ty">Nat</span>) = Ord {',
+          "    cmp(a, b) = compare_reverse(a, b),",
+          "};",
           'sort(<span class="kw">use</span> reverse, values)',
         ]],
         note: "override resolution — pass an ordinary concept value with `use`",
