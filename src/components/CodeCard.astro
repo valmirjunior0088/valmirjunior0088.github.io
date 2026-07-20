@@ -10,11 +10,6 @@ const hasActions = Astro.slots.has("actions");
 <div class="code-card">
   <div class="code-card-topbar" class:list={{ "code-card-topbar-split": hasActions }}>
     <div class="code-card-topbar-left">
-      <div class="code-card-dots" aria-hidden="true">
-        <div class="code-card-dot"></div>
-        <div class="code-card-dot"></div>
-        <div class="code-card-dot"></div>
-      </div>
       {filename && <span class="code-card-filename">{filename}</span>}
       <slot name="topbar-extra" />
     </div>
@@ -38,9 +33,5 @@ const hasActions = Astro.slots.has("actions");
     display: flex;
     align-items: center;
     gap: 12px;
-  }
-  .code-card-dots {
-    display: flex;
-    gap: 8px;
   }
 </style>

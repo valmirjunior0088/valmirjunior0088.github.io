@@ -1,159 +1,351 @@
-export interface CheatCard {
-  filename: string;
-  blurb: string;
-  lines: string[];
+export interface CheatsheetEntry {
+  examples: string[][];
+  note: string;
 }
 
-// Lines are pre-highlighted HTML (same convention as HERO_SNIPPET):
+export interface CheatsheetSection {
+  title: string;
+  entries: CheatsheetEntry[];
+}
+
+// Each entry holds one or more examples; an example is an array of
+// pre-highlighted HTML lines (same convention as HERO_SNIPPET):
 // .kw keywords, .ty types/sorts, .cm comments, .str strings.
-export const CHEATSHEET: CheatCard[] = [
+// Examples render side by side within their row, separated by hairlines.
+// Notes render on the right of each row; backticks become <code>.
+export const CHEATSHEET: CheatsheetSection[] = [
   {
-    filename: "bindings.crs",
-    blurb:
-      "A local `let` binds through its `;`. Binders take irrefutable tuple and struct patterns — projection sugar, no dispatch.",
-    lines: [
-      '<span class="cm">-- function sugar is a lambda with a telescope</span>',
-      '<span class="kw">let</span> increment(n : <span class="ty">Nat</span>) -&gt; <span class="ty">Nat</span> = n + 1;',
-      '<span class="kw">let</span> (a, b) = pair;         <span class="cm">-- destructuring, not a match</span>',
-      '<span class="kw">let</span> Point { x = px, y = py } = point;',
-      "increment(a + px)",
+    title: "modules",
+    entries: [
+      {
+        examples: [['<span class="kw">use</span> /std/{<span class="ty">Nat</span>, <span class="ty">Bool</span>};']],
+        note: "bring modules into scope",
+      },
+      {
+        examples: [['<span class="kw">pub use</span> Option/*;']],
+        note: "re-export a module's contents",
+      },
+      {
+        examples: [['<span class="kw">pub mod</span> <span class="ty">Nat</span>;']],
+        note: "load `Nat.crs` as a submodule",
+      },
+      {
+        examples: [[
+          '<span class="kw">pub mod</span> <span class="ty">Internal</span>',
+          '    <span class="kw">pub let</span> value : <span class="ty">Nat</span> = 1;',
+          '<span class="kw">end</span>',
+        ]],
+        note: "inline module, closed by `end`",
+      },
     ],
   },
   {
-    filename: "types.crs",
-    blurb:
-      "Function and tuple types are dependent telescopes — anything later may lean on anything earlier.",
-    lines: [
-      '(x : <span class="ty">Nat</span>, y : <span class="ty">Nat</span>) -&gt; <span class="ty">Nat</span>    <span class="cm">-- Π: later parts see earlier names</span>',
-      '(@A : <span class="ty">Type</span>, x : A) -&gt; A     <span class="cm">-- @ = implicit, erased at runtime</span>',
-      '(@A : <span class="ty">Type</span>, <span class="kw">use</span> <span class="ty">Show</span>(A), v : A) -&gt; <span class="ty">Str</span>',
-      '{value : A, proof : <span class="ty">Valid</span>(value)}  <span class="cm">-- Σ: data plus its receipt</span>',
+    title: "bindings",
+    entries: [
+      {
+        examples: [['<span class="kw">let</span> increment(n : <span class="ty">Nat</span>) -&gt; <span class="ty">Nat</span> = n + 1;']],
+        note: "function sugar — a lambda with a telescope",
+      },
+      {
+        examples: [['<span class="kw">let</span> (a, b) = pair;']],
+        note: "destructuring, not a match",
+      },
+      {
+        examples: [['<span class="kw">let</span> Point { x = px, y = py } = point;']],
+        note: "any irrefutable pattern works in a binder",
+      },
+      {
+        examples: [['(x : <span class="ty">Nat</span>) =&gt; x + 1']],
+        note: "a lambda — annotate only when context doesn't supply the type",
+      },
+      {
+        examples: [["(Point { x, y }) =&gt; x + y"]],
+        note: "lambda parameters take irrefutable patterns too",
+      },
     ],
   },
   {
-    filename: "induct.crs",
-    blurb:
-      "Each constructor states the indices it produces. The outer `pub` exports the name; the inner one, the representation.",
-    lines: [
-      '<span class="cm">-- an indexed family: the length lives in the type</span>',
-      '<span class="kw">pub induct</span> <span class="ty">Vec</span>(T : <span class="ty">Type</span>) : (n : <span class="ty">Nat</span>) -&gt; <span class="kw">pub</span> <span class="ty">Type</span>',
-      "| nil() : (0)",
-      '| cons(@m : <span class="ty">Nat</span>, x : T, xs : <span class="ty">Vec</span>(T, m)) : (m + 1)',
-      '<span class="kw">end</span>',
+    title: "types",
+    entries: [
+      {
+        examples: [['(x : <span class="ty">Nat</span>, y : <span class="ty">Nat</span>) -&gt; <span class="ty">Nat</span>']],
+        note: "Π — later parts see earlier names",
+      },
+      {
+        examples: [['(@A : <span class="ty">Type</span>, x : A) -&gt; A']],
+        note: "`@` is implicit, erased at runtime",
+      },
+      {
+        examples: [['(@A : <span class="ty">Type</span>, <span class="kw">use</span> <span class="ty">Show</span>(A), v : A) -&gt; <span class="ty">Str</span>']],
+        note: "`use` asks for a witness",
+      },
+      {
+        examples: [['{value : A, proof : <span class="ty">Valid</span>(value)}']],
+        note: "Σ — data plus its receipt",
+      },
+      {
+        examples: [['f(@<span class="ty">Nat</span>, x)']],
+        note: "supply an implicit at the call — omitted ones are inferred",
+      },
     ],
   },
   {
-    filename: "struct.crs",
-    blurb:
-      "Nominal dependent records. `..base` copies the rest; labeled overrides follow in declaration order.",
-    lines: [
-      '<span class="kw">pub struct</span> <span class="ty">Point</span> : <span class="kw">pub</span> <span class="ty">Type</span> { x : <span class="ty">Nat</span>, y : <span class="ty">Nat</span> }',
-      "",
-      '<span class="kw">let</span> p : <span class="ty">Point</span> = Point { x = 1, y = 2 };',
-      '<span class="kw">let</span> q : <span class="ty">Point</span> = Point { ..p, y = 9 };  <span class="cm">-- copy p, override y</span>',
-      "p.x + q.y",
+    title: "tuples",
+    entries: [
+      {
+        examples: [["(1, true)"], ["(left = 1, right = true)"]],
+        note: "tuple values — fields may be labeled",
+      },
+      {
+        examples: [["pair.0"], ["pair.fst"], ["config.network.port"]],
+        note: "projection, positional or labeled — chains freely",
+      },
+      {
+        examples: [["()"]],
+        note: "the unit value; its type is the empty tuple `{}`",
+      },
     ],
   },
   {
-    filename: "match.crs",
-    blurb:
-      "Several scrutinees at once, columns considered left to right — checked for overlap and completeness, no row priority.",
-    lines: [
-      '<span class="kw">match</span> (left, right)',
-      "| (some(x), some(y)) =&gt; x + y",
-      "| (some(x), none()) =&gt; x",
-      "| (none(), _) =&gt; 0",
-      '<span class="kw">end</span>',
+    title: "inductive types",
+    entries: [
+      {
+        examples: [[
+          '<span class="kw">pub induct</span> <span class="ty">Vec</span>(T : <span class="ty">Type</span>) : (n : <span class="ty">Nat</span>) -&gt; <span class="kw">pub</span> <span class="ty">Type</span>',
+          "| nil() : (0)",
+          '| cons(@m : <span class="ty">Nat</span>, x : T, xs : <span class="ty">Vec</span>(T, m)) : (m + 1)',
+          '<span class="kw">end</span>',
+        ]],
+        note: "an indexed family — the length lives in the type",
+      },
     ],
   },
   {
-    filename: "cond.crs",
-    blurb:
-      "No scrutinee: an ordered condition ladder, tried top to bottom. The final `_` is mandatory.",
-    lines: [
-      '<span class="kw">match</span>',
-      "| prefer_fresh &amp;&amp; fresh &gt; 0 =&gt; fresh",
-      '| some(n) = cached =&gt; n   <span class="cm">-- bind-arm: fires when it matches</span>',
-      "| _ =&gt; 0",
-      '<span class="kw">end</span>',
+    title: "structs",
+    entries: [
+      {
+        examples: [['<span class="kw">pub struct</span> <span class="ty">Point</span> : <span class="kw">pub</span> <span class="ty">Type</span> { x : <span class="ty">Nat</span>, y : <span class="ty">Nat</span> }']],
+        note: "a nominal dependent record",
+      },
+      {
+        examples: [['<span class="kw">let</span> p : <span class="ty">Point</span> = Point { x = 1, y = 2 };']],
+        note: "construct with labels",
+      },
+      {
+        examples: [['<span class="kw">let</span> q : <span class="ty">Point</span> = Point { ..p, y = 9 };']],
+        note: "`..p` copies the rest, overrides follow",
+      },
+      {
+        examples: [["p.x + q.y"]],
+        note: "project with a dot",
+      },
     ],
   },
   {
-    filename: "fold.crs",
-    blurb:
-      "The binder after `;` receives the result for the smaller structure — induction and folds without writing `rec`.",
-    lines: [
-      '<span class="kw">match</span> n : (m) =&gt; P(m)       <span class="cm">-- the motive</span>',
-      "| 0 =&gt; base",
-      "| pred + 1; hyp =&gt; step(pred, hyp)",
-      '<span class="kw">end</span>',
-      "",
-      '<span class="kw">match</span> values',
-      "| [] =&gt; 0",
-      '| [head, ..tail]; sum =&gt; head + sum  <span class="cm">-- a fold, for free</span>',
-      '<span class="kw">end</span>',
+    title: "pattern matching",
+    entries: [
+      {
+        examples: [[
+          '<span class="kw">match</span> (left, right)',
+          "| (some(x), some(y)) =&gt; x + y",
+          "| (some(x), none()) =&gt; x",
+          "| (none(), _) =&gt; 0",
+          '<span class="kw">end</span>',
+        ]],
+        note: "several scrutinees — checked for overlap and completeness",
+      },
+      {
+        examples: [['<span class="kw">match</span> option | some(v) =&gt; consume(v) | _ =&gt; fallback <span class="kw">end</span>']],
+        note: "a final bare `_` covers the constructors not named",
+      },
+      {
+        examples: [['<span class="kw">match</span> tag | 0 =&gt; first | 1 =&gt; second | _ =&gt; otherwise <span class="kw">end</span>']],
+        note: "literal dispatch — the `_` default is mandatory",
+      },
+      {
+        examples: [[
+          '<span class="kw">match</span> bits',
+          "| b\\ =&gt; base",
+          "| b\\head\\..tail; hyp =&gt; step(head, hyp)",
+          '<span class="kw">end</span>',
+        ]],
+        note: "packed folds — a `Bits` head is `Bool`, a `Bytes` head is `Byte`",
+      },
     ],
   },
   {
-    filename: "concept.crs",
-    blurb:
-      "Typeclass-style interfaces. `satisfy` registers a witness — one per key, program-wide — and `use` binders resolve silently at call sites.",
-    lines: [
-      '<span class="kw">pub concept</span> <span class="ty">Show</span>(A : <span class="ty">Type</span>) : <span class="ty">Type</span> {',
-      '    show(A) -&gt; <span class="ty">Str</span>,',
-      "}",
-      "",
-      '<span class="kw">satisfy</span> <span class="ty">Show</span>(<span class="ty">Nat</span>) { show(n) = Nat/to_str(n) }',
-      "",
-      '<span class="kw">let</span> join(@A : <span class="ty">Type</span>, <span class="kw">use</span> <span class="ty">Show</span>(A), v : A) -&gt; <span class="ty">Str</span> =',
-      "    Show/show(v);",
+    title: "condition ladders",
+    entries: [
+      {
+        examples: [[
+          '<span class="kw">match</span>',
+          "| prefer_fresh &amp;&amp; fresh &gt; 0 =&gt; fresh",
+          "| some(n) = cached =&gt; n",
+          "| _ =&gt; 0",
+          '<span class="kw">end</span>',
+        ]],
+        note: "no scrutinee — tried top to bottom, `some(n) = cached` is a bind-arm, final `_` is mandatory",
+      },
     ],
   },
   {
-    filename: "monad.crs",
-    blurb:
-      "Postfix `!` is `Monad/bind`. Every value body is already a do-block — no header, no `end`.",
-    lines: [
-      '<span class="kw">let</span> sum(a : <span class="ty">Option</span>(<span class="ty">Nat</span>), b : <span class="ty">Option</span>(<span class="ty">Nat</span>)) -&gt; <span class="ty">Option</span>(<span class="ty">Nat</span>) =',
-      '    <span class="kw">let</span> x = a!;',
-      '    <span class="kw">let</span> y = b!;',
-      "    Option/some(x + y);",
+    title: "folds & induction",
+    entries: [
+      {
+        examples: [[
+          '<span class="kw">match</span> n : (m) =&gt; P(m)',
+          "| 0 =&gt; base",
+          "| pred + 1; hyp =&gt; step(pred, hyp)",
+          '<span class="kw">end</span>',
+        ]],
+        note: "the motive names the result family; `; hyp` binds the result for the smaller structure",
+      },
+      {
+        examples: [[
+          '<span class="kw">match</span> values',
+          "| [] =&gt; 0",
+          "| [head, ..tail]; sum =&gt; head + sum",
+          '<span class="kw">end</span>',
+        ]],
+        note: "a fold, for free",
+      },
+      {
+        examples: [[
+          '<span class="kw">rec</span> even(n : <span class="ty">Nat</span>) -&gt; <span class="ty">Bool</span> =',
+          '    <span class="kw">match</span> n | 0 =&gt; true | p + 1; _ =&gt; odd(p) <span class="kw">end</span>',
+          '<span class="kw">and</span> odd(n : <span class="ty">Nat</span>) -&gt; <span class="ty">Bool</span> =',
+          '    <span class="kw">match</span> n | 0 =&gt; false | p + 1; _ =&gt; even(p) <span class="kw">end</span>;',
+          "even(input)",
+        ]],
+        note: "`rec` members need types; `and` joins a mutual group, one `;` ends it",
+      },
     ],
   },
   {
-    filename: "proof.crs",
-    blurb:
-      "`Eq` is an ordinary indexed inductive in `Prop`. Match on a proof like any other value — all of it erases before runtime.",
-    lines: [
-      '<span class="cm">-- symmetry, proved by matching on the proof</span>',
-      '<span class="kw">pub let</span> sym(@A : <span class="ty">Type</span>, @x : A, @y : A, p : <span class="ty">Eq</span>(x, y)) -&gt; <span class="ty">Eq</span>(y, x) =',
-      '    <span class="kw">match</span> p : (q : <span class="ty">Eq</span>(A, s, t)) =&gt; <span class="ty">Eq</span>(t, s)',
-      "    | refl(z) =&gt; Eq/refl()",
-      '    <span class="kw">end</span>;',
+    title: "operators",
+    entries: [
+      {
+        examples: [["a + b"], ["a == b"], ["a &amp;&amp; b"]],
+        note: "whitespace required, left-associative — each dispatches through a concept (`Add`, `Eql`, `And`)",
+      },
     ],
   },
   {
-    filename: "mod.crs",
-    blurb:
-      "Paths are `/`-separated; a leading `/` is absolute. A file is a module; an inline one ends with `end`.",
-    lines: [
-      '<span class="kw">use</span> /std/{<span class="ty">Nat</span>, <span class="ty">Bool</span>};      <span class="cm">-- import</span>',
-      '<span class="kw">pub use</span> Option/*;         <span class="cm">-- re-export</span>',
-      '<span class="kw">pub mod</span> <span class="ty">Nat</span>;              <span class="cm">-- loads Nat.crs</span>',
-      '<span class="kw">pub mod</span> <span class="ty">Internal</span>',
-      '    <span class="kw">pub let</span> value : <span class="ty">Nat</span> = 1;',
-      '<span class="kw">end</span>',
+    title: "concepts",
+    entries: [
+      {
+        examples: [[
+          '<span class="kw">pub concept</span> <span class="ty">Show</span>(A : <span class="ty">Type</span>) : <span class="ty">Type</span> {',
+          '    show(A) -&gt; <span class="ty">Str</span>,',
+          "}",
+        ]],
+        note: "a typeclass-style interface",
+      },
+      {
+        examples: [['<span class="kw">satisfy</span> <span class="ty">Show</span>(<span class="ty">Nat</span>) { show(n) = Nat/to_str(n) }']],
+        note: "one witness per key, program-wide",
+      },
+      {
+        examples: [[
+          '<span class="kw">let</span> join(@A : <span class="ty">Type</span>, <span class="kw">use</span> <span class="ty">Show</span>(A), v : A) -&gt; <span class="ty">Str</span> =',
+          "    Show/show(v);",
+        ]],
+        note: "resolved silently at the call site",
+      },
+      {
+        examples: [[
+          '<span class="kw">pub concept</span> <span class="ty">Ord</span>(A : <span class="ty">Type</span>) : <span class="ty">Type</span> {',
+          '    <span class="kw">use</span> <span class="ty">Eql</span>(A),',
+          '    cmp(A, A) -&gt; <span class="ty">Order</span>,',
+          "}",
+        ]],
+        note: "a `use` field is a superclass edge — satisfiable by projection",
+      },
+      {
+        examples: [[
+          '<span class="kw">satisfy</span> (@A : <span class="ty">Type</span>, <span class="kw">use</span> <span class="ty">Show</span>(A)) =&gt; <span class="ty">Show</span>(<span class="ty">Lst</span>(A)) {',
+          '    show(values) = Lst/fold(values, <span class="str">""</span>, (v, r) =&gt; Str/concat(r, Show/show(v))),',
+          "}",
+        ]],
+        note: "a parameterized witness — its premises resolve recursively",
+      },
+      {
+        examples: [[
+          '<span class="kw">let</span> reverse : <span class="ty">Ord</span>(<span class="ty">Nat</span>) = Ord { cmp(a, b) = compare_reverse(a, b) };',
+          'sort(<span class="kw">use</span> reverse, values)',
+        ]],
+        note: "override resolution — pass an ordinary concept value with `use`",
+      },
     ],
   },
   {
-    filename: "literal.crs",
-    blurb:
-      "Literals for lists, packed bits and bytes, certified `Char`, UTF-8 `Str`, and numbers that pick their type from context.",
-    lines: [
-      '[1, ..rest, 9]            <span class="cm">-- list spread, any position</span>',
-      'b\\1\\0\\1                   <span class="cm">-- packed Bits, LSB first</span>',
-      'x\\48\\69\\..suffix          <span class="cm">-- packed Bytes + spread</span>',
-      '<span class="str">\'λ\'</span>  <span class="str">"hello\\n"</span>  0xFF  1.0e9',
+    title: "monads",
+    entries: [
+      {
+        examples: [[
+          '<span class="kw">let</span> sum(a : <span class="ty">Option</span>(<span class="ty">Nat</span>), b : <span class="ty">Option</span>(<span class="ty">Nat</span>)) -&gt; <span class="ty">Option</span>(<span class="ty">Nat</span>) =',
+          '    <span class="kw">let</span> x = a!;',
+          '    <span class="kw">let</span> y = b!;',
+          "    Option/some(x + y);",
+        ]],
+        note: "postfix `!` is `Monad/bind` — every body is a do-block",
+      },
+    ],
+  },
+  {
+    title: "proofs",
+    entries: [
+      {
+        examples: [[
+          '<span class="kw">pub let</span> sym(@A : <span class="ty">Type</span>, @x : A, @y : A, p : <span class="ty">Eq</span>(x, y)) -&gt; <span class="ty">Eq</span>(y, x) =',
+          '    <span class="kw">match</span> p : (q : <span class="ty">Eq</span>(A, s, t)) =&gt; <span class="ty">Eq</span>(t, s)',
+          "    | refl(z) =&gt; Eq/refl()",
+          '    <span class="kw">end</span>;',
+        ]],
+        note: "match on the proof — all of it erases before runtime",
+      },
+    ],
+  },
+  {
+    title: "goals",
+    entries: [
+      {
+        examples: [['<span class="kw">let</span> todo : <span class="ty">Nat</span> = ?;']],
+        note: "a written goal — reports scope and expected type, then fails the build",
+      },
+    ],
+  },
+  {
+    title: "foreign",
+    entries: [
+      {
+        examples: [[
+          '<span class="kw">foreign</span> random : <span class="ty">Nat</span>;',
+          '<span class="kw">pub foreign</span> log : (<span class="ty">Bin</span>) -&gt; <span class="ty">Nat</span>;',
+        ]],
+        note: "implemented by the embedder — wire types only, `Bin` arrives as `Bytes`",
+      },
+    ],
+  },
+  {
+    title: "literals",
+    entries: [
+      {
+        examples: [["[1, ..rest, 9]"]],
+        note: "list literal, spread anywhere",
+      },
+      {
+        examples: [["b\\1\\0\\1"]],
+        note: "packed `Bits`, LSB first",
+      },
+      {
+        examples: [["x\\48\\69\\..suffix"]],
+        note: "packed `Bytes`, with spread",
+      },
+      {
+        examples: [['<span class="str">\'λ\'</span>'], ['<span class="str">"hello\\n"</span>'], ["0xFF"], ["1.0e9"]],
+        note: "`Char`, `Str`, numbers typed by context",
+      },
     ],
   },
 ];

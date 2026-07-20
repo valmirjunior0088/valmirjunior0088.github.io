@@ -2,12 +2,21 @@
 import Base from "../../layouts/Base.astro";
 import Nav from "../../components/Nav.astro";
 import Editor from "../../components/Editor.astro";
-import CodeCard from "../../components/CodeCard.astro";
 import { CHEATSHEET } from "../../data/cheatsheet";
 import { GITHUB_URL } from "../../data/site";
+import type { CheatsheetEntry, CheatsheetSection } from "../../data/cheatsheet";
 
 const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1</code>");
 const SYNTAX_URL = `${GITHUB_URL}/blob/main/documentation/SYNTAX.md`;
+
+const stripHtml = (html: string) =>
+  html
+    .replace(/<[^>]+>/g, "")
+    .replace(/&gt;/g, ">")
+    .replace(/&lt;/g, "<")
+    .replace(/&amp;/g, "&");
+const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
+  [section.title, ...entry.examples.flat().map(stripHtml), entry.note.replace(/`/g, "")].join(" ").toLowerCase();
 ---
 
 <Base
@@ -25,35 +34,225 @@ const SYNTAX_URL = `${GITHUB_URL}/blob/main/documentation/SYNTAX.md`;
 
       <Editor />
 
-      <div class="cheat-section">
-        <div class="cheat-intro">
-          <div class="eyebrow">// the cheat sheet</div>
-          <h2 class="h-serif">The whole language, one scroll.</h2>
-          <p>
-            Curios is a small language &mdash; this really is most of it. Lifted straight from the <a href={SYNTAX_URL} target="_blank" rel="noopener">language reference</a>; when the two disagree, that's a conformance bug in one of them.
-          </p>
+      <section class="cheatsheet-panel code-card" id="cheatsheet" aria-label="Cheatsheet">
+        <header class="cheatsheet-head">
+          <div class="cheatsheet-headline">
+            <h2 class="cheatsheet-title h-serif">Cheatsheet</h2>
+            <span class="cheatsheet-hint" aria-hidden="true">esc to close</span>
+          </div>
+          <span class="cheatsheet-count" aria-live="polite"></span>
+          <input class="cheatsheet-filter" type="search" placeholder='filter… try "match"' aria-label="Filter the cheatsheet" autocomplete="off" />
+          <button class="btn btn-outline cheatsheet-toggle" aria-expanded="false" aria-controls="cheatsheet">Enlarge</button>
+        </header>
+
+        <div class="cheatsheet-body" tabindex="0">
+          <div class="cheatsheet-cols">
+            {
+              CHEATSHEET.map((section) => (
+                <section class="cheatsheet-sec">
+                  <h3 class="cheatsheet-sec-title">{section.title}</h3>
+                  {section.entries.map((entry) => (
+                    <div class="cheatsheet-row" data-search={searchText(section, entry)}>
+                      <div class="cheatsheet-code">
+                        {entry.examples.map((example) => (
+                          <pre class="cheatsheet-example" set:html={example.join("\n")} />
+                        ))}
+                      </div>
+                      <div class="cheatsheet-note" set:html={renderInlineCode(entry.note)} />
+                    </div>
+                  ))}
+                </section>
+              ))
+            }
+          </div>
+          <p class="cheatsheet-empty" hidden>no matches for &ldquo;<span class="cheatsheet-empty-q"></span>&rdquo; &mdash; <button class="cheatsheet-clear">clear the filter</button></p>
+          <div class="cheatsheet-fade" aria-hidden="true"></div>
         </div>
 
-        <div class="cheat-grid">
-          {
-            CHEATSHEET.map((card) => (
-              <CodeCard filename={card.filename}>
-                <div class="cheat-blurb" set:html={renderInlineCode(card.blurb)} />
-                <pre class="cheat-code" set:html={card.lines.join("\n")} />
-              </CodeCard>
-            ))
-          }
-        </div>
-      </div>
+        <footer class="cheatsheet-foot">
+          <p>lifted straight from the <a href={SYNTAX_URL} target="_blank" rel="noopener">language reference</a> &mdash; when the two disagree, that's a conformance bug in one of them.</p>
+        </footer>
+      </section>
+      <div class="cheatsheet-placeholder" hidden aria-hidden="true"></div>
     </div>
   </div>
+
+  <div class="cheatsheet-backdrop" hidden></div>
 </Base>
 
+<script>
+  const panel = document.getElementById("cheatsheet")!;
+  const backdrop = document.querySelector<HTMLElement>(".cheatsheet-backdrop")!;
+  const toggle = panel.querySelector<HTMLButtonElement>(".cheatsheet-toggle")!;
+  const filter = panel.querySelector<HTMLInputElement>(".cheatsheet-filter")!;
+  const count = panel.querySelector<HTMLElement>(".cheatsheet-count")!;
+  const body = panel.querySelector<HTMLElement>(".cheatsheet-body")!;
+  const empty = panel.querySelector<HTMLElement>(".cheatsheet-empty")!;
+  const emptyQuery = panel.querySelector<HTMLElement>(".cheatsheet-empty-q")!;
+  const clear = panel.querySelector<HTMLButtonElement>(".cheatsheet-clear")!;
+  const rows = [...panel.querySelectorAll<HTMLElement>(".cheatsheet-row")];
+  const sections = [...panel.querySelectorAll<HTMLElement>(".cheatsheet-sec")];
+
+  const floating = () => panel.classList.contains("is-floating");
+
+  function updateFade() {
+    const atEnd = body.scrollTop + body.clientHeight >= body.scrollHeight - 6;
+    panel.classList.toggle("at-end", atEnd);
+  }
+
+  function applyFilter() {
+    const query = filter.value.trim().toLowerCase();
+    let shown = 0;
+    for (const row of rows) {
+      const hit = !query || (row.dataset.search ?? "").includes(query);
+      row.hidden = !hit;
+      if (hit) shown++;
+    }
+    for (const section of sections) {
+      section.hidden = !section.querySelector(".cheatsheet-row:not([hidden])");
+    }
+    count.textContent = query ? `${shown} of ${rows.length}` : "";
+    empty.hidden = shown > 0;
+    emptyQuery.textContent = query;
+    updateFade();
+  }
+
+  function clearFilter() {
+    filter.value = "";
+    applyFilter();
+  }
+
+  const placeholder = document.querySelector<HTMLElement>(".cheatsheet-placeholder")!;
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  const MOTION: KeyframeAnimationOptions = { duration: 240, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" };
+  let animating = false;
+
+  function setFloating(on: boolean) {
+    if (on === floating() || animating) return;
+    const first = panel.getBoundingClientRect();
+
+    if (on) {
+      toggle.textContent = "Shrink";
+      toggle.setAttribute("aria-expanded", "true");
+      placeholder.hidden = false;
+      panel.classList.add("is-floating");
+      panel.setAttribute("role", "dialog");
+      panel.setAttribute("aria-modal", "true");
+      backdrop.hidden = false;
+      document.documentElement.style.overflow = "hidden";
+      backdrop.getAnimations().forEach((animation) => animation.cancel());
+      if (!reduceMotion.matches) {
+        const last = panel.getBoundingClientRect();
+        animating = true;
+        backdrop.animate([{ opacity: 0 }, { opacity: 1 }], MOTION);
+        const slide = panel.animate(
+          [
+            { top: `${first.top}px`, height: `${first.height}px` },
+            { top: `${last.top}px`, height: `${last.height}px` },
+          ],
+          MOTION,
+        );
+        slide.finished.finally(() => {
+          animating = false;
+          panel.classList.add("show-hint");
+          updateFade();
+        });
+      } else {
+        panel.classList.add("show-hint");
+      }
+      filter.focus();
+    } else {
+      panel.classList.remove("show-hint");
+      const target = placeholder.getBoundingClientRect();
+      const finish = () => {
+        toggle.textContent = "Enlarge";
+        toggle.setAttribute("aria-expanded", "false");
+        panel.classList.remove("is-floating");
+        panel.removeAttribute("role");
+        panel.removeAttribute("aria-modal");
+        placeholder.hidden = true;
+        backdrop.hidden = true;
+        document.documentElement.style.overflow = "";
+        animating = false;
+        toggle.focus();
+        updateFade();
+      };
+      if (reduceMotion.matches) {
+        finish();
+      } else {
+        animating = true;
+        backdrop.animate([{ opacity: 1 }, { opacity: 0 }], { ...MOTION, fill: "forwards" });
+        const slide = panel.animate(
+          [
+            { top: `${first.top}px`, height: `${first.height}px` },
+            { top: `${target.top}px`, height: `${target.height}px` },
+          ],
+          MOTION,
+        );
+        slide.finished.then(finish, finish);
+      }
+    }
+    updateFade();
+  }
+
+  toggle.addEventListener("click", () => setFloating(!floating()));
+  backdrop.addEventListener("click", () => setFloating(false));
+  filter.addEventListener("input", applyFilter);
+  body.addEventListener("scroll", updateFade, { passive: true });
+  clear.addEventListener("click", () => {
+    clearFilter();
+    filter.focus();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      if (filter.value && (floating() || document.activeElement === filter)) {
+        clearFilter();
+        event.preventDefault();
+      } else if (floating()) {
+        setFloating(false);
+        event.preventDefault();
+      }
+      return;
+    }
+    if (event.key === "Tab" && floating()) {
+      const focusables = [...panel.querySelectorAll<HTMLElement>("a[href], button, input, [tabindex]")].filter(
+        (el) => el.offsetParent !== null,
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        last.focus();
+        event.preventDefault();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        first.focus();
+        event.preventDefault();
+      }
+    }
+  });
+
+  updateFade();
+</script>
+
 <style>
+  :global(html) {
+    scrollbar-gutter: stable;
+  }
+  .page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
   .main {
+    width: 100%;
     max-width: 1100px;
     margin: 0 auto;
-    padding: 40px clamp(20px, 4vw, 64px) 110px;
+    padding: 40px clamp(20px, 4vw, 64px);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
   .intro {
     margin-bottom: 28px;
@@ -69,81 +268,263 @@ const SYNTAX_URL = `${GITHUB_URL}/blob/main/documentation/SYNTAX.md`;
     max-width: 560px;
   }
 
-  .cheat-section {
-    margin-top: 90px;
+  .cheatsheet-panel {
+    margin-top: 36px;
+    flex: 1;
+    min-height: 340px;
+    display: flex;
+    flex-direction: column;
   }
-  .eyebrow {
+  .cheatsheet-placeholder {
+    flex: 1;
+    min-height: 340px;
+    margin-top: 36px;
+  }
+  .cheatsheet-placeholder[hidden] {
+    display: none;
+  }
+
+  .cheatsheet-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .cheatsheet-headline {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-right: auto;
+  }
+  .cheatsheet-title {
+    font-size: 19px;
+    margin: 0 0 0 4px;
+  }
+  .cheatsheet-count {
     font-family: var(--mono);
-    font-size: 13.5px;
+    font-size: 12.5px;
+    color: var(--fg-faint);
+    white-space: nowrap;
+  }
+  .cheatsheet-filter {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--fg);
+    background: var(--bg-output);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 8px 12px;
+    width: clamp(150px, 22vw, 250px);
+  }
+  .cheatsheet-filter::placeholder {
+    color: var(--fg-faint);
+  }
+  .cheatsheet-filter:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  .cheatsheet-hint {
+    display: none;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--fg-faint);
+    white-space: nowrap;
+  }
+  .cheatsheet-panel.show-hint .cheatsheet-hint {
+    display: inline;
+  }
+  .cheatsheet-toggle {
+    font-size: 12.5px;
+    padding: 7px 13px;
+    white-space: nowrap;
+  }
+
+  .cheatsheet-body {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 18px 22px 0;
+  }
+  .cheatsheet-cols {
+    columns: 2;
+    column-gap: 32px;
+  }
+  .cheatsheet-sec {
+    break-inside: avoid;
+    margin-bottom: 24px;
+  }
+  .cheatsheet-sec[hidden] {
+    display: none;
+  }
+  .cheatsheet-sec-title {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
     color: var(--accent);
-    letter-spacing: 0.02em;
-    margin-bottom: 20px;
+    margin: 0 0 2px;
   }
-  .cheat-intro h2 {
-    font-size: clamp(26px, 3vw, 34px);
-    margin: 0 0 12px;
+  .cheatsheet-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 18px;
+    padding: 9px 0;
   }
-  .cheat-intro p {
-    font-size: 15.5px;
-    line-height: 1.65;
-    color: var(--fg-dimmer);
-    max-width: 640px;
+  .cheatsheet-row:not([hidden]) ~ .cheatsheet-row:not([hidden]) {
+    border-top: 1px solid var(--border-soft);
+  }
+  .cheatsheet-row[hidden] {
+    display: none;
+  }
+  .cheatsheet-code {
+    display: flex;
+    align-items: baseline;
+    min-width: 0;
+    overflow-x: auto;
+  }
+  .cheatsheet-example {
     margin: 0;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--fg);
+    white-space: pre;
+  }
+  .cheatsheet-example + .cheatsheet-example {
+    margin-left: 14px;
+    padding-left: 14px;
+    border-left: 1px solid var(--border-strong);
+  }
+  .cheatsheet-code :global(.kw) {
+    color: oklch(74% 0.18 306);
+  }
+  .cheatsheet-code :global(.ty) {
+    color: oklch(82% 0.09 300);
+  }
+  .cheatsheet-code :global(.cm) {
+    color: var(--fg-faint);
+  }
+  .cheatsheet-code :global(.str) {
+    color: var(--green);
+  }
+  .cheatsheet-note {
+    flex: 0 1 auto;
+    max-width: 45%;
+    font-size: 13.5px;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--fg-dimmer);
+    text-align: right;
     text-wrap: pretty;
   }
-  .cheat-intro a {
+  .cheatsheet-note :global(code) {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    font-style: normal;
+    color: var(--fg-dim);
+  }
+
+  .cheatsheet-empty {
+    font-size: 14px;
+    color: var(--fg-dimmer);
+    margin: 8px 0 24px;
+  }
+  .cheatsheet-clear {
+    font: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  .cheatsheet-fade {
+    position: sticky;
+    bottom: 0;
+    display: block;
+    height: 42px;
+    margin-top: -42px;
+    background: linear-gradient(to bottom, transparent, var(--bg-card) 90%);
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 150ms ease;
+  }
+  .cheatsheet-panel.at-end .cheatsheet-fade {
+    opacity: 0;
+  }
+
+  .cheatsheet-foot {
+    border-top: 1px solid var(--border-soft);
+    padding: 11px 22px;
+    background: var(--bg-card);
+  }
+  .cheatsheet-foot p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--fg-faint);
+  }
+  .cheatsheet-foot a {
     color: var(--accent);
   }
 
-  .cheat-grid {
-    margin-top: 36px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    align-items: start;
-  }
-  .cheat-blurb {
-    padding: 16px 22px 0;
-    font-size: 14px;
-    line-height: 1.6;
-    color: var(--fg-dimmer);
-    text-wrap: pretty;
-  }
-  .cheat-blurb :global(code) {
-    font-family: var(--mono);
-    font-size: 0.88em;
-    color: var(--fg);
-    background: color-mix(in srgb, var(--fg) 7%, transparent);
-    border: 1px solid var(--border-soft);
-    border-radius: 5px;
-    padding: 1px 5px;
-  }
-  .cheat-code {
+  .cheatsheet-panel.is-floating {
+    position: fixed;
+    z-index: 80;
+    top: clamp(16px, 3vh, 40px);
+    bottom: clamp(16px, 3vh, 40px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(min(1100px, 100vw) - clamp(40px, 8vw, 128px));
     margin: 0;
-    padding: 14px 22px 20px;
-    font-family: var(--mono);
-    font-size: 13.5px;
-    line-height: 1.75;
-    color: var(--fg);
-    white-space: pre;
-    overflow-x: auto;
+    box-shadow: 0 40px 120px oklch(5% 0.01 285 / 60%);
   }
-  .cheat-code :global(.kw) {
-    color: oklch(74% 0.18 306);
+  .cheatsheet-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    background: oklch(5% 0.01 285 / 62%);
+    backdrop-filter: blur(3px);
   }
-  .cheat-code :global(.ty) {
-    color: oklch(82% 0.09 300);
-  }
-  .cheat-code :global(.cm) {
-    color: var(--fg-faint);
-  }
-  .cheat-code :global(.str) {
-    color: var(--green);
+  @media (prefers-reduced-motion: reduce) {
+    .cheatsheet-fade {
+      transition: none;
+    }
   }
 
   @media (max-width: 860px) {
-    .cheat-grid {
-      grid-template-columns: 1fr;
+    .cheatsheet-cols {
+      columns: 1;
+    }
+    .cheatsheet-row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+    }
+    .cheatsheet-note {
+      max-width: none;
+      text-align: left;
+    }
+    .cheatsheet-head {
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .cheatsheet-filter {
+      width: 100%;
+      order: 10;
+    }
+    .cheatsheet-panel.show-hint .cheatsheet-hint {
+      display: none;
+    }
+    .cheatsheet-panel.is-floating {
+      top: 10px;
+      bottom: 10px;
+      width: calc(100vw - 20px);
     }
   }
 </style>
