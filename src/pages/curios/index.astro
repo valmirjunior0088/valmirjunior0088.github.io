@@ -208,7 +208,7 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     margin: 0 auto;
     padding: clamp(56px, 9vw, 110px) clamp(20px, 4vw, 64px) clamp(50px, 7vw, 90px);
     display: grid;
-    grid-template-columns: 1.05fr 0.95fr;
+    grid-template-columns: 1fr 1fr;
     gap: 56px;
     align-items: center;
   }
@@ -229,6 +229,36 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
   .hero-snippet {
     position: relative;
     z-index: 1;
+  }
+  /* contain: size zeroes the snippet's intrinsic height, so the copy column
+     alone sets the row — the card stretches to it and the code scrolls */
+  .hero-snippet {
+    align-self: stretch;
+    contain: size;
+    display: flex;
+    flex-direction: column;
+  }
+  .hero-snippet > :global(.code-card) {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .hero-snippet .code-scroll {
+    flex: 1;
+    min-height: 0;
+    /* the one and only scroll container: the pre below overflows visibly
+       into it, instead of nesting a second scroller */
+    overflow: auto;
+    align-items: flex-start;
+  }
+  .hero-snippet .code-area {
+    overflow: visible;
+  }
+  .hero-snippet .code-gutter {
+    position: sticky;
+    left: 0;
+    background: var(--bg-card);
   }
   /* the pre-formatted code snippets would otherwise set the tracks' min
      width and push the single-column layouts past the viewport on phones */
@@ -582,6 +612,11 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     .bench-grid,
     .stdlib-grid {
       grid-template-columns: 1fr;
+    }
+    /* stacked layout: natural height again */
+    .hero-snippet {
+      align-self: auto;
+      contain: none;
     }
     .features-grid {
       grid-template-columns: repeat(2, 1fr);

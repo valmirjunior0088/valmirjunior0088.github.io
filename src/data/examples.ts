@@ -167,12 +167,29 @@ export const EXAMPLES: Record<string, CuriosExample> = {
 export const PREVIEW_KEYS = ["hello", "patterns", "cond match", "concepts", "vec", "error"];
 
 export const HERO_SNIPPET = {
-  filename: "vec.crs",
+  filename: "lengths.crs",
   lines: [
     '<span class="cm">-- a vector indexed by its own length</span>',
     '<span class="kw">pub induct</span> <span class="ty">Vec</span>(T : <span class="ty">Type</span>) : (n : <span class="ty">Nat</span>) -&gt; Type',
     "| nil() : (0)",
     "| cons(@m : Nat, x : T, xs : Vec(T, m)) : (m + 1)",
     '<span class="kw">end</span>',
+    "",
+    '<span class="cm">-- head is total: Vec(T, n + 1) is never empty</span>',
+    '<span class="kw">pub let</span> head(@T : <span class="ty">Type</span>, @n : <span class="ty">Nat</span>,',
+    "             xs : Vec(T, n + 1)) -&gt; T =",
+    '    <span class="kw">match</span> xs : (xs : Vec(T, k)) =&gt; T',
+    "    | cons(_, x, _) =&gt; x",
+    '    <span class="kw">end</span>;',
+    "",
+    '<span class="cm">-- appending adds the lengths, provably</span>',
+    '<span class="kw">pub rec</span> append(@T : <span class="ty">Type</span>, @n : <span class="ty">Nat</span>, @m : <span class="ty">Nat</span>,',
+    "               v : Vec(T, n), w : Vec(T, m))",
+    "    -&gt; Vec(T, n + m) =",
+    '    <span class="kw">match</span> v : (v : Vec(T, k)) =&gt; Vec(T, k + m)',
+    "    | nil() =&gt; w",
+    "    | cons(j, x, xs) =&gt;",
+    "        Vec/cons(x, append(xs, w))",
+    '    <span class="kw">end</span>;',
   ],
 };
