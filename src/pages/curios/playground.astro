@@ -40,7 +40,7 @@ for (const section of CHEATSHEET) {
     <div class="main">
       <div class="intro">
         <h1 class="h-serif">Playground</h1>
-        <p>Pick an example or write your own curios — it typechecks and compiles to WebAssembly right here, nothing leaves your browser. One caveat: abstract modules like <code>pub mod Name;</code> only resolve in the native compiler, where a file system backs them — the playground has none.</p>
+        <p>Pick an example or write your own curios — it typechecks and compiles to WebAssembly right here, nothing leaves your browser.<br /><strong>One caveat:</strong> abstract modules like <code>pub mod Name;</code> only resolve in the native compiler, where a file system backs them — the playground has none.</p>
       </div>
 
       <Editor />
@@ -294,7 +294,6 @@ for (const section of CHEATSHEET) {
     font-size: 15.5px;
     color: var(--fg-dimmer);
     margin: 0;
-    max-width: 560px;
   }
   .intro p code {
     font-family: var(--mono);

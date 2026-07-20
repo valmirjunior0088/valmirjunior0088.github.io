@@ -32,7 +32,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
       },
       {
         examples: [['<span class="kw">pub mod</span> <span class="ty">Nat</span>;']],
-        note: "load `Nat.crs` as a submodule — needs a file system, so the native compiler only",
+        note: "load `Nat.crs` as a submodule — only resolves in the native compiler, where a file system backs it",
       },
       {
         examples: [[
