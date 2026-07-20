@@ -17,6 +17,17 @@ const stripHtml = (html: string) =>
     .replace(/&amp;/g, "&");
 const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
   [section.title, ...entry.examples.flat().map(stripHtml), entry.note.replace(/`/g, "")].join(" ").toLowerCase();
+
+// widest row that fits a two-column layout at full width; side-by-side examples pay ~4 chars for the separator
+const LINE_BUDGET = 58;
+for (const section of CHEATSHEET) {
+  for (const entry of section.entries) {
+    const widths = entry.examples.map((example) => Math.max(...example.map((line) => stripHtml(line).length)));
+    const width = widths.reduce((total, w) => total + w, 0) + (widths.length - 1) * 4;
+    if (width > LINE_BUDGET)
+      console.warn(`[cheatsheet] "${section.title}" entry is ${width} chars wide (budget ${LINE_BUDGET}), will clip: ${stripHtml(entry.examples[0][0]).trim().slice(0, 40)}`);
+  }
+}
 ---
 
 <Base
@@ -29,7 +40,7 @@ const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
     <div class="main">
       <div class="intro">
         <h1 class="h-serif">Playground</h1>
-        <p>Pick an example or write your own curios — it typechecks and compiles to WebAssembly right here, nothing leaves your browser.</p>
+        <p>Pick an example or write your own curios — it typechecks and compiles to WebAssembly right here, nothing leaves your browser. One caveat: abstract modules like <code>pub mod Name;</code> only resolve in the native compiler, where a file system backs them — the playground has none.</p>
       </div>
 
       <Editor />
@@ -37,12 +48,23 @@ const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
       <section class="cheatsheet-panel code-card" id="cheatsheet" aria-label="Cheatsheet">
         <header class="cheatsheet-head">
           <div class="cheatsheet-headline">
-            <h2 class="cheatsheet-title h-serif">Cheatsheet</h2>
-            <span class="cheatsheet-hint" aria-hidden="true">esc to close</span>
+            <button class="btn btn-outline cheatsheet-toggle" aria-expanded="false" aria-controls="cheatsheet" aria-label="Enlarge the cheatsheet">
+              <svg class="cheatsheet-icon-enlarge" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                <path d="M9.5 2.5h4v4" />
+                <path d="M13.5 2.5 9.5 6.5" />
+                <path d="M6.5 13.5h-4v-4" />
+                <path d="M2.5 13.5 6.5 9.5" />
+              </svg>
+              <svg class="cheatsheet-icon-close" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                <path d="M4 4l8 8" />
+                <path d="M12 4l-8 8" />
+              </svg>
+            </button>
+            <h2 class="cheatsheet-title">Cheatsheet</h2>
+            <span class="cheatsheet-hint" aria-hidden="true">esc or click outside to close</span>
           </div>
           <span class="cheatsheet-count" aria-live="polite"></span>
           <input class="cheatsheet-filter" type="search" placeholder='filter… try "match"' aria-label="Filter the cheatsheet" autocomplete="off" />
-          <button class="btn btn-outline cheatsheet-toggle" aria-expanded="false" aria-controls="cheatsheet">Enlarge</button>
         </header>
 
         <div class="cheatsheet-body" tabindex="0">
@@ -114,6 +136,7 @@ const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
     count.textContent = query ? `${shown} of ${rows.length}` : "";
     empty.hidden = shown > 0;
     emptyQuery.textContent = query;
+    body.scrollTop = 0;
     updateFade();
   }
 
@@ -136,8 +159,9 @@ const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
     const first = panel.getBoundingClientRect();
 
     if (on) {
-      toggle.textContent = "Shrink";
+      toggle.setAttribute("aria-label", "Close the cheatsheet");
       toggle.setAttribute("aria-expanded", "true");
+      placeholder.style.height = `${first.height}px`;
       placeholder.hidden = false;
       panel.classList.add("is-floating");
       panel.setAttribute("role", "dialog");
@@ -164,7 +188,7 @@ const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
       panel.classList.remove("show-hint");
       const target = placeholder.getBoundingClientRect();
       const finish = () => {
-        toggle.textContent = "Enlarge";
+        toggle.setAttribute("aria-label", "Enlarge the cheatsheet");
         toggle.setAttribute("aria-expanded", "false");
         panel.classList.remove("is-floating");
         panel.removeAttribute("role");
@@ -260,16 +284,21 @@ const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
     margin: 0;
     max-width: 560px;
   }
+  .intro p code {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    color: var(--fg-dim);
+  }
 
   .cheatsheet-panel {
     margin-top: 36px;
     flex: 1;
     min-height: 340px;
+    max-height: calc(100dvh - 80px);
     display: flex;
     flex-direction: column;
   }
   .cheatsheet-placeholder {
-    flex: 1;
     min-height: 340px;
     margin-top: 36px;
   }
@@ -286,13 +315,17 @@ const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
   }
   .cheatsheet-headline {
     display: flex;
-    align-items: baseline;
-    gap: 14px;
+    align-items: center;
+    gap: 12px;
     margin-right: auto;
   }
   .cheatsheet-title {
-    font-size: 19px;
-    margin: 0 0 0 4px;
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1;
+    text-box: trim-both cap alphabetic;
+    margin: 0;
   }
   .cheatsheet-count {
     font-family: var(--mono);
@@ -328,9 +361,25 @@ const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
     display: inline;
   }
   .cheatsheet-toggle {
-    font-size: 12.5px;
-    padding: 7px 13px;
-    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+  }
+  .cheatsheet-toggle svg {
+    width: 14px;
+    height: 14px;
+  }
+  .cheatsheet-icon-close {
+    display: none;
+  }
+  .cheatsheet-panel.is-floating .cheatsheet-icon-enlarge {
+    display: none;
+  }
+  .cheatsheet-panel.is-floating .cheatsheet-icon-close {
+    display: block;
   }
 
   .cheatsheet-body {
@@ -338,7 +387,6 @@ const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    overscroll-behavior: contain;
     padding: 18px 22px 0;
   }
   .cheatsheet-cols {

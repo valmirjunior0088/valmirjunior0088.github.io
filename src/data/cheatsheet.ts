@@ -13,6 +13,7 @@ export interface CheatsheetSection {
 // .kw keywords, .ty types/sorts, .cm comments, .str strings.
 // Examples render side by side within their row, separated by hairlines.
 // Notes render on the right of each row; backticks become <code>.
+// Sections are ordered least to most complex.
 export const CHEATSHEET: CheatsheetSection[] = [
   {
     title: "modules",
@@ -27,7 +28,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
       },
       {
         examples: [['<span class="kw">pub mod</span> <span class="ty">Nat</span>;']],
-        note: "load `Nat.crs` as a submodule",
+        note: "load `Nat.crs` as a submodule — needs a file system, so the native compiler only",
       },
       {
         examples: [[
@@ -36,6 +37,27 @@ export const CHEATSHEET: CheatsheetSection[] = [
           '<span class="kw">end</span>',
         ]],
         note: "inline module, closed by `end`",
+      },
+    ],
+  },
+  {
+    title: "literals",
+    entries: [
+      {
+        examples: [["[1, ..rest, 9]"]],
+        note: "list literal, spread anywhere",
+      },
+      {
+        examples: [["b\\1\\0\\1"]],
+        note: "packed `Bits`, LSB first",
+      },
+      {
+        examples: [["x\\48\\69\\..suffix"]],
+        note: "packed `Bytes`, with spread",
+      },
+      {
+        examples: [['<span class="str">\'λ\'</span>'], ['<span class="str">"hello\\n"</span>'], ["0xFF"], ["1.0e9"]],
+        note: "`Char`, `Str`, numbers typed by context",
       },
     ],
   },
@@ -65,6 +87,53 @@ export const CHEATSHEET: CheatsheetSection[] = [
     ],
   },
   {
+    title: "operators",
+    entries: [
+      {
+        examples: [["a + b"], ["a == b"], ["a &amp;&amp; b"]],
+        note: "whitespace required, left-associative — each dispatches through a concept (`Add`, `Eql`, `And`)",
+      },
+    ],
+  },
+  {
+    title: "tuples",
+    entries: [
+      {
+        examples: [["(1, true)"], ["(left = 1, right = true)"]],
+        note: "tuple values — fields may be labeled",
+      },
+      {
+        examples: [["pair.0"], ["pair.fst"], ["config.network.port"]],
+        note: "projection, positional or labeled — chains freely",
+      },
+      {
+        examples: [["()"]],
+        note: "the unit value; its type is the empty tuple `{}`",
+      },
+    ],
+  },
+  {
+    title: "structs",
+    entries: [
+      {
+        examples: [['<span class="kw">pub struct</span> <span class="ty">Point</span> : <span class="kw">pub</span> <span class="ty">Type</span> { x : <span class="ty">Nat</span>, y : <span class="ty">Nat</span> }']],
+        note: "a nominal dependent record",
+      },
+      {
+        examples: [['<span class="kw">let</span> p : <span class="ty">Point</span> = Point { x = 1, y = 2 };']],
+        note: "construct with labels",
+      },
+      {
+        examples: [['<span class="kw">let</span> q : <span class="ty">Point</span> = Point { ..p, y = 9 };']],
+        note: "`..p` copies the rest, overrides follow",
+      },
+      {
+        examples: [["p.x + q.y"]],
+        note: "project with a dot",
+      },
+    ],
+  },
+  {
     title: "types",
     entries: [
       {
@@ -90,23 +159,6 @@ export const CHEATSHEET: CheatsheetSection[] = [
     ],
   },
   {
-    title: "tuples",
-    entries: [
-      {
-        examples: [["(1, true)"], ["(left = 1, right = true)"]],
-        note: "tuple values — fields may be labeled",
-      },
-      {
-        examples: [["pair.0"], ["pair.fst"], ["config.network.port"]],
-        note: "projection, positional or labeled — chains freely",
-      },
-      {
-        examples: [["()"]],
-        note: "the unit value; its type is the empty tuple `{}`",
-      },
-    ],
-  },
-  {
     title: "inductive types",
     entries: [
       {
@@ -117,27 +169,6 @@ export const CHEATSHEET: CheatsheetSection[] = [
           '<span class="kw">end</span>',
         ]],
         note: "an indexed family — the length lives in the type",
-      },
-    ],
-  },
-  {
-    title: "structs",
-    entries: [
-      {
-        examples: [['<span class="kw">pub struct</span> <span class="ty">Point</span> : <span class="kw">pub</span> <span class="ty">Type</span> { x : <span class="ty">Nat</span>, y : <span class="ty">Nat</span> }']],
-        note: "a nominal dependent record",
-      },
-      {
-        examples: [['<span class="kw">let</span> p : <span class="ty">Point</span> = Point { x = 1, y = 2 };']],
-        note: "construct with labels",
-      },
-      {
-        examples: [['<span class="kw">let</span> q : <span class="ty">Point</span> = Point { ..p, y = 9 };']],
-        note: "`..p` copies the rest, overrides follow",
-      },
-      {
-        examples: [["p.x + q.y"]],
-        note: "project with a dot",
       },
     ],
   },
@@ -222,15 +253,6 @@ export const CHEATSHEET: CheatsheetSection[] = [
     ],
   },
   {
-    title: "operators",
-    entries: [
-      {
-        examples: [["a + b"], ["a == b"], ["a &amp;&amp; b"]],
-        note: "whitespace required, left-associative — each dispatches through a concept (`Add`, `Eql`, `And`)",
-      },
-    ],
-  },
-  {
     title: "concepts",
     entries: [
       {
@@ -264,14 +286,17 @@ export const CHEATSHEET: CheatsheetSection[] = [
       {
         examples: [[
           '<span class="kw">satisfy</span> (@A : <span class="ty">Type</span>, <span class="kw">use</span> <span class="ty">Show</span>(A)) =&gt; <span class="ty">Show</span>(<span class="ty">Lst</span>(A)) {',
-          '    show(values) = Lst/fold(values, <span class="str">""</span>, (v, r) =&gt; Str/concat(r, Show/show(v))),',
+          "    show(values) =",
+          '        Lst/fold(values, <span class="str">""</span>, (v, r) =&gt;',
+          "            Str/concat(r, Show/show(v))),",
           "}",
         ]],
         note: "a parameterized witness — its premises resolve recursively",
       },
       {
         examples: [[
-          '<span class="kw">let</span> reverse : <span class="ty">Ord</span>(<span class="ty">Nat</span>) = Ord { cmp(a, b) = compare_reverse(a, b) };',
+          '<span class="kw">let</span> reverse : <span class="ty">Ord</span>(<span class="ty">Nat</span>) =',
+          "    Ord { cmp(a, b) = compare_reverse(a, b) };",
           'sort(<span class="kw">use</span> reverse, values)',
         ]],
         note: "override resolution — pass an ordinary concept value with `use`",
@@ -283,7 +308,8 @@ export const CHEATSHEET: CheatsheetSection[] = [
     entries: [
       {
         examples: [[
-          '<span class="kw">let</span> sum(a : <span class="ty">Option</span>(<span class="ty">Nat</span>), b : <span class="ty">Option</span>(<span class="ty">Nat</span>)) -&gt; <span class="ty">Option</span>(<span class="ty">Nat</span>) =',
+          '<span class="kw">let</span> sum(a : <span class="ty">Option</span>(<span class="ty">Nat</span>), b : <span class="ty">Option</span>(<span class="ty">Nat</span>))',
+          '    -&gt; <span class="ty">Option</span>(<span class="ty">Nat</span>) =',
           '    <span class="kw">let</span> x = a!;',
           '    <span class="kw">let</span> y = b!;',
           "    Option/some(x + y);",
@@ -297,7 +323,8 @@ export const CHEATSHEET: CheatsheetSection[] = [
     entries: [
       {
         examples: [[
-          '<span class="kw">pub let</span> sym(@A : <span class="ty">Type</span>, @x : A, @y : A, p : <span class="ty">Eq</span>(x, y)) -&gt; <span class="ty">Eq</span>(y, x) =',
+          '<span class="kw">pub let</span> sym(@A : <span class="ty">Type</span>, @x : A, @y : A, p : <span class="ty">Eq</span>(x, y))',
+          '    -&gt; <span class="ty">Eq</span>(y, x) =',
           '    <span class="kw">match</span> p : (q : <span class="ty">Eq</span>(A, s, t)) =&gt; <span class="ty">Eq</span>(t, s)',
           "    | refl(z) =&gt; Eq/refl()",
           '    <span class="kw">end</span>;',
@@ -324,27 +351,6 @@ export const CHEATSHEET: CheatsheetSection[] = [
           '<span class="kw">pub foreign</span> log : (<span class="ty">Bin</span>) -&gt; <span class="ty">Nat</span>;',
         ]],
         note: "implemented by the embedder — wire types only, `Bin` arrives as `Bytes`",
-      },
-    ],
-  },
-  {
-    title: "literals",
-    entries: [
-      {
-        examples: [["[1, ..rest, 9]"]],
-        note: "list literal, spread anywhere",
-      },
-      {
-        examples: [["b\\1\\0\\1"]],
-        note: "packed `Bits`, LSB first",
-      },
-      {
-        examples: [["x\\48\\69\\..suffix"]],
-        note: "packed `Bytes`, with spread",
-      },
-      {
-        examples: [['<span class="str">\'λ\'</span>'], ['<span class="str">"hello\\n"</span>'], ["0xFF"], ["1.0e9"]],
-        note: "`Char`, `Str`, numbers typed by context",
       },
     ],
   },
