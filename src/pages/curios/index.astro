@@ -141,7 +141,7 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
 
       <div class="bench-note">
         <p>
-          <span class="fg-full">Full disclosure:</span> the same person wrote the compiler and the benchmark, so treat this like a self-graded exam. What survives the bias: every answer is cross-checked against Rust, AssemblyScript, and Grain &mdash; three compilers we didn't write &mdash; and they all agree. Allocation runs within 2&times; of Rust on the same engine &mdash; with checked <span class="fg-full">Nat</span>/<span class="fg-full">Int</span> arithmetic included, work Rust isn't doing.
+          <span class="fg-full">Reading it straight:</span> Curios lands within 1.65&times; of Rust on the integer loop and within 2&times; on allocation &mdash; with checked <span class="fg-full">Nat</span>/<span class="fg-full">Int</span> arithmetic included, work Rust isn't doing. The two workloads are deliberate extremes &mdash; <span class="fg-full">lcg</span> never allocates, <span class="fg-full">trees</span> does nothing else &mdash; so those two multipliers bracket where a real program should land.
         </p>
       </div>
     </div>
