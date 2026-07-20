@@ -122,7 +122,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     label: "vec.crs",
     code:
       "use /std/{Io, Nat};\n\n" +
-      "pub induct Vec(T : Type) : (n : Nat) -> Type\n" +
+      "pub induct Vec(T : Type) : (n : Nat) -> pub Type\n" +
       "| nil() : (0)\n" +
       "| cons(@m : Nat, x : T, xs : Vec(T, m)) : (m + 1)\n" +
       "end\n\n" +
