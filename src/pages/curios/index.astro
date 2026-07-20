@@ -4,7 +4,7 @@ import Nav from "../../components/Nav.astro";
 import CodeCard from "../../components/CodeCard.astro";
 import Editor from "../../components/Editor.astro";
 import { PREVIEW_KEYS, HERO_SNIPPET } from "../../data/examples";
-import { FEATURES, BENCHMARKS } from "../../data/home";
+import { FEATURES, BENCHMARKS, STDLIB_MODULES, STDLIB_SNIPPET } from "../../data/home";
 import { GITHUB_URL } from "../../data/site";
 
 const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1</code>");
@@ -21,9 +21,7 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
         <div class="eyebrow">// a small language, fully dependent</div>
         <h1 class="h-serif">A language for<br /><em>the curious.</em></h1>
         <p class="lede">
-          curios is a small, dependently-typed language that compiles straight to WebAssembly.
-          Types can depend on values, proofs live right alongside ordinary code, and the
-          compiler is happy to double-check your math homework.
+          curios is a small, dependently-typed language that compiles straight to WebAssembly. Types can depend on values, proofs live right alongside ordinary code, and the compiler is happy to double-check your math homework.
         </p>
         <div class="hero-actions">
           <a href="/curios/playground" class="btn btn-primary hero-cta">Open the Playground &rarr;</a>
@@ -47,9 +45,7 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
         <div class="eyebrow">// the whole point</div>
         <h2 class="h-serif">This is Curios. Pick an example, hit run.</h2>
         <p class="section-lede">
-          Nothing to install, nothing to read first &mdash; the playground typechecks and
-          compiles straight to WebAssembly using the same pipeline as the CLI, entirely in
-          your browser.
+          Nothing to install, nothing to read first &mdash; the playground typechecks and compiles straight to WebAssembly using the same pipeline as the CLI, entirely in your browser.
         </p>
       </div>
 
@@ -78,14 +74,49 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
       </div>
     </div>
 
+    <div id="stdlib" class="section">
+      <div class="section-intro">
+        <div class="eyebrow">// the standard library</div>
+        <h2 class="h-serif">Batteries included. Some of them certified.</h2>
+        <p class="section-lede">
+          An HTTPS request, a JSON decode, and a race between two mirrors, without leaving <code>/std</code> &mdash; and this being Curios, some batteries carry proofs. Strings store certified UTF-8, and <code>BigNat</code>'s arithmetic laws are machine-checked in the library itself, not in a paper about it.
+        </p>
+      </div>
+
+      <div class="stdlib-grid">
+        <div class="stdlib-snippet">
+          <CodeCard filename={STDLIB_SNIPPET.filename}>
+            <div class="code-scroll">
+              <div class="code-gutter">
+                {STDLIB_SNIPPET.lines.map((_, i) => <div>{i + 1}</div>)}
+              </div>
+              <pre class="code-area" set:html={STDLIB_SNIPPET.lines.join("\n")} />
+            </div>
+          </CodeCard>
+        </div>
+
+        <div class="stdlib-modules">
+          {
+            STDLIB_MODULES.map((module) => (
+              <div class="stdlib-row">
+                <div class="stdlib-name">{module.name}</div>
+                <div class="stdlib-desc" set:html={renderInlineCode(module.body)} />
+              </div>
+            ))
+          }
+          <div class="stdlib-foot">
+            plus files, processes, clocks, randomness, and TCP servers &mdash; the boring parts are in there too.
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="benchmarks" class="section">
       <div class="section-intro">
         <div class="eyebrow">// how it performs</div>
         <h2 class="h-serif">Benchmarked against the languages it keeps company with.</h2>
         <p class="section-lede">
-          A single-machine snapshot (wasmtime on Cranelift, one pinned core) &mdash;
-          orientation, not a leaderboard. Curios only targets WebAssembly, so this is the
-          fair fight: same engine, same workloads.
+          A single-machine snapshot (wasmtime on Cranelift, one pinned core) &mdash; orientation, not a leaderboard. Curios only targets WebAssembly, so this is the fair fight: same engine, same workloads.
         </p>
       </div>
 
@@ -110,12 +141,7 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
 
       <div class="bench-note">
         <p>
-          <span class="fg-full">Reading it straight:</span> Curios lands within 1.7&times; of Rust
-          on tight integer work and within 2.6&times; on allocation &mdash; with checked
-          <span class="fg-full">Nat</span>/<span class="fg-full">Int</span> arithmetic
-          included, work Rust isn't doing. That's close company for a young,
-          dependently-typed language sharing a track with hand-tuned systems code, and the
-          remaining distance looks like a tuning problem, not a ceiling.
+          <span class="fg-full">Full disclosure:</span> the same person wrote the compiler and the benchmark, so treat this like a self-graded exam. What survives the bias: every answer is cross-checked against Rust, AssemblyScript, and Grain &mdash; not a line of them ours &mdash; and they all agree. The history is worth owning too: growing the language once cost allocation 42&ndash;47%, and two structural rewrites later (neither aimed at performance) the debt got paid back with interest &mdash; ~4.2M tree nodes in about a quarter of a second, 20% faster than the very first baseline, within 2&times; of Rust on the same engine, with checked <span class="fg-full">Nat</span>/<span class="fg-full">Int</span> arithmetic included &mdash; work Rust isn't doing. The integer loop stayed boring in the best way, holding within a few percent across all three runs while the compiler under it changed twice.
         </p>
       </div>
     </div>
@@ -126,6 +152,9 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
       <div class="install-card">
         <div class="fainter">// grab the curios binary for your platform</div>
         <div><span class="fainter">$</span> chmod +x curios &amp;&amp; ./curios run hello.crs</div>
+        <div class="ok">Hello, world!</div>
+        <div class="fainter">// or bundle a standalone executable &mdash; AOT-compiled, launches without a JIT</div>
+        <div><span class="fainter">$</span> ./curios compile hello.crs -o hello &amp;&amp; ./hello</div>
         <div class="ok">Hello, world!</div>
       </div>
       <p class="install-note">Prebuilt binaries for Linux (x86_64/aarch64) and macOS (aarch64) live on the <a href={`${GITHUB_URL}/releases`} target="_blank" rel="noopener">releases page</a>. Prefer building from source? <code>git clone</code> the repo and follow the README. Or just open the playground above &mdash; nothing to install.</p>
@@ -363,6 +392,78 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     padding: 1px 5px;
   }
 
+  .section-lede code {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    color: var(--fg);
+    background: color-mix(in srgb, var(--fg) 7%, transparent);
+    border: 1px solid var(--border-soft);
+    border-radius: 5px;
+    padding: 1px 5px;
+  }
+
+  .stdlib-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .stdlib-snippet .code-area,
+  .stdlib-snippet .code-gutter {
+    font-size: 13.5px;
+    line-height: 1.75;
+  }
+  .stdlib-snippet :global(.kw) {
+    color: oklch(74% 0.18 306);
+  }
+  .stdlib-snippet :global(.ty) {
+    color: oklch(82% 0.09 300);
+  }
+  .stdlib-snippet :global(.cm) {
+    color: var(--fg-faint);
+  }
+  .stdlib-snippet :global(.str) {
+    color: var(--green);
+  }
+  .stdlib-modules {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 10px 26px 20px;
+  }
+  .stdlib-row {
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .stdlib-name {
+    flex-shrink: 0;
+    width: 108px;
+    font-family: var(--mono);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .stdlib-desc {
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--fg-dim);
+  }
+  .stdlib-desc :global(code) {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    color: var(--fg);
+  }
+  .stdlib-foot {
+    padding-top: 16px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--fg-faint);
+    font-style: italic;
+  }
+
   .install-section {
     max-width: 760px;
     text-align: center;
@@ -455,7 +556,8 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
 
   @media (max-width: 860px) {
     .hero,
-    .bench-grid {
+    .bench-grid,
+    .stdlib-grid {
       grid-template-columns: 1fr;
     }
     .features-grid {

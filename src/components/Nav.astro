@@ -28,6 +28,11 @@ const { crumb } = Astro.props;
           <a href="/curios/#features" class="navlink">features</a>
         )
       }
+      {
+        !crumb && (
+          <a href="/curios/#stdlib" class="navlink">stdlib</a>
+        )
+      }
       <a href="/curios/#benchmarks" class="navlink">benchmarks</a>
       <a href="/curios/docs/" class="navlink">docs</a>
       <a
