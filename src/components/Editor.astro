@@ -303,15 +303,19 @@ const positionalTabCSS = editable
         compile: "✗ compile error",
     };
 
+    function resetOutput() {
+        revokeDownload();
+        el.output.hidden = true;
+        setStatus("");
+    }
+
     if (editable) {
         function setActiveTab(key) {
-            revokeDownload();
+            resetOutput();
             active = key;
             const example = examples[key];
             el.filename.textContent = example.label;
             el.filename.hidden = false;
-            el.output.hidden = true;
-            setStatus("");
             el.tabs.forEach((btn) =>
                 btn.classList.toggle("tab-active", btn.dataset.example === key),
             );
@@ -334,6 +338,10 @@ const positionalTabCSS = editable
         el.reset.addEventListener("click", () => setActiveTab(active));
 
         setActiveTab(defaultKey);
+    } else {
+        widget.querySelectorAll(".tab-radio").forEach((radio) => {
+            radio.addEventListener("change", resetOutput);
+        });
     }
 
     el.run.addEventListener("click", async () => {
