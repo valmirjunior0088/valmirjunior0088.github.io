@@ -406,7 +406,18 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     display: grid;
     grid-template-columns: 1.1fr 0.9fr;
     gap: 24px;
-    align-items: start;
+  }
+  .stdlib-snippet {
+    display: flex;
+    flex-direction: column;
+  }
+  .stdlib-snippet > :global(.code-card) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .stdlib-snippet :global(.code-scroll) {
+    flex: 1;
   }
   .stdlib-snippet .code-area,
   .stdlib-snippet .code-gutter {
