@@ -70,20 +70,24 @@ for (const section of CHEATSHEET) {
         <div class="cheatsheet-body" tabindex="0">
           <div class="cheatsheet-cols">
             {
-              CHEATSHEET.map((section) => (
-                <section class="cheatsheet-sec">
-                  <h3 class="cheatsheet-sec-title">{section.title}</h3>
-                  {section.entries.map((entry) => (
-                    <div class="cheatsheet-row" data-search={searchText(section, entry)}>
-                      <div class="cheatsheet-code">
-                        {entry.examples.map((example) => (
-                          <pre class="cheatsheet-example" set:html={example.join("\n")} />
-                        ))}
-                      </div>
-                      <div class="cheatsheet-note" set:html={renderInlineCode(entry.note)} />
-                    </div>
+              [1, 2].map((column) => (
+                <div class="cheatsheet-col">
+                  {CHEATSHEET.filter((section) => section.column === column).map((section) => (
+                    <section class="cheatsheet-sec">
+                      <h3 class="cheatsheet-sec-title">{section.title}</h3>
+                      {section.entries.map((entry) => (
+                        <div class="cheatsheet-row" data-search={searchText(section, entry)}>
+                          <div class="cheatsheet-code">
+                            {entry.examples.map((example) => (
+                              <pre class="cheatsheet-example" set:html={example.join("\n")} />
+                            ))}
+                          </div>
+                          <div class="cheatsheet-note" set:html={renderInlineCode(entry.note)} />
+                        </div>
+                      ))}
+                    </section>
                   ))}
-                </section>
+                </div>
               ))
             }
           </div>
@@ -390,11 +394,12 @@ for (const section of CHEATSHEET) {
     padding: 18px 22px 0;
   }
   .cheatsheet-cols {
-    columns: 2;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: 32px;
+    align-items: start;
   }
   .cheatsheet-sec {
-    break-inside: avoid;
     margin-bottom: 24px;
   }
   .cheatsheet-sec[hidden] {
@@ -545,7 +550,7 @@ for (const section of CHEATSHEET) {
 
   @media (max-width: 860px) {
     .cheatsheet-cols {
-      columns: 1;
+      grid-template-columns: minmax(0, 1fr);
     }
     .cheatsheet-head {
       flex-wrap: wrap;

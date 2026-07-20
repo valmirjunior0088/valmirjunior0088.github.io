@@ -5,6 +5,7 @@ export interface CheatsheetEntry {
 
 export interface CheatsheetSection {
   title: string;
+  column: 1 | 2;
   entries: CheatsheetEntry[];
 }
 
@@ -14,9 +15,12 @@ export interface CheatsheetSection {
 // Examples render side by side within their row, separated by hairlines.
 // Notes render on the right of each row; backticks become <code>.
 // Sections are ordered least to most complex.
+// `column` hand-assigns each section to a cheatsheet column (1 left, 2 right);
+// rebalance by eye when sections grow or shrink.
 export const CHEATSHEET: CheatsheetSection[] = [
   {
     title: "modules",
+    column: 1,
     entries: [
       {
         examples: [['<span class="kw">use</span> /std/{<span class="ty">Nat</span>, <span class="ty">Bool</span>};']],
@@ -42,6 +46,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "literals",
+    column: 1,
     entries: [
       {
         examples: [["[1, ..rest, 9]"]],
@@ -63,6 +68,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "bindings",
+    column: 1,
     entries: [
       {
         examples: [['<span class="kw">let</span> increment(n : <span class="ty">Nat</span>) -&gt; <span class="ty">Nat</span> = n + 1;']],
@@ -88,6 +94,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "operators",
+    column: 1,
     entries: [
       {
         examples: [["a + b"], ["a == b"], ["a &amp;&amp; b"]],
@@ -97,6 +104,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "tuples",
+    column: 1,
     entries: [
       {
         examples: [["(1, true)"], ["(left = 1, right = true)"]],
@@ -114,6 +122,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "structs",
+    column: 1,
     entries: [
       {
         examples: [['<span class="kw">pub struct</span> <span class="ty">Point</span> : <span class="kw">pub</span> <span class="ty">Type</span> { x : <span class="ty">Nat</span>, y : <span class="ty">Nat</span> }']],
@@ -135,6 +144,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "types",
+    column: 1,
     entries: [
       {
         examples: [['(x : <span class="ty">Nat</span>, y : <span class="ty">Nat</span>) -&gt; <span class="ty">Nat</span>']],
@@ -160,6 +170,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "inductive types",
+    column: 1,
     entries: [
       {
         examples: [[
@@ -174,6 +185,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "pattern matching",
+    column: 2,
     entries: [
       {
         examples: [[
@@ -217,6 +229,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "condition ladders",
+    column: 2,
     entries: [
       {
         examples: [[
@@ -232,6 +245,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "folds & induction",
+    column: 2,
     entries: [
       {
         examples: [[
@@ -265,6 +279,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "concepts",
+    column: 2,
     entries: [
       {
         examples: [[
@@ -316,6 +331,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "monads",
+    column: 2,
     entries: [
       {
         examples: [[
@@ -331,6 +347,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "proofs",
+    column: 2,
     entries: [
       {
         examples: [[
@@ -346,6 +363,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "goals",
+    column: 1,
     entries: [
       {
         examples: [['<span class="kw">let</span> todo : <span class="ty">Nat</span> = ?;']],
@@ -355,6 +373,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "foreign",
+    column: 1,
     entries: [
       {
         examples: [[
