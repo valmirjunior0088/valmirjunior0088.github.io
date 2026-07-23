@@ -327,7 +327,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
       },
       {
         examples: [[
-          '<span class="kw">pub concept</span> <span class="ty">Ord</span>(A : <span class="ty">Type</span>) : <span class="ty">Type</span> {',
+          '<span class="kw">pub concept</span> <span class="ty">Ord</span>(A : <span class="ty">Type</span>) : <span class="kw">pub</span> <span class="ty">Type</span> {',
           '    <span class="kw">use</span> <span class="ty">Eql</span>(A),',
           '    cmp(A, A) -&gt; <span class="ty">Order</span>,',
           "}",
