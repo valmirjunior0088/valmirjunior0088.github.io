@@ -28,13 +28,17 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
         </div>
       </div>
 
-      <div class="hero-snippet">
+      <div class="hero-snippet at-start">
         <CodeCard filename={HERO_SNIPPET.filename}>
-          <div class="code-scroll">
-            <div class="code-gutter">
-              {HERO_SNIPPET.lines.map((_, i) => <div>{i + 1}</div>)}
+          <div class="hero-scroll">
+            <div class="code-scroll">
+              <div class="code-gutter">
+                {HERO_SNIPPET.lines.map((_, i) => <div>{i + 1}</div>)}
+              </div>
+              <pre class="code-area" set:html={HERO_SNIPPET.lines.join("\n")} />
             </div>
-            <pre class="code-area" set:html={HERO_SNIPPET.lines.join("\n")} />
+            <div class="hero-fade hero-fade-top" aria-hidden="true"></div>
+            <div class="hero-fade hero-fade-bottom" aria-hidden="true"></div>
           </div>
         </CodeCard>
       </div>
@@ -68,8 +72,10 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
         {
           FEATURES.map((feature) => (
             <div class="feature-card">
-              <div class="feature-glyph">{feature.glyph}</div>
-              <div class="feature-title">{feature.title}</div>
+              <div class="feature-head">
+                <div class="feature-glyph"><span class="feature-glyph-mark">{feature.glyph}</span></div>
+                <div class="feature-title">{feature.title}</div>
+              </div>
               <div class="feature-body" set:html={renderInlineCode(feature.body)} />
             </div>
           ))
@@ -244,6 +250,15 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     display: flex;
     flex-direction: column;
   }
+  /* positioning context for the fades — no padding, so they span the full
+     width and pin to the scroll viewport (below the filename bar) */
+  .hero-scroll {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
   .hero-snippet .code-scroll {
     flex: 1;
     min-height: 0;
@@ -251,6 +266,44 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
        into it, instead of nesting a second scroller */
     overflow: auto;
     align-items: flex-start;
+  }
+  /* purple hints that the code keeps going past the fold; each toggle hides
+     its fade once the reader reaches that edge */
+  .hero-fade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 40px;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 150ms ease;
+  }
+  .hero-fade-top {
+    top: 0;
+    background: linear-gradient(
+      to top,
+      transparent,
+      color-mix(in srgb, var(--accent) 50%, var(--bg-card)) 90%
+    );
+  }
+  .hero-fade-bottom {
+    bottom: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      color-mix(in srgb, var(--accent) 50%, var(--bg-card)) 90%
+    );
+  }
+  .hero-snippet.at-start .hero-fade-top {
+    opacity: 0;
+  }
+  .hero-snippet.at-end .hero-fade-bottom {
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-fade {
+      transition: none;
+    }
   }
   .hero-snippet .code-area {
     overflow: visible;
@@ -393,9 +446,10 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     color: var(--fg);
   }
 
+  /* six cards, an even 2 / 2 / 2 */
   .features-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
   .feature-card {
@@ -405,15 +459,39 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     padding: 26px;
   }
   .feature-glyph {
-    font-family: var(--serif);
-    font-size: 26px;
+    /* A fixed square token, like the inline code chips: every glyph shares the
+       same box whatever its width. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    font-family: var(--mono);
+    font-size: 17px;
     color: var(--accent);
-    margin-bottom: 16px;
+    background: color-mix(in srgb, var(--accent) 9%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+    border-radius: 9px;
+    flex: none;
+  }
+  .feature-glyph-mark {
+    /* Trim the line box to the cap/baseline band — the same trick as the
+       cheatsheet title — so each glyph optically centres in the square. */
+    line-height: 1;
+    text-box: trim-both cap alphabetic;
+  }
+  .feature-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
   }
   .feature-title {
-    font-size: 16px;
+    font-family: var(--mono);
+    font-size: 14px;
     font-weight: 600;
-    margin-bottom: 10px;
+    line-height: 1;
+    text-box: trim-both cap alphabetic;
   }
   .feature-body {
     font-size: 14.5px;
@@ -621,6 +699,9 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     .features-grid {
       grid-template-columns: repeat(2, 1fr);
     }
+    .feature-card {
+      grid-column: auto;
+    }
     .section {
       padding-bottom: clamp(64px, 12vw, 110px);
     }
@@ -640,3 +721,21 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     }
   }
 </style>
+
+<script>
+  import { scrollFades } from "../../scripts/scrollFades";
+
+  // The hero card is copy-height, so its code usually overflows. Fades hint at
+  // more code above/below; `content` is the <pre>, watched because it reflows
+  // taller when the mono web font swaps in (changing overflow with no event).
+  const snippet = document.querySelector<HTMLElement>(".hero-snippet");
+  const scroll = snippet?.querySelector<HTMLElement>(".code-scroll");
+
+  if (snippet && scroll) {
+    scrollFades({
+      scroller: scroll,
+      target: snippet,
+      content: scroll.querySelector<HTMLElement>(".code-area"),
+    });
+  }
+</script>

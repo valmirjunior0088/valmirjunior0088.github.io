@@ -94,7 +94,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "operators",
-    column: 1,
+    column: 2,
     entries: [
       {
         examples: [["a + b"], ["a == b"], ["a &amp;&amp; b"]],
@@ -244,17 +244,17 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "condition ladders",
-    column: 2,
+    column: 1,
     entries: [
       {
         examples: [[
-          '<span class="kw">match</span>',
+          '<span class="kw">choose</span>',
           "| prefer_fresh &amp;&amp; fresh &gt; 0 =&gt; fresh",
           "| some(n) = cached =&gt; n",
           "| _ =&gt; 0",
           '<span class="kw">end</span>',
         ]],
-        note: "no scrutinee — tried top to bottom, `some(n) = cached` is a bind-arm, final `_` is mandatory",
+        note: "`choose` takes no scrutinee — tried top to bottom, `some(n) = cached` is a bind-arm, final `_` is mandatory",
       },
     ],
   },
@@ -304,7 +304,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
     entries: [
       {
         examples: [[
-          '<span class="kw">pub concept</span> <span class="ty">Show</span>(A : <span class="ty">Type</span>) : <span class="ty">Type</span> {',
+          '<span class="kw">pub concept</span> <span class="ty">Show</span>(A : <span class="ty">Type</span>) : <span class="kw">pub</span> <span class="ty">Type</span> {',
           '    show(A) -&gt; <span class="ty">Str</span>,',
           "}",
         ]],
@@ -361,8 +361,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
     entries: [
       {
         examples: [[
-          '<span class="kw">let</span> sum(a : <span class="ty">Option</span>(<span class="ty">Nat</span>), b : <span class="ty">Option</span>(<span class="ty">Nat</span>))',
-          '    -&gt; <span class="ty">Option</span>(<span class="ty">Nat</span>) =',
+          '<span class="kw">let</span> sum(a : <span class="ty">Option</span>(<span class="ty">Nat</span>), b : <span class="ty">Option</span>(<span class="ty">Nat</span>)) -&gt; <span class="ty">Option</span>(<span class="ty">Nat</span>) =',
           '    <span class="kw">let</span> x = a!;',
           '    <span class="kw">let</span> y = b!;',
           "    Option/some(x + y);",
@@ -377,10 +376,9 @@ export const CHEATSHEET: CheatsheetSection[] = [
     entries: [
       {
         examples: [[
-          '<span class="kw">pub let</span> sym(@A : <span class="ty">Type</span>, @x : A, @y : A, p : <span class="ty">Eq</span>(x, y))',
-          '    -&gt; <span class="ty">Eq</span>(y, x) =',
-          '    <span class="kw">match</span> p : (q : <span class="ty">Eq</span>(A, s, t)) =&gt; <span class="ty">Eq</span>(t, s)',
-          "    | refl(z) =&gt; Eq/refl()",
+          '<span class="kw">let</span> sym(@x : <span class="ty">Nat</span>, @y : <span class="ty">Nat</span>, p : <span class="ty">Eq</span>(x, y)) -&gt; <span class="ty">Eq</span>(y, x) =',
+          '    <span class="kw">match</span> p : (q : <span class="ty">Eq</span>(<span class="ty">Nat</span>, s, t)) =&gt; <span class="ty">Eq</span>(t, s)',
+          "    | refl(@z) =&gt; Eq/refl()",
           '    <span class="kw">end</span>;',
         ]],
         note: "match on the proof — all of it erases before runtime",
@@ -399,7 +397,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "foreign",
-    column: 1,
+    column: 2,
     entries: [
       {
         examples: [[

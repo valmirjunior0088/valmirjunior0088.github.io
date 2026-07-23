@@ -45,7 +45,7 @@ for (const section of CHEATSHEET) {
 
       <Editor />
 
-      <section class="cheatsheet-panel code-card" id="cheatsheet" aria-label="Cheatsheet">
+      <section class="cheatsheet-panel code-card at-start" id="cheatsheet" aria-label="Cheatsheet">
         <header class="cheatsheet-head">
           <div class="cheatsheet-headline">
             <button class="btn btn-outline cheatsheet-toggle" aria-expanded="false" aria-controls="cheatsheet" aria-label="Enlarge the cheatsheet">
@@ -68,6 +68,7 @@ for (const section of CHEATSHEET) {
         </header>
 
         <div class="cheatsheet-body" tabindex="0">
+          <div class="cheatsheet-fade cheatsheet-fade-top" aria-hidden="true"></div>
           <div class="cheatsheet-cols">
             {
               [1, 2].map((column) => (
@@ -92,7 +93,7 @@ for (const section of CHEATSHEET) {
             }
           </div>
           <p class="cheatsheet-empty" hidden>no matches for &ldquo;<span class="cheatsheet-empty-q"></span>&rdquo; &mdash; <button class="cheatsheet-clear">clear the filter</button></p>
-          <div class="cheatsheet-fade" aria-hidden="true"></div>
+          <div class="cheatsheet-fade cheatsheet-fade-bottom" aria-hidden="true"></div>
         </div>
 
         <footer class="cheatsheet-foot">
@@ -107,6 +108,8 @@ for (const section of CHEATSHEET) {
 </Base>
 
 <script>
+  import { scrollFades } from "../../scripts/scrollFades";
+
   const panel = document.getElementById("cheatsheet")!;
   const backdrop = document.querySelector<HTMLElement>(".cheatsheet-backdrop")!;
   const toggle = panel.querySelector<HTMLButtonElement>(".cheatsheet-toggle")!;
@@ -121,10 +124,9 @@ for (const section of CHEATSHEET) {
 
   const floating = () => panel.classList.contains("is-floating");
 
-  function updateFade() {
-    const atEnd = body.scrollTop + body.clientHeight >= body.scrollHeight - 6;
-    panel.classList.toggle("at-end", atEnd);
-  }
+  // `at-start` / `at-end` on the panel drive the cheatsheet's edge fades;
+  // scrollFades also owns the scroll/resize listeners and the initial pass.
+  const updateFade = scrollFades({ scroller: body, target: panel });
 
   function applyFilter() {
     const query = filter.value.trim().toLowerCase();
@@ -227,7 +229,6 @@ for (const section of CHEATSHEET) {
   toggle.addEventListener("click", () => setFloating(!floating()));
   backdrop.addEventListener("click", () => setFloating(false));
   filter.addEventListener("input", applyFilter);
-  body.addEventListener("scroll", updateFade, { passive: true });
   clear.addEventListener("click", () => {
     clearFilter();
     filter.focus();
@@ -260,8 +261,6 @@ for (const section of CHEATSHEET) {
       }
     }
   });
-
-  updateFade();
 </script>
 
 <style>
@@ -398,13 +397,16 @@ for (const section of CHEATSHEET) {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding: 18px 22px 0;
+    /* no padding here: it lives on the content below, so the sticky fades pin
+       flush to the body's top and bottom edges and span its full width */
+    padding: 0;
   }
   .cheatsheet-cols {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: 32px;
     align-items: start;
+    padding: 18px 22px 0;
   }
   .cheatsheet-sec {
     margin-bottom: 24px;
@@ -491,6 +493,7 @@ for (const section of CHEATSHEET) {
     font-size: 14px;
     color: var(--fg-dimmer);
     margin: 8px 0 24px;
+    padding-inline: 22px;
   }
   .cheatsheet-clear {
     font: inherit;
@@ -504,16 +507,28 @@ for (const section of CHEATSHEET) {
 
   .cheatsheet-fade {
     position: sticky;
-    bottom: 0;
     display: block;
-    height: 42px;
-    margin-top: -42px;
-    background: linear-gradient(to bottom, transparent, var(--bg-card) 90%);
+    height: 34px;
     pointer-events: none;
     opacity: 1;
     transition: opacity 150ms ease;
   }
-  .cheatsheet-panel.at-end .cheatsheet-fade {
+  /* each fade overlaps its neighbouring content via a negative margin so it
+     adds no height of its own; the sticky edge pins it to the scroll viewport */
+  .cheatsheet-fade-top {
+    top: 0;
+    margin-bottom: -34px;
+    background: linear-gradient(to top, transparent, color-mix(in srgb, var(--accent) 50%, var(--bg-card)) 90%);
+  }
+  .cheatsheet-fade-bottom {
+    bottom: 0;
+    margin-top: -34px;
+    background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--accent) 50%, var(--bg-card)) 90%);
+  }
+  .cheatsheet-panel.at-start .cheatsheet-fade-top {
+    opacity: 0;
+  }
+  .cheatsheet-panel.at-end .cheatsheet-fade-bottom {
     opacity: 0;
   }
 

@@ -6,14 +6,9 @@ export interface Feature {
 
 export const FEATURES: Feature[] = [
   {
-    glyph: "Π Σ",
+    glyph: "ΠΣ",
     title: "Dependent by design",
     body: "Function and tuple types are Π/Σ types — a type can mention a value that came before it, like a vector indexed by its own length.",
-  },
-  {
-    glyph: "≡",
-    title: "Proofs, not comments",
-    body: "A proof-irrelevant `Prop` sort, propositional equality, and the `refl` / `sym` / `trans` / `cong` toolkit, ready in the standard library.",
   },
   {
     glyph: "μ",
@@ -21,19 +16,24 @@ export const FEATURES: Feature[] = [
     body: "Declare your own data and proof families with index telescopes and per-constructor targets — the same machinery `Vec` and `Eq` are built from.",
   },
   {
+    glyph: "≡",
+    title: "Proofs, not comments",
+    body: "A proof-irrelevant `Prop` sort, propositional equality, and the `refl` / `sym` / `trans` / `cong` toolkit, ready in the standard library — state an equation as a type and prove it by matching.",
+  },
+  {
     glyph: "@",
     title: "Erased at runtime",
     body: "Mark an argument `@` and it vanishes after type-checking — type parameters, lengths, and proofs steer the checker, then leave no trace in the compiled WebAssembly. Zero runtime cost.",
   },
   {
-    glyph: "⇒",
-    title: "Ad-hoc polymorphism",
-    body: "`concept` and `satisfy` declarations give you typeclass-style interfaces — every operator (`+`, `==`, `<`) dispatches through one, and postfix `!` sequences any `Monad` witness as do-notation.",
+    glyph: "{·}",
+    title: "Patterns, not just tags",
+    body: "Destructure tuples and structs in a `let`, lambda, or parameter, and nest match arms across several scrutinees — checked for overlap and completeness. Match on plain literals and packed `Bits`/`Bytes`, not only constructor tags.",
   },
   {
-    glyph: "▦",
-    title: "Patterns, not just tags",
-    body: "Destructure tuples and structs in a `let`, lambda, or parameter, and nest match arms arbitrarily across several scrutinees — all checked for overlap and completeness by the compiler.",
+    glyph: "=>",
+    title: "Ad-hoc polymorphism",
+    body: "`concept` and `satisfy` declarations give you typeclass-style interfaces — every operator (`+`, `==`, `<`) dispatches through one. Mark a concept's sort `pub` to expose its witness record, or leave it sealed behind the interface.",
   },
 ];
 
@@ -45,15 +45,19 @@ export interface StdlibModule {
 export const STDLIB_MODULES: StdlibModule[] = [
   {
     name: "/std/http",
-    body: "Request/response over TCP or TLS, every call a `Task`.",
+    body: "Request/response over TCP or TLS, every call an `Async`.",
   },
   {
     name: "/std/Json",
     body: "A full codec — encode, decode, and the `Json` tree between.",
   },
   {
-    name: "/std/Task",
-    body: "Cooperative fibers with `both`, `race`, and `select`.",
+    name: "/std/Toml",
+    body: "A full TOML 1.0.0 codec — parse, print, and every conflict caught.",
+  },
+  {
+    name: "/std/Async",
+    body: "Cooperative fibers with `race`, `select`, and `join_all`.",
   },
   {
     name: "/std/Parse",
@@ -82,24 +86,24 @@ export const STDLIB_MODULES: StdlibModule[] = [
 export const STDLIB_SNIPPET = {
   filename: "pulse.crs",
   lines: [
-    '<span class="kw">use</span> /std/{<span class="ty">Task</span>, http, <span class="ty">Parse</span>, <span class="ty">Json</span>, <span class="ty">Result</span>, <span class="ty">Fmt</span>, <span class="ty">Io</span>};',
+    '<span class="kw">use</span> /std/{<span class="ty">Async</span>, http, <span class="ty">Parse</span>, <span class="ty">Json</span>, <span class="ty">Result</span>, <span class="ty">Fmt</span>};',
     "",
     '<span class="cm">-- race two TLS mirrors, decode whichever answers first</span>',
-    '<span class="kw">let</span> pulse : <span class="ty">Task</span>({}) =',
-    '    <span class="kw">let</span> reply = Task/race([',
+    '<span class="kw">let</span> pulse : <span class="ty">Async</span>({}) =',
+    '    <span class="kw">let</span> reply = Async/race([',
     '        () =&gt; http/perform(http/get_tls(<span class="str">"eu.api.dev"</span>, 443, <span class="str">"/"</span>)),',
     '        () =&gt; http/perform(http/get_tls(<span class="str">"us.api.dev"</span>, 443, <span class="str">"/"</span>))',
     "    ])!;",
-    '    Task/pure(<span class="kw">match</span> reply',
+    '    Async/pure(<span class="kw">match</span> reply',
     "    | success(r) =&gt;",
     '        <span class="kw">match</span> Parse/run(Json/decode, r.body)',
-    '        | success(j) =&gt; Fmt/print(<span class="str">"pulse = %s\\n"</span>)(Json/encode(j))',
-    '        | failure(e) =&gt; Fmt/print(<span class="str">"bad json: %s\\n"</span>)(e)',
+    '        | success(j) =&gt; Fmt/print(<span class="str">"pulse = %\\n"</span>)(Json/encode(j))',
+    '        | failure(e) =&gt; Fmt/print(<span class="str">"bad json: %\\n"</span>)(e)',
     '        <span class="kw">end</span>',
-    '    | failure(_) =&gt; Io/print(<span class="str">"both mirrors down\\n"</span>)',
+    '    | failure(_) =&gt; /std/print(<span class="str">"both mirrors down\\n"</span>)',
     '    <span class="kw">end</span>);',
     "",
-    "Task/run(pulse)",
+    "Async/run(pulse)",
   ],
 };
 
