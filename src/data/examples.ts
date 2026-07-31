@@ -68,10 +68,10 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     code:
       "use /std/{Fmt, Nat, Map, Option};\n\n" +
       "let m0 : Map(Nat) = Map/empty();\n" +
-      'let m1 : Map(Nat) = Map/set(m0, "ada", 92);\n' +
-      'let m2 : Map(Nat) = Map/set(m1, "grace", 87);\n' +
-      'let m3 : Map(Nat) = Map/set(m2, "alan", 95);\n\n' +
-      'match Map/get(m3, "grace")\n' +
+      'let m1 : Map(Nat) = Map/insert(m0, "ada", 92);\n' +
+      'let m2 : Map(Nat) = Map/insert(m1, "grace", 87);\n' +
+      'let m3 : Map(Nat) = Map/insert(m2, "alan", 95);\n\n' +
+      'match Map/get(m3, "grace") : (_) => {}\n' +
       '| some(score) => Fmt/print("grace scored % out of % entries\\n")(score)(Map/len(m3))\n' +
       '| none() => /std/print("no such entry\\n")\n' +
       "end",
@@ -86,7 +86,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "    let y = b!;\n" +
       "    let z = c!;\n" +
       "    Option/some(x + y + z);\n\n" +
-      "match sum_all(Option/some(3), Option/some(4), Option/some(5))\n" +
+      "match sum_all(Option/some(3), Option/some(4), Option/some(5)) : (_) => {}\n" +
       '| some(n) => Fmt/print("sum = %\\n")(n)\n' +
       '| none() => /std/print("missing a reading\\n")\n' +
       "end",
@@ -98,7 +98,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "use /std/{Nat, Fmt, Add};\n\n" +
       "pub struct Point : pub Type {\n" +
       "    x : Nat,\n" +
-      "    y : Nat,\n" +
+      "    y : Nat\n" +
       "}\n\n" +
       "satisfy Add(Point) {\n" +
       "    add(a, b) = Point { x = a.x + b.x, y = a.y + b.y }\n" +
@@ -112,7 +112,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     code:
       "use /std/{Nat, Vec};\n\n" +
       "pub let head(@T : Type, @n : Nat, xs : Vec(T, n + 1)) -> T =\n" +
-      "    match xs : (xs : Vec(T, k)) => T\n" +
+      "    match xs\n" +
       "    | cons(@_, x, _) => x\n" +
       "    end;\n\n" +
       '/std/print("typechecks: head, n erased\\n")',
@@ -127,7 +127,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "| cons(@m : Nat, x : T, xs : Vec(T, m)) : (m + 1)\n" +
       "end\n\n" +
       "pub rec append(@T : Type, @n : Nat, @m : Nat, v : Vec(T, n), w : Vec(T, m)) -> Vec(T, n + m) =\n" +
-      "    match v : (v : Vec(T, k)) => Vec(T, k + m)\n" +
+      "    match v : (k, v) => Vec(T, k + m)\n" +
       "    | nil() => w\n" +
       "    | cons(@j, x, xs) => Vec/cons(x, append(xs, w))\n" +
       "    end;\n\n" +
@@ -139,7 +139,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     code:
       "use /std/{Eq};\n\n" +
       "pub let sym(@A : Type, @x : A, @y : A, p : Eq(x, y)) -> Eq(y, x) =\n" +
-      "    match p : (q : Eq(A, s, t)) => Eq(t, s)\n" +
+      "    match p : (s, t, q) => Eq(t, s)\n" +
       "    | refl(@z) => Eq/refl()\n" +
       "    end;\n\n" +
       '/std/print("typechecks: sym\\n")',
@@ -177,7 +177,7 @@ export const HERO_SNIPPET = {
     '<span class="cm">-- head is total: Vec(T, n + 1) is never empty</span>',
     '<span class="kw">pub let</span> head(@T : <span class="ty">Type</span>, @n : <span class="ty">Nat</span>,',
     "             xs : Vec(T, n + 1)) -&gt; T =",
-    '    <span class="kw">match</span> xs : (xs : Vec(T, k)) =&gt; T',
+    '    <span class="kw">match</span> xs',
     "    | cons(@_, x, _) =&gt; x",
     '    <span class="kw">end</span>;',
     "",
@@ -185,7 +185,7 @@ export const HERO_SNIPPET = {
     '<span class="kw">pub rec</span> append(@T : <span class="ty">Type</span>, @n : <span class="ty">Nat</span>, @m : <span class="ty">Nat</span>,',
     "               v : Vec(T, n), w : Vec(T, m))",
     "    -&gt; Vec(T, n + m) =",
-    '    <span class="kw">match</span> v : (v : Vec(T, k)) =&gt; Vec(T, k + m)',
+    '    <span class="kw">match</span> v : (k, v) =&gt; Vec(T, k + m)',
     "    | nil() =&gt; w",
     "    | cons(@j, x, xs) =&gt;",
     "        Vec/cons(x, append(xs, w))",

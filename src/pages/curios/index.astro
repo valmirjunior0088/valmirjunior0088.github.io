@@ -150,7 +150,7 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
 
       <div class="bench-note">
         <p>
-          <span class="fg-full">Reading it straight:</span> Curios lands within 1.65&times; of Rust on the integer loop and within 2&times; on allocation &mdash; with checked <span class="fg-full">Nat</span>/<span class="fg-full">Int</span> arithmetic included, work Rust isn't doing. The two workloads are deliberate extremes &mdash; <span class="fg-full">lcg</span> never allocates, <span class="fg-full">trees</span> does nothing else &mdash; so those two multipliers bracket where a real program should land.
+          <span class="fg-full">Reading it straight:</span> Curios lands within 1.7&times; of Rust on the integer loop and just over 2&times; on allocation &mdash; with checked <span class="fg-full">Nat</span>/<span class="fg-full">Int</span> arithmetic included, work Rust isn't doing. The two workloads are deliberate extremes &mdash; <span class="fg-full">lcg</span> never allocates, <span class="fg-full">trees</span> does nothing else &mdash; so those two multipliers bracket where a real program should land.
         </p>
       </div>
     </div>
@@ -446,7 +446,7 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
     color: var(--fg);
   }
 
-  /* six cards, an even 2 / 2 / 2 */
+  /* eight cards, an even 2 / 2 / 2 / 2 */
   .features-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

@@ -128,7 +128,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
         examples: [[
           '<span class="kw">pub struct</span> <span class="ty">Point</span> : <span class="kw">pub</span> <span class="ty">Type</span> {',
           '    x : <span class="ty">Nat</span>,',
-          '    y : <span class="ty">Nat</span>,',
+          '    y : <span class="ty">Nat</span>',
           "}",
         ]],
         note: "a nominal dependent record",
@@ -137,7 +137,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
         examples: [[
           '<span class="kw">let</span> p : <span class="ty">Point</span> = Point {',
           "    x = 1,",
-          "    y = 2,",
+          "    y = 2",
           "};",
         ]],
         note: "construct with labels",
@@ -146,7 +146,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
         examples: [[
           '<span class="kw">let</span> q : <span class="ty">Point</span> = Point {',
           "    ..p,",
-          "    y = 9,",
+          "    y = 9",
           "};",
         ]],
         note: "`..p` copies the rest, overrides follow",
@@ -269,7 +269,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
           "| pred + 1; hyp =&gt; step(pred, hyp)",
           '<span class="kw">end</span>',
         ]],
-        note: "the motive names the result family; `; hyp` binds the result for the smaller structure",
+        note: "the motive binds the indices then the scrutinee, and can be left off wherever the elaborator infers it; `; hyp` binds the result for the smaller structure",
       },
       {
         examples: [[
@@ -305,7 +305,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
       {
         examples: [[
           '<span class="kw">pub concept</span> <span class="ty">Show</span>(A : <span class="ty">Type</span>) : <span class="kw">pub</span> <span class="ty">Type</span> {',
-          '    show(A) -&gt; <span class="ty">Str</span>,',
+          '    show(A) -&gt; <span class="ty">Str</span>',
           "}",
         ]],
         note: "a typeclass-style interface",
@@ -313,7 +313,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
       {
         examples: [[
           '<span class="kw">satisfy</span> <span class="ty">Show</span>(<span class="ty">Nat</span>) {',
-          "    show(n) = Nat/to_str(n),",
+          "    show(n) = Nat/to_str(n)",
           "}",
         ]],
         note: "one witness per key, program-wide",
@@ -329,7 +329,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
         examples: [[
           '<span class="kw">pub concept</span> <span class="ty">Ord</span>(A : <span class="ty">Type</span>) : <span class="kw">pub</span> <span class="ty">Type</span> {',
           '    <span class="kw">use</span> <span class="ty">Eql</span>(A),',
-          '    cmp(A, A) -&gt; <span class="ty">Order</span>,',
+          '    cmp(A, A) -&gt; <span class="ty">Order</span>',
           "}",
         ]],
         note: "a `use` field is a superclass edge — satisfiable by projection",
@@ -339,7 +339,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
           '<span class="kw">satisfy</span> (@A : <span class="ty">Type</span>, <span class="kw">use</span> <span class="ty">Show</span>(A)) =&gt; <span class="ty">Show</span>(<span class="ty">Lst</span>(A)) {',
           "    show(values) =",
           '        Lst/fold(values, <span class="str">""</span>, (v, r) =&gt;',
-          "            Str/concat(r, Show/show(v))),",
+          "            Str/concat(r, Show/show(v)))",
           "}",
         ]],
         note: "a parameterized witness — its premises resolve recursively",
@@ -347,7 +347,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
       {
         examples: [[
           '<span class="kw">let</span> reverse : <span class="ty">Ord</span>(<span class="ty">Nat</span>) = Ord {',
-          "    cmp(a, b) = compare_reverse(a, b),",
+          "    cmp(a, b) = compare_reverse(a, b)",
           "};",
           'sort(<span class="kw">use</span> reverse, values)',
         ]],
@@ -377,7 +377,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
       {
         examples: [[
           '<span class="kw">let</span> sym(@x : <span class="ty">Nat</span>, @y : <span class="ty">Nat</span>, p : <span class="ty">Eq</span>(x, y)) -&gt; <span class="ty">Eq</span>(y, x) =',
-          '    <span class="kw">match</span> p : (q : <span class="ty">Eq</span>(<span class="ty">Nat</span>, s, t)) =&gt; <span class="ty">Eq</span>(t, s)',
+          '    <span class="kw">match</span> p : (s, t, q) =&gt; <span class="ty">Eq</span>(t, s)',
           "    | refl(@z) =&gt; Eq/refl()",
           '    <span class="kw">end</span>;',
         ]],

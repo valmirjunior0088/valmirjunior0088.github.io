@@ -35,6 +35,16 @@ export const FEATURES: Feature[] = [
     title: "Ad-hoc polymorphism",
     body: "`concept` and `satisfy` declarations give you typeclass-style interfaces — every operator (`+`, `==`, `<`) dispatches through one. Mark a concept's sort `pub` to expose its witness record, or leave it sealed behind the interface.",
   },
+  {
+    glyph: "≤",
+    title: "Universes, inferred",
+    body: "`Type` is a cumulative hierarchy, so a type of types is just another type — and the levels are inferred rather than written. You never annotate one to make a definition fit.",
+  },
+  {
+    glyph: "⊢",
+    title: "A second opinion",
+    body: "An independent kernel re-checks every compilation from the finished terms alone — strict positivity, termination, erasure, universes. Still being refined, and a second opinion rather than a proof of soundness.",
+  },
 ];
 
 export interface StdlibModule {
@@ -57,7 +67,7 @@ export const STDLIB_MODULES: StdlibModule[] = [
   },
   {
     name: "/std/Async",
-    body: "Cooperative fibers with `race`, `select`, and `join_all`.",
+    body: "Cooperative fibers and tasks — `spawn`, `join`, `cancel`, `race`.",
   },
   {
     name: "/std/Parse",
@@ -96,7 +106,7 @@ export const STDLIB_SNIPPET = {
     "    ])!;",
     '    Async/pure(<span class="kw">match</span> reply',
     "    | success(r) =&gt;",
-    '        <span class="kw">match</span> Parse/run(Json/decode, r.body)',
+    '        <span class="kw">match</span> Parse/run(Json/decode, r.body) : (_) =&gt; {}',
     '        | success(j) =&gt; Fmt/print(<span class="str">"pulse = %\\n"</span>)(Json/encode(j))',
     '        | failure(e) =&gt; Fmt/print(<span class="str">"bad json: %\\n"</span>)(e)',
     '        <span class="kw">end</span>',
@@ -123,20 +133,20 @@ export const BENCHMARKS: Benchmark[] = [
     filename: "lcg — integer loop, N=100,000,000",
     rows: [
       { lang: "language", value: "mean · vs best", variant: "head" },
-      { lang: "Rust → wasm", value: "265.5 ms · 1.00×" },
-      { lang: "AssemblyScript", value: "318.4 ms · 1.20×" },
-      { lang: "Curios", value: "438.2 ms · 1.65×", variant: "highlight" },
-      { lang: "Grain", value: "30,029 ms · 113.1×", variant: "faint" },
+      { lang: "Rust → wasm", value: "261.3 ms · 1.00×" },
+      { lang: "AssemblyScript", value: "316.3 ms · 1.21×" },
+      { lang: "Curios", value: "438.4 ms · 1.68×", variant: "highlight" },
+      { lang: "Grain", value: "29,898 ms · 114.4×", variant: "faint" },
     ],
   },
   {
     filename: "trees — allocation, D=21",
     rows: [
       { lang: "language", value: "mean · vs best", variant: "head" },
-      { lang: "Rust → wasm", value: "123.6 ms · 1.00×" },
-      { lang: "AssemblyScript", value: "212.7 ms · 1.72×" },
-      { lang: "Curios", value: "246.1 ms · 1.99×", variant: "highlight" },
-      { lang: "Grain", value: "1,764 ms · 14.3×", variant: "faint" },
+      { lang: "Rust → wasm", value: "127.0 ms · 1.00×" },
+      { lang: "AssemblyScript", value: "232.1 ms · 1.83×" },
+      { lang: "Curios", value: "260.0 ms · 2.05×", variant: "highlight" },
+      { lang: "Grain", value: "1,787 ms · 14.1×", variant: "faint" },
     ],
   },
 ];
