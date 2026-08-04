@@ -53,12 +53,16 @@ export const CHEATSHEET: CheatsheetSection[] = [
         note: "list literal, spread anywhere",
       },
       {
-        examples: [["b\\1\\0\\1"]],
-        note: "packed `Bits`, LSB first",
+        examples: [["b[\\1, \\0, \\1]"]],
+        note: "packed `Bits`, LSB first — the grain letter glues to the `[`",
       },
       {
-        examples: [["x\\48\\69\\..suffix"]],
-        note: "packed `Bytes`, with spread",
+        examples: [["x[\\48, \\69, ..suffix]"]],
+        note: "packed `Bytes` — `\\` marks a constant atom, `..` spreads a whole value",
+      },
+      {
+        examples: [["b[flag, ..rest]"], ["x[..acc, byte]"]],
+        note: "an unescaped entry is an ordinary term contributing one atom — cons and append, with no named form",
       },
       {
         examples: [['<span class="str">\'λ\'</span>'], ['<span class="str">"hello\\n"</span>'], ["0xFF"], ["1.0e9"]],
@@ -234,8 +238,8 @@ export const CHEATSHEET: CheatsheetSection[] = [
       {
         examples: [[
           '<span class="kw">match</span> bits',
-          "| b\\ =&gt; base",
-          "| b\\head\\..tail; hyp =&gt; step(head, hyp)",
+          "| b[] =&gt; base",
+          "| b[head, ..tail]; hyp =&gt; step(head, hyp)",
           '<span class="kw">end</span>',
         ]],
         note: "packed folds — a `Bits` head is `Bool`, a `Bytes` head is `Byte`",
