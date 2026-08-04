@@ -122,7 +122,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     label: "vec.crs",
     code:
       "use /std/{Nat};\n\n" +
-      "pub induct Vec(T : Type) : (n : Nat) -> pub Type\n" +
+      "pub induct Vec(T : Type) : (Nat) -> pub Type\n" +
       "| nil() : (0)\n" +
       "| cons(@m : Nat, x : T, xs : Vec(T, m)) : (m + 1)\n" +
       "end\n\n" +
@@ -169,7 +169,7 @@ export const HERO_SNIPPET = {
   filename: "lengths.crs",
   lines: [
     '<span class="cm">-- a vector indexed by its own length</span>',
-    '<span class="kw">pub induct</span> <span class="ty">Vec</span>(T : <span class="ty">Type</span>) : (n : <span class="ty">Nat</span>) -&gt; <span class="kw">pub</span> <span class="ty">Type</span>',
+    '<span class="kw">pub induct</span> <span class="ty">Vec</span>(T : <span class="ty">Type</span>) : (<span class="ty">Nat</span>) -&gt; <span class="kw">pub</span> <span class="ty">Type</span>',
     "| nil() : (0)",
     "| cons(@m : Nat, x : T, xs : Vec(T, m)) : (m + 1)",
     '<span class="kw">end</span>',

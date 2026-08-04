@@ -189,7 +189,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
     entries: [
       {
         examples: [[
-          '<span class="kw">pub induct</span> <span class="ty">Vec</span>(T : <span class="ty">Type</span>) : (n : <span class="ty">Nat</span>) -&gt; <span class="kw">pub</span> <span class="ty">Type</span>',
+          '<span class="kw">pub induct</span> <span class="ty">Vec</span>(T : <span class="ty">Type</span>) : (<span class="ty">Nat</span>) -&gt; <span class="kw">pub</span> <span class="ty">Type</span>',
           "| nil() : (0)",
           '| cons(@m : <span class="ty">Nat</span>, x : T, xs : <span class="ty">Vec</span>(T, m)) : (m + 1)',
           '<span class="kw">end</span>',
@@ -402,9 +402,9 @@ export const CHEATSHEET: CheatsheetSection[] = [
       {
         examples: [[
           '<span class="kw">foreign</span> random : <span class="ty">Nat</span>;',
-          '<span class="kw">pub foreign</span> log : (<span class="ty">Bin</span>) -&gt; <span class="ty">Nat</span>;',
+          '<span class="kw">pub foreign</span> log : (<span class="ty">Bytes</span>) -&gt; <span class="ty">Nat</span>;',
         ]],
-        note: "implemented by the embedder — wire types only, `Bin` arrives as `Bytes`",
+        note: "implemented by the embedder — wire types only: `Nat`, `Int`, `Bool`, `Bytes`, `Handle`, `Lst(T)`",
       },
     ],
   },
