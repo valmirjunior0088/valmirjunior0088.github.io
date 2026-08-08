@@ -8,7 +8,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
   hello: {
     tab: "hello world",
     label: "hello.crs",
-    code: '/std/print("Hello, world!\\n")',
+    code: 'use /std/{print};\n\nprint("Hello, world!\\n")',
   },
   destructure: {
     tab: "destructuring",
@@ -66,21 +66,21 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     tab: "map lookup",
     label: "scores.crs",
     code:
-      "use /std/{Fmt, Nat, Map, Option, Io};\n\n" +
+      "use /std/{Fmt, Nat, Map, Option, Io, print};\n\n" +
       "let m0 : Map(Nat) = Map/empty();\n" +
       'let m1 : Map(Nat) = Map/insert(m0, "ada", 92);\n' +
       'let m2 : Map(Nat) = Map/insert(m1, "grace", 87);\n' +
       'let m3 : Map(Nat) = Map/insert(m2, "alan", 95);\n\n' +
       'match Map/get(m3, "grace") : (_) => Io({})\n' +
       '| some(score) => Fmt/print("grace scored % out of % entries\\n")(score)(Map/len(m3))\n' +
-      '| none() => /std/print("no such entry\\n")\n' +
+      '| none() => print("no such entry\\n")\n' +
       "end",
   },
   donotation: {
     tab: "do-notation",
     label: "sum_all.crs",
     code:
-      "use /std/{Nat, Option, Fmt, Io};\n\n" +
+      "use /std/{Nat, Option, Fmt, Io, print};\n\n" +
       "let sum_all(a : Option(Nat), b : Option(Nat), c : Option(Nat)) -> Option(Nat) =\n" +
       "    let x = a!;\n" +
       "    let y = b!;\n" +
@@ -88,7 +88,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "    Option/some(x + y + z);\n\n" +
       "match sum_all(Option/some(3), Option/some(4), Option/some(5)) : (_) => Io({})\n" +
       '| some(n) => Fmt/print("sum = %\\n")(n)\n' +
-      '| none() => /std/print("missing a reading\\n")\n' +
+      '| none() => print("missing a reading\\n")\n' +
       "end",
   },
   concepts: {
@@ -110,18 +110,18 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     tab: "erased arg",
     label: "erased.crs",
     code:
-      "use /std/{Nat, Vec};\n\n" +
+      "use /std/{Nat, Vec, print};\n\n" +
       "pub let head(@T : Type, @n : Nat, xs : Vec(T, n + 1)) -> T =\n" +
       "    match xs\n" +
       "    | cons(@_, x, _) => x\n" +
       "    end;\n\n" +
-      '/std/print("typechecks: head, n erased\\n")',
+      'print("typechecks: head, n erased\\n")',
   },
   vec: {
     tab: "vec append",
     label: "vec.crs",
     code:
-      "use /std/{Nat};\n\n" +
+      "use /std/{Nat, print};\n\n" +
       "pub induct Vec(T : Type) : (Nat) -> pub Type\n" +
       "| nil() : (0)\n" +
       "| cons(@m : Nat, x : T, xs : Vec(T, m)) : (m + 1)\n" +
@@ -131,35 +131,36 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "    | nil() => w\n" +
       "    | cons(@j, x, xs) => Vec/cons(x, append(xs, w))\n" +
       "    end;\n\n" +
-      '/std/print("typechecks: Vec/append\\n")',
+      'print("typechecks: Vec/append\\n")',
   },
   sym: {
     tab: "sym proof",
     label: "sym.crs",
     code:
-      "use /std/{Eq};\n\n" +
+      "use /std/{Eq, print};\n\n" +
       "pub let sym(@A : Type, @x : A, @y : A, p : Eq(x, y)) -> Eq(y, x) =\n" +
       "    match p : (s, t, q) => Eq(t, s)\n" +
       "    | refl(@z) => Eq/refl()\n" +
       "    end;\n\n" +
-      '/std/print("typechecks: sym\\n")',
+      'print("typechecks: sym\\n")',
   },
   goal: {
     tab: "written goal",
     label: "goal.crs",
     code:
+      "use /std/{print};\n\n" +
       "pub let compose(@A : Type, @B : Type, @C : Type, f : (B) -> C, g : (A) -> B) -> (A) -> C =\n" +
       "    ?;\n\n" +
-      '/std/print("unreachable\\n")',
+      'print("unreachable\\n")',
   },
   error: {
     tab: "type error",
     label: "broken.crs",
     code:
-      "use /std/{Nat, Vec};\n\n" +
+      "use /std/{Nat, Vec, print};\n\n" +
       "pub let broken(@n : Nat) -> Vec(Nat, n) =\n" +
       "    Vec/cons(0, Vec/nil());\n\n" +
-      '/std/print("unreachable\\n")',
+      'print("unreachable\\n")',
   },
 };
 

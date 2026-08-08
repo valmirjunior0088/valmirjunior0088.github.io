@@ -110,7 +110,7 @@ export const STDLIB_MODULES: StdlibModule[] = [
 export const STDLIB_SNIPPET = {
   filename: "pulse.crs",
   lines: [
-    '<span class="kw">use</span> /std/{<span class="ty">Async</span>, http, <span class="ty">Parse</span>, <span class="ty">Json</span>, <span class="ty">Result</span>, <span class="ty">Fmt</span>, <span class="ty">Io</span>};',
+    '<span class="kw">use</span> /std/{<span class="ty">Async</span>, http, <span class="ty">Parse</span>, <span class="ty">Json</span>, <span class="ty">Result</span>, <span class="ty">Fmt</span>, <span class="ty">Io</span>, print};',
     "",
     '<span class="cm">-- race two TLS mirrors, decode whichever answers first</span>',
     '<span class="kw">let</span> pulse : <span class="ty">Async</span>({}) =',
@@ -125,7 +125,7 @@ export const STDLIB_SNIPPET = {
     '        | success(j) =&gt; Fmt/print(<span class="str">"pulse = %\\n"</span>)(Json/encode(j))',
     '        | failure(e) =&gt; Fmt/print(<span class="str">"bad json: %\\n"</span>)(e)',
     '        <span class="kw">end</span>',
-    '    | failure(_) =&gt; /std/print(<span class="str">"both mirrors down\\n"</span>)',
+    '    | failure(_) =&gt; print(<span class="str">"both mirrors down\\n"</span>)',
     '    <span class="kw">end</span>;',
     '    <span class="cm">-- &hellip;the ! sequences it here, lifted Io &rarr; Async</span>',
     '    <span class="kw">let</span> _ = report!;',
