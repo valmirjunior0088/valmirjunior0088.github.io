@@ -66,12 +66,12 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     tab: "map lookup",
     label: "scores.crs",
     code:
-      "use /std/{Fmt, Nat, Map, Option};\n\n" +
+      "use /std/{Fmt, Nat, Map, Option, Io};\n\n" +
       "let m0 : Map(Nat) = Map/empty();\n" +
       'let m1 : Map(Nat) = Map/insert(m0, "ada", 92);\n' +
       'let m2 : Map(Nat) = Map/insert(m1, "grace", 87);\n' +
       'let m3 : Map(Nat) = Map/insert(m2, "alan", 95);\n\n' +
-      'match Map/get(m3, "grace") : (_) => {}\n' +
+      'match Map/get(m3, "grace") : (_) => Io({})\n' +
       '| some(score) => Fmt/print("grace scored % out of % entries\\n")(score)(Map/len(m3))\n' +
       '| none() => /std/print("no such entry\\n")\n' +
       "end",
@@ -80,13 +80,13 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     tab: "do-notation",
     label: "sum_all.crs",
     code:
-      "use /std/{Nat, Option, Fmt};\n\n" +
+      "use /std/{Nat, Option, Fmt, Io};\n\n" +
       "let sum_all(a : Option(Nat), b : Option(Nat), c : Option(Nat)) -> Option(Nat) =\n" +
       "    let x = a!;\n" +
       "    let y = b!;\n" +
       "    let z = c!;\n" +
       "    Option/some(x + y + z);\n\n" +
-      "match sum_all(Option/some(3), Option/some(4), Option/some(5)) : (_) => {}\n" +
+      "match sum_all(Option/some(3), Option/some(4), Option/some(5)) : (_) => Io({})\n" +
       '| some(n) => Fmt/print("sum = %\\n")(n)\n' +
       '| none() => /std/print("missing a reading\\n")\n' +
       "end",

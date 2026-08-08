@@ -370,7 +370,19 @@ export const CHEATSHEET: CheatsheetSection[] = [
           '    <span class="kw">let</span> y = b!;',
           "    Option/some(x + y);",
         ]],
-        note: "postfix `!` is `Monad/bind` — every body is a do-block",
+        note: "postfix `!` is `Monad/bind` — every body is a do-block, and the region's monad is read from its type, never from the action",
+      },
+      {
+        examples: [['<span class="kw">let</span> greeting : <span class="ty">Io</span>({}) = print(<span class="str">"hi"</span>);']],
+        note: "a host call builds an `Io` description and performs nothing — a program's tail is one `Io({})`, forced once",
+      },
+      {
+        examples: [[
+          '<span class="kw">let</span> fiber : <span class="ty">Async</span>({}) =',
+          '    <span class="kw">let</span> _ = print(<span class="str">"hi\\n"</span>)!;',
+          "    Async/pure(());",
+        ]],
+        note: "a cross-monad action lifts through the declared `Lift` witness — `/std/Async` declares `Lift(Io, Async)`; edges never chain",
       },
     ],
   },
@@ -395,7 +407,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
     entries: [
       {
         examples: [['<span class="kw">let</span> todo : <span class="ty">Nat</span> = ?;']],
-        note: "a written goal — reports scope and expected type, then fails the build",
+        note: "a written goal — the report gives scope, expected type, and verified candidate fits, then the build exits 2",
       },
     ],
   },
@@ -408,7 +420,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
           '<span class="kw">foreign</span> random : <span class="ty">Nat</span>;',
           '<span class="kw">pub foreign</span> log : (<span class="ty">Bytes</span>) -&gt; <span class="ty">Nat</span>;',
         ]],
-        note: "implemented by the embedder — wire types only: `Nat`, `Int`, `Bool`, `Bytes`, `Handle`, `Lst(T)`",
+        note: "implemented by the embedder — wire types only: `Nat`, `Int`, `Bool`, `Bytes`, `Handle`, `Lst(T)`; a call to one yields an `Io`",
       },
     ],
   },

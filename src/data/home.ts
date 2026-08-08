@@ -45,6 +45,16 @@ export const FEATURES: Feature[] = [
     title: "A second opinion",
     body: "An independent kernel re-checks every compilation from the finished terms alone — strict positivity, termination, erasure, universes. Still being refined, and a second opinion rather than a proof of soundness.",
   },
+  {
+    glyph: "Io",
+    title: "Effects are data",
+    body: "Every host operation — printing, clocks, sockets — returns an `Io` description; calling one performs nothing, and nothing turns an `Io(T)` back into a `T`. The program's tail is the one description the runtime forces.",
+  },
+  {
+    glyph: "!",
+    title: "Do-notation everywhere",
+    body: "Postfix `!` is monadic bind, so every body is a do-block — `Option`, `Parse`, `Async`, `Io` alike. An action from another monad lifts through a declared `Lift` edge: `/std/Async` embeds `Io`, so a fiber prints without ceremony.",
+  },
 ];
 
 export interface StdlibModule {
@@ -68,6 +78,10 @@ export const STDLIB_MODULES: StdlibModule[] = [
   {
     name: "/std/Async",
     body: "Cooperative fibers and tasks — `spawn`, `join`, `cancel`, `race`.",
+  },
+  {
+    name: "/std/Io",
+    body: "Host effects as descriptions — performed once, at the program's tail.",
   },
   {
     name: "/std/Parse",
@@ -96,22 +110,26 @@ export const STDLIB_MODULES: StdlibModule[] = [
 export const STDLIB_SNIPPET = {
   filename: "pulse.crs",
   lines: [
-    '<span class="kw">use</span> /std/{<span class="ty">Async</span>, http, <span class="ty">Parse</span>, <span class="ty">Json</span>, <span class="ty">Result</span>, <span class="ty">Fmt</span>};',
+    '<span class="kw">use</span> /std/{<span class="ty">Async</span>, http, <span class="ty">Parse</span>, <span class="ty">Json</span>, <span class="ty">Result</span>, <span class="ty">Fmt</span>, <span class="ty">Io</span>};',
     "",
     '<span class="cm">-- race two TLS mirrors, decode whichever answers first</span>',
     '<span class="kw">let</span> pulse : <span class="ty">Async</span>({}) =',
     '    <span class="kw">let</span> reply = Async/race([',
-    '        () =&gt; http/perform(http/get_tls(<span class="str">"eu.api.dev"</span>, 443, <span class="str">"/"</span>)),',
-    '        () =&gt; http/perform(http/get_tls(<span class="str">"us.api.dev"</span>, 443, <span class="str">"/"</span>))',
+    '        http/perform(http/get_tls(<span class="str">"eu.api.dev"</span>, 443, <span class="str">"/"</span>)),',
+    '        http/perform(http/get_tls(<span class="str">"us.api.dev"</span>, 443, <span class="str">"/"</span>))',
     "    ])!;",
-    '    Async/pure(<span class="kw">match</span> reply',
+    '    <span class="cm">-- build the report as an Io description&hellip;</span>',
+    '    <span class="kw">let</span> report : <span class="ty">Io</span>({}) = <span class="kw">match</span> reply',
     "    | success(r) =&gt;",
-    '        <span class="kw">match</span> Parse/run(Json/decode, r.body) : (_) =&gt; {}',
+    '        <span class="kw">match</span> Parse/run(Json/decode, r.body) : (_) =&gt; <span class="ty">Io</span>({})',
     '        | success(j) =&gt; Fmt/print(<span class="str">"pulse = %\\n"</span>)(Json/encode(j))',
     '        | failure(e) =&gt; Fmt/print(<span class="str">"bad json: %\\n"</span>)(e)',
     '        <span class="kw">end</span>',
     '    | failure(_) =&gt; /std/print(<span class="str">"both mirrors down\\n"</span>)',
-    '    <span class="kw">end</span>);',
+    '    <span class="kw">end</span>;',
+    '    <span class="cm">-- &hellip;the ! sequences it here, lifted Io &rarr; Async</span>',
+    '    <span class="kw">let</span> _ = report!;',
+    "    Async/pure(());",
     "",
     "Async/run(pulse)",
   ],

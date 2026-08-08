@@ -3,7 +3,7 @@ let modulePromise = null;
 function warmUp(mod) {
   const start = performance.now();
   try {
-    mod.compile("()");
+    mod.compile("/std/Io/pure(())");
   } catch {}
   return performance.now() - start;
 }
