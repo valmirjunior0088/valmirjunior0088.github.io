@@ -121,7 +121,7 @@ export const STDLIB_SNIPPET = {
     '    <span class="cm">-- build the report as an Io description&hellip;</span>',
     '    <span class="kw">let</span> report : <span class="ty">Io</span>({}) = <span class="kw">match</span> reply',
     "    | success(r) =&gt;",
-    '        <span class="kw">match</span> Parse/run(Json/decode, r.body) : (_) =&gt; <span class="ty">Io</span>({})',
+    '        <span class="kw">match</span> Parse/run(Json/decode, r.body)',
     '        | success(j) =&gt; Fmt/print(<span class="str">"pulse = %\\n"</span>)(Json/encode(j))',
     '        | failure(e) =&gt; Fmt/print(<span class="str">"bad json: %\\n"</span>)(e)',
     '        <span class="kw">end</span>',

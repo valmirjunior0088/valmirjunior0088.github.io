@@ -66,12 +66,12 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     tab: "map lookup",
     label: "scores.crs",
     code:
-      "use /std/{Fmt, Nat, Map, Option, Io, print};\n\n" +
+      "use /std/{Fmt, Nat, Map, Option, print};\n\n" +
       "let m0 : Map(Nat) = Map/empty();\n" +
       'let m1 : Map(Nat) = Map/insert(m0, "ada", 92);\n' +
       'let m2 : Map(Nat) = Map/insert(m1, "grace", 87);\n' +
       'let m3 : Map(Nat) = Map/insert(m2, "alan", 95);\n\n' +
-      'match Map/get(m3, "grace") : (_) => Io({})\n' +
+      'match Map/get(m3, "grace")\n' +
       '| some(score) => Fmt/print("grace scored % out of % entries\\n")(score)(Map/len(m3))\n' +
       '| none() => print("no such entry\\n")\n' +
       "end",
@@ -80,13 +80,13 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     tab: "do-notation",
     label: "sum_all.crs",
     code:
-      "use /std/{Nat, Option, Fmt, Io, print};\n\n" +
+      "use /std/{Nat, Option, Fmt, print};\n\n" +
       "let sum_all(a : Option(Nat), b : Option(Nat), c : Option(Nat)) -> Option(Nat) =\n" +
       "    let x = a!;\n" +
       "    let y = b!;\n" +
       "    let z = c!;\n" +
       "    Option/some(x + y + z);\n\n" +
-      "match sum_all(Option/some(3), Option/some(4), Option/some(5)) : (_) => Io({})\n" +
+      "match sum_all(Option/some(3), Option/some(4), Option/some(5))\n" +
       '| some(n) => Fmt/print("sum = %\\n")(n)\n' +
       '| none() => print("missing a reading\\n")\n' +
       "end",
@@ -127,7 +127,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "| cons(@m : Nat, x : T, xs : Vec(T, m)) : (m + 1)\n" +
       "end\n\n" +
       "pub rec append(@T : Type, @n : Nat, @m : Nat, v : Vec(T, n), w : Vec(T, m)) -> Vec(T, n + m) =\n" +
-      "    match v : (k, v) => Vec(T, k + m)\n" +
+      "    match v\n" +
       "    | nil() => w\n" +
       "    | cons(@j, x, xs) => Vec/cons(x, append(xs, w))\n" +
       "    end;\n\n" +
@@ -139,7 +139,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     code:
       "use /std/{Eq, print};\n\n" +
       "pub let sym(@A : Type, @x : A, @y : A, p : Eq(x, y)) -> Eq(y, x) =\n" +
-      "    match p : (s, t, q) => Eq(t, s)\n" +
+      "    match p\n" +
       "    | refl(@z) => Eq/refl()\n" +
       "    end;\n\n" +
       'print("typechecks: sym\\n")',
@@ -186,7 +186,7 @@ export const HERO_SNIPPET = {
     '<span class="kw">pub rec</span> append(@T : <span class="ty">Type</span>, @n : <span class="ty">Nat</span>, @m : <span class="ty">Nat</span>,',
     "               v : Vec(T, n), w : Vec(T, m))",
     "    -&gt; Vec(T, n + m) =",
-    '    <span class="kw">match</span> v : (k, v) =&gt; Vec(T, k + m)',
+    '    <span class="kw">match</span> v',
     "    | nil() =&gt; w",
     "    | cons(@j, x, xs) =&gt;",
     "        Vec/cons(x, append(xs, w))",
