@@ -102,7 +102,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
     entries: [
       {
         examples: [["a + b"], ["a == b"], ["a &amp;&amp; b"]],
-        note: "whitespace required, left-associative — each dispatches through a concept (`Add`, `Eql`, `And`)",
+        note: "whitespace required on both sides, left-associative — each dispatches through a concept (`Add`, `Eql`, `And`); a path is the opposite and takes none, so `a / b` divides and `a/b` names",
       },
     ],
   },
@@ -286,6 +286,15 @@ export const CHEATSHEET: CheatsheetSection[] = [
       },
       {
         examples: [[
+          '<span class="kw">match</span> n',
+          "| 0 =&gt; (0, true)",
+          "| pred + 1; (count, live) =&gt; step(count, live)",
+          '<span class="kw">end</span>',
+        ]],
+        note: "the `;` binder names the fold result, not scrutinee shape — so it takes any irrefutable tuple or struct pattern, exactly like a `let`",
+      },
+      {
+        examples: [[
           '<span class="kw">rec</span> even(n : <span class="ty">Nat</span>) -&gt; <span class="ty">Bool</span> =',
           '    <span class="kw">match</span> n',
           "    | 0 =&gt; true",
@@ -340,9 +349,9 @@ export const CHEATSHEET: CheatsheetSection[] = [
       },
       {
         examples: [[
-          '<span class="kw">satisfy</span> (@A : <span class="ty">Type</span>, <span class="kw">use</span> <span class="ty">Show</span>(A)) =&gt; <span class="ty">Show</span>(<span class="ty">Lst</span>(A)) {',
+          '<span class="kw">satisfy</span> (@A : <span class="ty">Type</span>, <span class="kw">use</span> <span class="ty">Show</span>(A)) =&gt; <span class="ty">Show</span>(<span class="ty">List</span>(A)) {',
           "    show(values) =",
-          '        Lst/fold(values, <span class="str">""</span>, (v, r) =&gt;',
+          '        List/fold(values, <span class="str">""</span>, (v, r) =&gt;',
           "            Str/concat(r, Show/show(v)))",
           "}",
         ]],
@@ -384,6 +393,16 @@ export const CHEATSHEET: CheatsheetSection[] = [
         ]],
         note: "a cross-monad action lifts through the declared `Lift` witness — `/std/Async` declares `Lift(Io, Async)`; edges never chain",
       },
+      {
+        examples: [[
+          '<span class="kw">satisfy</span> (@S : <span class="ty">Type</span>) =&gt;',
+          '        <span class="ty">Monad</span>((A : <span class="ty">Type</span>) =&gt; <span class="ty">State</span>(S, A)) {',
+          "    pure(@A, a) = State/pure(a),",
+          "    bind(@A, @B, m, f) = State/bind(m, f)",
+          "}",
+        ]],
+        note: "a witness may key on a partially applied family — which is why `State(S, A)` and `Throw(E, A)` put the result parameter last",
+      },
     ],
   },
   {
@@ -420,7 +439,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
           '<span class="kw">foreign</span> random : <span class="ty">Nat</span>;',
           '<span class="kw">pub foreign</span> log : (<span class="ty">Bytes</span>) -&gt; <span class="ty">Nat</span>;',
         ]],
-        note: "implemented by the embedder — wire types only: `Nat`, `Int`, `Bool`, `Bytes`, `Handle`, `Lst(T)`; a call to one yields an `Io`",
+        note: "implemented by the embedder — wire types only: `Nat`, `Int`, `Bool`, `Bytes`, `Handle`, `List(T)`; a call to one yields an `Io`",
       },
     ],
   },

@@ -27,13 +27,13 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     tab: "spread syntax",
     label: "spread.crs",
     code:
-      "use /std/{Fmt, Nat, Lst};\n\n" +
+      "use /std/{Fmt, Nat, List};\n\n" +
       "pub struct Point : pub Type { x : Nat, y : Nat }\n\n" +
       "let p : Point = Point { x = 1, y = 2 };\n" +
       "let q : Point = Point { ..p, y = 9 };\n\n" +
-      "let base : Lst(Nat) = [2, 3, 4];\n" +
-      "let padded : Lst(Nat) = [1, ..base, 5];\n\n" +
-      'Fmt/print("q = (%, %), padded has % elems\\n")(q.x)(q.y)(Lst/len(padded))',
+      "let base : List(Nat) = [2, 3, 4];\n" +
+      "let padded : List(Nat) = [1, ..base, 5];\n\n" +
+      'Fmt/print("q = (%, %), padded has % elems\\n")(q.x)(q.y)(List/len(padded))',
   },
   patterns: {
     tab: "nested match",

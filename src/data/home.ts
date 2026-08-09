@@ -84,6 +84,14 @@ export const STDLIB_MODULES: StdlibModule[] = [
     body: "Host effects as descriptions — performed once, at the program's tail.",
   },
   {
+    name: "/std/State",
+    body: "Pure state threading — a region that provably performs nothing.",
+  },
+  {
+    name: "/std/Throw",
+    body: "Short-circuiting failure — `!` as checked early return over `Result`.",
+  },
+  {
     name: "/std/Parse",
     body: "Parser combinators — the HTTP decoder is written in them.",
   },
