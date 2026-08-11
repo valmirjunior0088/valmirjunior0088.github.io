@@ -3,6 +3,7 @@ import Base from "../../layouts/Base.astro";
 import Nav from "../../components/Nav.astro";
 import Editor from "../../components/Editor.astro";
 import { CHEATSHEET } from "../../data/cheatsheet";
+import { EXAMPLES } from "../../data/examples";
 import { GITHUB_URL } from "../../data/site";
 import type { CheatsheetEntry, CheatsheetSection } from "../../data/cheatsheet";
 
@@ -17,6 +18,21 @@ const stripHtml = (html: string) =>
     .replace(/&amp;/g, "&");
 const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
   [section.title, ...entry.examples.flat().map(stripHtml), entry.note.replace(/`/g, "")].join(" ").toLowerCase();
+
+// The editor pane is the full section width less the gutter and code padding —
+// roomy enough that canonical output fits, so most examples carry `curios format`
+// output verbatim. Four deliberately do not: `cond match`, `erased`, `sym` and
+// `vec` keep the laddered `match`/`choose` that the formatter collapses onto one
+// line once it fits. The ladder is the thing those four are teaching, so they are
+// kept laddered and fail `curios format --check` on purpose. That is a different
+// exemption from the hero and stdlib snippets, which are hand-wrapped because
+// canonical output does not fit their columns at all — budgets in index.astro.
+const EXAMPLE_BUDGET = 122;
+for (const [key, example] of Object.entries(EXAMPLES)) {
+  for (const line of example.code.split("\n"))
+    if (line.length > EXAMPLE_BUDGET)
+      console.warn(`[examples] "${key}" line is ${line.length} chars (budget ${EXAMPLE_BUDGET}), will scroll: ${line.trim().slice(0, 40)}`);
+}
 
 // widest row that fits a two-column layout at full width; side-by-side examples pay ~4 chars for the separator
 const LINE_BUDGET = 58;

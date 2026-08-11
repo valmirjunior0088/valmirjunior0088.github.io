@@ -8,19 +8,26 @@ export const EXAMPLES: Record<string, CuriosExample> = {
   hello: {
     tab: "hello world",
     label: "hello.crs",
-    code: 'use /std/{print};\n\nprint("Hello, world!\\n")',
+    code:
+      "use /std/{print};\n\n" +
+      'print("Hello, world!\\n")',
   },
   destructure: {
     tab: "destructuring",
     label: "midpoint.crs",
     code:
       "use /std/{Fmt, Nat};\n\n" +
-      "pub struct Point: pub Type { x: Nat, y: Nat }\n\n" +
+      "pub struct Point: pub Type {\n" +
+      "    x: Nat,\n" +
+      "    y: Nat,\n" +
+      "}\n\n" +
       "let midpoint(Point { x = ax, y = ay }: Point, Point { x = bx, y = by }: Point) -> Point =\n" +
       "    Point { x = (ax + bx) / 2, y = (ay + by) / 2 };\n\n" +
-      "let bounds(p: Point) -> { Nat, Nat } = (p.x, p.y);\n\n" +
-      "let m: Point = midpoint(Point { x = 0, y = 0 }, Point { x = 4, y = 10 });\n" +
-      "let (mx, my) = bounds(m);\n\n" +
+      "let bounds(p: Point) -> {Nat, Nat} =\n" +
+      "    (p.x, p.y);\n\n" +
+      "let m: Point =\n" +
+      "    midpoint(Point { x = 0, y = 0 }, Point { x = 4, y = 10 });\n\n" +
+      "let (mx, my) = bounds(m);\n" +
       'Fmt/print("midpoint = (%, %)\\n")(mx)(my)',
   },
   spread: {
@@ -28,11 +35,18 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     label: "spread.crs",
     code:
       "use /std/{Fmt, Nat, List};\n\n" +
-      "pub struct Point: pub Type { x: Nat, y: Nat }\n\n" +
-      "let p: Point = Point { x = 1, y = 2 };\n" +
-      "let q: Point = Point { ..p, y = 9 };\n\n" +
-      "let base: List(Nat) = [2, 3, 4];\n" +
-      "let padded: List(Nat) = [1, ..base, 5];\n\n" +
+      "pub struct Point: pub Type {\n" +
+      "    x: Nat,\n" +
+      "    y: Nat,\n" +
+      "}\n\n" +
+      "let p: Point =\n" +
+      "    Point { x = 1, y = 2 };\n\n" +
+      "let q: Point =\n" +
+      "    Point { ..p, y = 9 };\n\n" +
+      "let base: List(Nat) =\n" +
+      "    [2, 3, 4];\n\n" +
+      "let padded: List(Nat) =\n" +
+      "    [1, ..base, 5];\n\n" +
       'Fmt/print("q = (%, %), padded has % elems\\n")(q.x)(q.y)(List/len(padded))',
   },
   patterns: {
@@ -67,10 +81,14 @@ export const EXAMPLES: Record<string, CuriosExample> = {
     label: "scores.crs",
     code:
       "use /std/{Fmt, Nat, Map, Option, print};\n\n" +
-      "let m0: Map(Nat) = Map/empty();\n" +
-      'let m1: Map(Nat) = Map/insert(m0, "ada", 92);\n' +
-      'let m2: Map(Nat) = Map/insert(m1, "grace", 87);\n' +
-      'let m3: Map(Nat) = Map/insert(m2, "alan", 95);\n\n' +
+      "let m0: Map(Nat) =\n" +
+      "    Map/empty();\n\n" +
+      "let m1: Map(Nat) =\n" +
+      '    Map/insert(m0, "ada", 92);\n\n' +
+      "let m2: Map(Nat) =\n" +
+      '    Map/insert(m1, "grace", 87);\n\n' +
+      "let m3: Map(Nat) =\n" +
+      '    Map/insert(m2, "alan", 95);\n\n' +
       'match Map/get(m3, "grace")\n' +
       '| some(score) => Fmt/print("grace scored % out of % entries\\n")(score)(Map/len(m3))\n' +
       '| none() => print("no such entry\\n")\n' +
@@ -98,12 +116,13 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "use /std/{Nat, Fmt, Add};\n\n" +
       "pub struct Point: pub Type {\n" +
       "    x: Nat,\n" +
-      "    y: Nat\n" +
+      "    y: Nat,\n" +
       "}\n\n" +
       "satisfy Add(Point) {\n" +
-      "    add(a, b) = Point { x = a.x + b.x, y = a.y + b.y }\n" +
+      "    add(a, b) = Point { x = a.x + b.x, y = a.y + b.y },\n" +
       "}\n\n" +
-      "let p: Point = Point { x = 1, y = 2 } + Point { x = 3, y = 4 };\n\n" +
+      "let p: Point =\n" +
+      "    Point { x = 1, y = 2 } + Point { x = 3, y = 4 };\n\n" +
       'Fmt/print("p.x + p.y = %\\n")(p.x + p.y)',
   },
   erased: {

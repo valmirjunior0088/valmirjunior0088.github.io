@@ -11,6 +11,35 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
 const INSTALL_URL = `${GITHUB_URL}/releases/latest/download/install.sh`;
 const INSTALL_COMMAND = `curl -fsSL ${INSTALL_URL} | sh`;
 const USAGE_URL = `${GITHUB_URL}/blob/main/documentation/USAGE.md`;
+
+// These two snippets sit in narrow grid columns, and a code card clips rather
+// than wraps — outgrow the column and it scrolls sideways instead of failing,
+// which is exactly the kind of regression nobody notices. So these two are kept
+// out of `curios format` on width grounds: canonical style unwraps telescopes
+// onto ~90 char lines, which the hero cannot hold at any viewport. Wrap them by
+// hand, and only where the width actually demands it: a line the formatter would
+// leave alone is left alone, so these snippets take no position on shapes the
+// formatter owns. (Four playground examples are also exempt, but for readability
+// rather than width; see playground.astro.) Budgets are the
+// 1280px case, less the 46px
+// gutter and 44px of code padding: .hero splits 1fr/1fr with a 56px gap,
+// .stdlib-grid 1.1fr/0.9fr with 24px. Both narrow further between the 860px
+// breakpoint and ~1130px, where they scroll — accepted, and the reason to
+// spend the headroom these budgets leave rather than sit right on them.
+const ENTITIES: Record<string, string> = { "&gt;": ">", "&lt;": "<", "&amp;": "&", "&hellip;": "…", "&rarr;": "→" };
+const plainWidth = (line: string) =>
+  line.replace(/<[^>]+>/g, "").replace(/&\w+;/g, (m) => ENTITIES[m] ?? m).length;
+
+for (const [name, snippet, budget] of [
+  ["hero", HERO_SNIPPET, 52],
+  ["stdlib", STDLIB_SNIPPET, 65],
+] as const) {
+  for (const line of snippet.lines) {
+    const width = plainWidth(line);
+    if (width > budget)
+      console.warn(`[${name}] ${snippet.filename} line is ${width} chars (budget ${budget}), will scroll: ${line.replace(/<[^>]+>/g, "").trim().slice(0, 40)}`);
+  }
+}
 ---
 
 <Base title="Curios — a language for the curious">
