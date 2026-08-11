@@ -8,6 +8,9 @@ import { FEATURES, BENCHMARKS, STDLIB_MODULES, STDLIB_SNIPPET } from "../../data
 import { GITHUB_URL } from "../../data/site";
 
 const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1</code>");
+const INSTALL_URL = `${GITHUB_URL}/releases/latest/download/install.sh`;
+const INSTALL_COMMAND = `curl -fsSL ${INSTALL_URL} | sh`;
+const USAGE_URL = `${GITHUB_URL}/blob/main/documentation/USAGE.md`;
 ---
 
 <Base title="Curios — a language for the curious">
@@ -150,7 +153,7 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
 
       <div class="bench-note">
         <p>
-          <span class="fg-full">Reading it straight:</span> Curios lands within 1.7&times; of Rust on the integer loop and just over 2&times; on allocation &mdash; with checked <span class="fg-full">Nat</span>/<span class="fg-full">Int</span> arithmetic included, work Rust isn't doing. The two workloads are deliberate extremes &mdash; <span class="fg-full">lcg</span> never allocates, <span class="fg-full">trees</span> does nothing else &mdash; so those two multipliers bracket where a real program should land.
+          <span class="fg-full">Reading it straight:</span> Curios lands within 1.7&times; of Rust on the integer loop and right at 2&times; on allocation &mdash; with checked <span class="fg-full">Nat</span>/<span class="fg-full">Int</span> arithmetic included, work Rust isn't doing. The two workloads are deliberate extremes &mdash; <span class="fg-full">lcg</span> never allocates, <span class="fg-full">trees</span> does nothing else &mdash; so those two multipliers bracket where a real program should land.
         </p>
       </div>
     </div>
@@ -159,14 +162,25 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
       <div class="eyebrow eyebrow-center">// get started</div>
       <h2 class="h-serif">Up and running in under a minute.</h2>
       <div class="install-card">
-        <div class="fainter">// grab the Curios binary for your platform</div>
-        <div><span class="fainter">$</span> chmod +x curios &amp;&amp; ./curios run hello.crs</div>
-        <div class="ok">Hello, world!</div>
-        <div class="fainter">// or bundle a standalone executable &mdash; AOT-compiled, launches without a JIT</div>
-        <div><span class="fainter">$</span> ./curios compile hello.crs -o hello &amp;&amp; ./hello</div>
+        <div class="fainter">// one line, no options &mdash; checksummed, into ~/.local/bin</div>
+        <div class="install-row">
+          <div class="install-cmd"><span class="fainter">$</span> curl -fsSL {INSTALL_URL} | sh</div>
+          <button type="button" class="copy-btn" data-copy={INSTALL_COMMAND} aria-label="Copy the install command">copy</button>
+        </div>
+        <div><span class="fainter">$</span> curios run hello.crs</div>
         <div class="ok">Hello, world!</div>
       </div>
-      <p class="install-note">Prebuilt binaries for Linux (x86_64/aarch64) and macOS (aarch64) live on the <a href={`${GITHUB_URL}/releases`} target="_blank" rel="noopener">releases page</a>.<br />Prefer building from source? <code>git clone</code> the repo and follow the README.<br />Or just open the playground above &mdash; nothing to install.</p>
+      <div class="install-card">
+        <div class="fainter">// or bundle a standalone executable &mdash; AOT-compiled, no JIT</div>
+        <div><span class="fainter">$</span> curios compile hello.crs -o hello &amp;&amp; ./hello</div>
+        <div class="ok">Hello, world!</div>
+      </div>
+      <div class="install-card">
+        <div class="fainter">// outgrown one file? lib.crs is the library, exe.crs the program</div>
+        <div><span class="fainter">$</span> curios new hello &amp;&amp; cd hello &amp;&amp; curios run</div>
+        <div class="ok">Hello, world!</div>
+      </div>
+      <p class="install-note">Prebuilt for Linux (x86_64/aarch64) and macOS (aarch64) &mdash; every binary and checksum is on the <a href={`${GITHUB_URL}/releases`} target="_blank" rel="noopener">releases page</a>.<br />Anywhere else, <code>git clone</code> the repo and build from source.<br />Dependencies, umbrellas, and the rest of the command line live in <a href={USAGE_URL} target="_blank" rel="noopener">the usage reference</a>.<br />Or just open the playground above &mdash; nothing to install.</p>
     </div>
 
     <div class="github-band">
@@ -613,6 +627,54 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
   .install-card > div {
     white-space: nowrap;
   }
+  .install-card + .install-card {
+    margin-top: 16px;
+  }
+  .install-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  /* The install URL is the one line no card width fits. Rather than wrap it
+     or scroll the card, it runs under a fade and stops — the button beside it
+     is what makes that honest, since the tail is to be copied, not read. The
+     visible head still carries the host and most of the path, so nobody is
+     asked to pipe an unreadable URL into a shell. */
+  .install-cmd {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent);
+  }
+  .copy-btn {
+    flex: none;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--fg-dim);
+    background: color-mix(in srgb, var(--fg) 7%, transparent);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px 10px;
+    cursor: pointer;
+    transition:
+      color 120ms ease,
+      border-color 120ms ease;
+  }
+  .copy-btn:hover {
+    color: var(--fg);
+    border-color: var(--accent);
+  }
+  .copy-btn.is-copied {
+    color: var(--green);
+    border-color: var(--green);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .copy-btn {
+      transition: none;
+    }
+  }
   .fainter {
     color: var(--fg-faint);
   }
@@ -736,6 +798,31 @@ const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1<
       scroller: scroll,
       target: snippet,
       content: scroll.querySelector<HTMLElement>(".code-area"),
+    });
+  }
+
+  // The label is the only feedback, so it has to report the failure too:
+  // clipboard writes reject outside a secure context, and a button that
+  // says "copied" when nothing was copied is worse than no button.
+  for (const button of document.querySelectorAll<HTMLButtonElement>(".copy-btn")) {
+    let restore: ReturnType<typeof setTimeout>;
+
+    button.addEventListener("click", async () => {
+      let copied = true;
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy ?? "");
+      } catch {
+        copied = false;
+      }
+
+      button.textContent = copied ? "copied" : "copy failed";
+      button.classList.toggle("is-copied", copied);
+
+      clearTimeout(restore);
+      restore = setTimeout(() => {
+        button.textContent = "copy";
+        button.classList.remove("is-copied");
+      }, 1600);
     });
   }
 </script>

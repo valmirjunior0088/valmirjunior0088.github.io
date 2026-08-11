@@ -14,9 +14,19 @@ export interface CheatsheetSection {
 // .kw keywords, .ty types/sorts, .cm comments, .str strings.
 // Examples render side by side within their row, separated by hairlines.
 // Notes render on the right of each row; backticks become <code>.
-// Sections are ordered least to most complex.
-// `column` hand-assigns each section to a cheatsheet column (1 left, 2 right);
-// rebalance by eye when sections grow or shrink.
+// This array is in one global order, least to most complex, and the render
+// filters it per column — so each column comes out ascending on its own, and
+// keeping this array sorted is the whole job. Note the columns are read side
+// by side, not one after the other: column 2 is not a continuation of column
+// 1, so both have to open on something easy and deepen going down. That is
+// why `column` interleaves rather than cutting the order in half — a split
+// would stack every easy section on the left and open the right on `types`.
+// `column` is therefore free to be anything, and is chosen to even the two
+// columns' rendered heights (measured, not counted: a row is its code lines
+// plus its wrapped note). Reassigning a section changes only balance, never
+// order. One ordering constraint worth keeping: `choose` trails `match`
+// despite being the smaller construct, because its bind-arm
+// (`some(n) = cached`) is a constructor pattern.
 export const CHEATSHEET: CheatsheetSection[] = [
   {
     title: "modules",
@@ -32,12 +42,12 @@ export const CHEATSHEET: CheatsheetSection[] = [
       },
       {
         examples: [['<span class="kw">pub mod</span> <span class="ty">Nat</span>;']],
-        note: "load `Nat.crs` as a submodule — only resolves in the native compiler, where a file system backs it",
+        note: "load a submodule from the header's stem directory — `mod Nat;` in `main.crs` reads `main/Nat.crs`; only resolves in the native compiler, where a file system backs it",
       },
       {
         examples: [[
           '<span class="kw">pub mod</span> <span class="ty">Internal</span>',
-          '    <span class="kw">pub let</span> value : <span class="ty">Nat</span> = 1;',
+          '    <span class="kw">pub let</span> value: <span class="ty">Nat</span> = 1;',
           '<span class="kw">end</span>',
         ]],
         note: "inline module, closed by `end`",
@@ -46,7 +56,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "literals",
-    column: 1,
+    column: 2,
     entries: [
       {
         examples: [["[1, ..rest, 9]"]],
@@ -71,11 +81,21 @@ export const CHEATSHEET: CheatsheetSection[] = [
     ],
   },
   {
+    title: "operators",
+    column: 2,
+    entries: [
+      {
+        examples: [["a + b"], ["a == b"], ["a &amp;&amp; b"]],
+        note: "whitespace required on both sides, left-associative — each dispatches through a concept (`Add`, `Eql`, `And`); a path is the opposite and takes none, so `a / b` divides and `a/b` names",
+      },
+    ],
+  },
+  {
     title: "bindings",
     column: 1,
     entries: [
       {
-        examples: [['<span class="kw">let</span> increment(n : <span class="ty">Nat</span>) -&gt; <span class="ty">Nat</span> = n + 1;']],
+        examples: [['<span class="kw">let</span> increment(n: <span class="ty">Nat</span>) -&gt; <span class="ty">Nat</span> = n + 1;']],
         note: "function sugar — a lambda with a telescope",
       },
       {
@@ -87,7 +107,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
         note: "any irrefutable pattern works in a binder",
       },
       {
-        examples: [['(x : <span class="ty">Nat</span>) =&gt; x + 1']],
+        examples: [['(x: <span class="ty">Nat</span>) =&gt; x + 1']],
         note: "a lambda — annotate only when context doesn't supply the type",
       },
       {
@@ -97,12 +117,12 @@ export const CHEATSHEET: CheatsheetSection[] = [
     ],
   },
   {
-    title: "operators",
-    column: 2,
+    title: "goals",
+    column: 1,
     entries: [
       {
-        examples: [["a + b"], ["a == b"], ["a &amp;&amp; b"]],
-        note: "whitespace required on both sides, left-associative — each dispatches through a concept (`Add`, `Eql`, `And`); a path is the opposite and takes none, so `a / b` divides and `a/b` names",
+        examples: [['<span class="kw">let</span> todo: <span class="ty">Nat</span> = ?;']],
+        note: "a written goal — the report gives scope, expected type, and verified candidate fits, then the build exits 2",
       },
     ],
   },
@@ -126,20 +146,20 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "structs",
-    column: 1,
+    column: 2,
     entries: [
       {
         examples: [[
-          '<span class="kw">pub struct</span> <span class="ty">Point</span> : <span class="kw">pub</span> <span class="ty">Type</span> {',
-          '    x : <span class="ty">Nat</span>,',
-          '    y : <span class="ty">Nat</span>',
+          '<span class="kw">pub struct</span> <span class="ty">Point</span>: <span class="kw">pub</span> <span class="ty">Type</span> {',
+          '    x: <span class="ty">Nat</span>,',
+          '    y: <span class="ty">Nat</span>',
           "}",
         ]],
         note: "a nominal dependent record",
       },
       {
         examples: [[
-          '<span class="kw">let</span> p : <span class="ty">Point</span> = Point {',
+          '<span class="kw">let</span> p: <span class="ty">Point</span> = Point {',
           "    x = 1,",
           "    y = 2",
           "};",
@@ -148,7 +168,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
       },
       {
         examples: [[
-          '<span class="kw">let</span> q : <span class="ty">Point</span> = Point {',
+          '<span class="kw">let</span> q: <span class="ty">Point</span> = Point {',
           "    ..p,",
           "    y = 9",
           "};",
@@ -158,47 +178,6 @@ export const CHEATSHEET: CheatsheetSection[] = [
       {
         examples: [["p.x + q.y"]],
         note: "project with a dot",
-      },
-    ],
-  },
-  {
-    title: "types",
-    column: 1,
-    entries: [
-      {
-        examples: [['(x : <span class="ty">Nat</span>, y : <span class="ty">Nat</span>) -&gt; <span class="ty">Nat</span>']],
-        note: "Π — later parts see earlier names",
-      },
-      {
-        examples: [['(@A : <span class="ty">Type</span>, x : A) -&gt; A']],
-        note: "`@` is implicit, erased at runtime",
-      },
-      {
-        examples: [['(@A : <span class="ty">Type</span>, <span class="kw">use</span> <span class="ty">Show</span>(A), v : A) -&gt; <span class="ty">Str</span>']],
-        note: "`use` asks for a witness",
-      },
-      {
-        examples: [['{value : A, proof : <span class="ty">Valid</span>(value)}']],
-        note: "Σ — data plus its receipt",
-      },
-      {
-        examples: [['f(@<span class="ty">Nat</span>, x)']],
-        note: "supply an implicit at the call — omitted ones are inferred",
-      },
-    ],
-  },
-  {
-    title: "inductive types",
-    column: 1,
-    entries: [
-      {
-        examples: [[
-          '<span class="kw">pub induct</span> <span class="ty">Vec</span>(T : <span class="ty">Type</span>) : (<span class="ty">Nat</span>) -&gt; <span class="kw">pub</span> <span class="ty">Type</span>',
-          "| nil() : (0)",
-          '| cons(@m : <span class="ty">Nat</span>, x : T, xs : <span class="ty">Vec</span>(T, m)) : (m + 1)',
-          '<span class="kw">end</span>',
-        ]],
-        note: "an indexed family — the length lives in the type",
       },
     ],
   },
@@ -248,7 +227,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "condition ladders",
-    column: 1,
+    column: 2,
     entries: [
       {
         examples: [[
@@ -263,12 +242,53 @@ export const CHEATSHEET: CheatsheetSection[] = [
     ],
   },
   {
-    title: "folds & induction",
+    title: "types",
+    column: 1,
+    entries: [
+      {
+        examples: [['(x: <span class="ty">Nat</span>, y: <span class="ty">Nat</span>) -&gt; <span class="ty">Nat</span>']],
+        note: "Π — later parts see earlier names",
+      },
+      {
+        examples: [['(@A: <span class="ty">Type</span>, x: A) -&gt; A']],
+        note: "`@` is implicit, erased at runtime",
+      },
+      {
+        examples: [['(@A: <span class="ty">Type</span>, <span class="kw">use</span> <span class="ty">Show</span>(A), v: A) -&gt; <span class="ty">Str</span>']],
+        note: "`use` asks for a witness",
+      },
+      {
+        examples: [['{value: A, proof: <span class="ty">Valid</span>(value)}']],
+        note: "Σ — data plus its receipt",
+      },
+      {
+        examples: [['f(@<span class="ty">Nat</span>, x)']],
+        note: "supply an implicit at the call — omitted ones are inferred",
+      },
+    ],
+  },
+  {
+    title: "inductive types",
     column: 2,
     entries: [
       {
         examples: [[
-          '<span class="kw">match</span> n : (m) =&gt; P(m)',
+          '<span class="kw">pub induct</span> <span class="ty">Vec</span>(T: <span class="ty">Type</span>): (<span class="ty">Nat</span>) -&gt; <span class="kw">pub</span> <span class="ty">Type</span>',
+          "| nil(): (0)",
+          '| cons(@m: <span class="ty">Nat</span>, x: T, xs: <span class="ty">Vec</span>(T, m)): (m + 1)',
+          '<span class="kw">end</span>',
+        ]],
+        note: "an indexed family — the length lives in the type",
+      },
+    ],
+  },
+  {
+    title: "folds & induction",
+    column: 1,
+    entries: [
+      {
+        examples: [[
+          '<span class="kw">match</span> n: (m) =&gt; P(m)',
           "| 0 =&gt; base",
           "| pred + 1; hyp =&gt; step(pred, hyp)",
           '<span class="kw">end</span>',
@@ -295,12 +315,12 @@ export const CHEATSHEET: CheatsheetSection[] = [
       },
       {
         examples: [[
-          '<span class="kw">rec</span> even(n : <span class="ty">Nat</span>) -&gt; <span class="ty">Bool</span> =',
+          '<span class="kw">rec</span> even(n: <span class="ty">Nat</span>) -&gt; <span class="ty">Bool</span> =',
           '    <span class="kw">match</span> n',
           "    | 0 =&gt; true",
           "    | p + 1 =&gt; odd(p)",
           '    <span class="kw">end</span>',
-          '<span class="kw">and</span> odd(n : <span class="ty">Nat</span>) -&gt; <span class="ty">Bool</span> =',
+          '<span class="kw">and</span> odd(n: <span class="ty">Nat</span>) -&gt; <span class="ty">Bool</span> =',
           '    <span class="kw">match</span> n',
           "    | 0 =&gt; false",
           "    | p + 1 =&gt; even(p)",
@@ -317,7 +337,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
     entries: [
       {
         examples: [[
-          '<span class="kw">pub concept</span> <span class="ty">Show</span>(A : <span class="ty">Type</span>) : <span class="kw">pub</span> <span class="ty">Type</span> {',
+          '<span class="kw">pub concept</span> <span class="ty">Show</span>(A: <span class="ty">Type</span>): <span class="kw">pub</span> <span class="ty">Type</span> {',
           '    show(A) -&gt; <span class="ty">Str</span>',
           "}",
         ]],
@@ -333,14 +353,14 @@ export const CHEATSHEET: CheatsheetSection[] = [
       },
       {
         examples: [[
-          '<span class="kw">let</span> join(@A : <span class="ty">Type</span>, <span class="kw">use</span> <span class="ty">Show</span>(A), v : A) -&gt; <span class="ty">Str</span> =',
+          '<span class="kw">let</span> join(@A: <span class="ty">Type</span>, <span class="kw">use</span> <span class="ty">Show</span>(A), v: A) -&gt; <span class="ty">Str</span> =',
           "    Show/show(v);",
         ]],
         note: "resolved silently at the call site",
       },
       {
         examples: [[
-          '<span class="kw">pub concept</span> <span class="ty">Ord</span>(A : <span class="ty">Type</span>) : <span class="kw">pub</span> <span class="ty">Type</span> {',
+          '<span class="kw">pub concept</span> <span class="ty">Ord</span>(A: <span class="ty">Type</span>): <span class="kw">pub</span> <span class="ty">Type</span> {',
           '    <span class="kw">use</span> <span class="ty">Eql</span>(A),',
           '    cmp(A, A) -&gt; <span class="ty">Order</span>',
           "}",
@@ -349,7 +369,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
       },
       {
         examples: [[
-          '<span class="kw">satisfy</span> (@A : <span class="ty">Type</span>, <span class="kw">use</span> <span class="ty">Show</span>(A)) =&gt; <span class="ty">Show</span>(<span class="ty">List</span>(A)) {',
+          '<span class="kw">satisfy</span> (@A: <span class="ty">Type</span>, <span class="kw">use</span> <span class="ty">Show</span>(A)) =&gt; <span class="ty">Show</span>(<span class="ty">List</span>(A)) {',
           "    show(values) =",
           '        List/fold(values, <span class="str">""</span>, (v, r) =&gt;',
           "            Str/concat(r, Show/show(v)))",
@@ -359,7 +379,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
       },
       {
         examples: [[
-          '<span class="kw">let</span> reverse : <span class="ty">Ord</span>(<span class="ty">Nat</span>) = Ord {',
+          '<span class="kw">let</span> reverse: <span class="ty">Ord</span>(<span class="ty">Nat</span>) = Ord {',
           "    cmp(a, b) = compare_reverse(a, b)",
           "};",
           'sort(<span class="kw">use</span> reverse, values)',
@@ -370,11 +390,11 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "monads",
-    column: 2,
+    column: 1,
     entries: [
       {
         examples: [[
-          '<span class="kw">let</span> sum(a : <span class="ty">Option</span>(<span class="ty">Nat</span>), b : <span class="ty">Option</span>(<span class="ty">Nat</span>)) -&gt; <span class="ty">Option</span>(<span class="ty">Nat</span>) =',
+          '<span class="kw">let</span> sum(a: <span class="ty">Option</span>(<span class="ty">Nat</span>), b: <span class="ty">Option</span>(<span class="ty">Nat</span>)) -&gt; <span class="ty">Option</span>(<span class="ty">Nat</span>) =',
           '    <span class="kw">let</span> x = a!;',
           '    <span class="kw">let</span> y = b!;',
           "    Option/some(x + y);",
@@ -382,12 +402,12 @@ export const CHEATSHEET: CheatsheetSection[] = [
         note: "postfix `!` is `Monad/bind` — every body is a do-block, and the region's monad is read from its type, never from the action",
       },
       {
-        examples: [['<span class="kw">let</span> greeting : <span class="ty">Io</span>({}) = print(<span class="str">"hi"</span>);']],
+        examples: [['<span class="kw">let</span> greeting: <span class="ty">Io</span>({}) = print(<span class="str">"hi"</span>);']],
         note: "a host call builds an `Io` description and performs nothing — a program's tail is one `Io({})`, forced once",
       },
       {
         examples: [[
-          '<span class="kw">let</span> fiber : <span class="ty">Async</span>({}) =',
+          '<span class="kw">let</span> fiber: <span class="ty">Async</span>({}) =',
           '    <span class="kw">let</span> _ = print(<span class="str">"hi\\n"</span>)!;',
           "    Async/pure(());",
         ]],
@@ -395,8 +415,8 @@ export const CHEATSHEET: CheatsheetSection[] = [
       },
       {
         examples: [[
-          '<span class="kw">satisfy</span> (@S : <span class="ty">Type</span>) =&gt;',
-          '        <span class="ty">Monad</span>((A : <span class="ty">Type</span>) =&gt; <span class="ty">State</span>(S, A)) {',
+          '<span class="kw">satisfy</span> (@S: <span class="ty">Type</span>) =&gt;',
+          '        <span class="ty">Monad</span>((A: <span class="ty">Type</span>) =&gt; <span class="ty">State</span>(S, A)) {',
           "    pure(@A, a) = State/pure(a),",
           "    bind(@A, @B, m, f) = State/bind(m, f)",
           "}",
@@ -411,8 +431,8 @@ export const CHEATSHEET: CheatsheetSection[] = [
     entries: [
       {
         examples: [[
-          '<span class="kw">let</span> sym(@x : <span class="ty">Nat</span>, @y : <span class="ty">Nat</span>, p : <span class="ty">Eq</span>(x, y)) -&gt; <span class="ty">Eq</span>(y, x) =',
-          '    <span class="kw">match</span> p : (s, t, q) =&gt; <span class="ty">Eq</span>(t, s)',
+          '<span class="kw">let</span> sym(@x: <span class="ty">Nat</span>, @y: <span class="ty">Nat</span>, p: <span class="ty">Eq</span>(x, y)) -&gt; <span class="ty">Eq</span>(y, x) =',
+          '    <span class="kw">match</span> p: (s, t, q) =&gt; <span class="ty">Eq</span>(t, s)',
           "    | refl(@z) =&gt; Eq/refl()",
           '    <span class="kw">end</span>;',
         ]],
@@ -421,23 +441,13 @@ export const CHEATSHEET: CheatsheetSection[] = [
     ],
   },
   {
-    title: "goals",
+    title: "foreign",
     column: 1,
     entries: [
       {
-        examples: [['<span class="kw">let</span> todo : <span class="ty">Nat</span> = ?;']],
-        note: "a written goal — the report gives scope, expected type, and verified candidate fits, then the build exits 2",
-      },
-    ],
-  },
-  {
-    title: "foreign",
-    column: 2,
-    entries: [
-      {
         examples: [[
-          '<span class="kw">foreign</span> random : <span class="ty">Nat</span>;',
-          '<span class="kw">pub foreign</span> log : (<span class="ty">Bytes</span>) -&gt; <span class="ty">Nat</span>;',
+          '<span class="kw">foreign</span> random: <span class="ty">Nat</span>;',
+          '<span class="kw">pub foreign</span> log: (<span class="ty">Bytes</span>) -&gt; <span class="ty">Nat</span>;',
         ]],
         note: "implemented by the embedder — wire types only: `Nat`, `Int`, `Bool`, `Bytes`, `Handle`, `List(T)`; a call to one yields an `Io`",
       },
