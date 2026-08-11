@@ -1,15 +1,7 @@
 #!/usr/bin/env bash
-# Fetches the pinned curios release's wasm playground bundle and rustdoc API
-# docs into public/curios/web and public/curios/docs, exactly what the
-# deploy workflow does before `astro build`. Run this once (`npm run fetch`)
-# to get a working playground and docs link locally; without it, the "Run"
-# button and the docs link fail (the site handles that gracefully, but the
-# playground won't work).
+# Fetches the pinned curios release's wasm playground bundle and rustdoc API docs into public/curios/web and public/curios/docs, exactly what the deploy workflow does before `astro build`. Run this once (`npm run fetch`) to get a working playground and docs link locally; without it, the "Run" button and the docs link fail (the site handles that gracefully, but the playground won't work).
 #
-# package.json's "releaseArtifacts" field is the single source of truth for
-# the pinned release — the deploy workflow (.github/workflows/deploy.yml)
-# invokes this same script, so bumping the tag there is the only place a
-# release bump needs to happen.
+# package.json's "releaseArtifacts" field is the single source of truth for the pinned release — the deploy workflow (.github/workflows/deploy.yml) invokes this same script, so bumping the tag there is the only place a release bump needs to happen.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

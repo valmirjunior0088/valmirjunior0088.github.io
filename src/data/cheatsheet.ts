@@ -9,24 +9,10 @@ export interface CheatsheetSection {
   entries: CheatsheetEntry[];
 }
 
-// Each entry holds one or more examples; an example is an array of
-// pre-highlighted HTML lines (same convention as HERO_SNIPPET):
-// .kw keywords, .ty types/sorts, .cm comments, .str strings.
-// Examples render side by side within their row, separated by hairlines.
-// Notes render on the right of each row; backticks become <code>.
-// This array is in one global order, least to most complex, and the render
-// filters it per column — so each column comes out ascending on its own, and
-// keeping this array sorted is the whole job. Note the columns are read side
-// by side, not one after the other: column 2 is not a continuation of column
-// 1, so both have to open on something easy and deepen going down. That is
-// why `column` interleaves rather than cutting the order in half — a split
-// would stack every easy section on the left and open the right on `types`.
-// `column` is therefore free to be anything, and is chosen to even the two
-// columns' rendered heights (measured, not counted: a row is its code lines
-// plus its wrapped note). Reassigning a section changes only balance, never
-// order. One ordering constraint worth keeping: `choose` trails `match`
-// despite being the smaller construct, because its bind-arm
-// (`some(n) = cached`) is a constructor pattern.
+// Each entry holds one or more examples; an example is an array of pre-highlighted HTML lines (same convention as HERO_SNIPPET): .kw keywords, .ty types/sorts, .cm comments, .str strings.
+// Examples render side by side within their row, separated by hairlines. Notes render on the right of each row; backticks become <code>.
+// This array is in one global order, least to most complex, and the render filters it per column — so each column comes out ascending on its own, and keeping this array sorted is the whole job. Note the columns are read side by side, not one after the other: column 2 is not a continuation of column 1, so both have to open on something easy and deepen going down. That is why `column` interleaves rather than cutting the order in half — a split would stack every easy section on the left and open the right on `types`.
+// `column` is therefore free to be anything, and is chosen to even the two columns' rendered heights (measured, not counted: a row is its code lines plus its wrapped note). Reassigning a section changes only balance, never order. One ordering constraint worth keeping: `choose` trails `match` despite being the smaller construct, because its bind-arm (`some(n) = cached`) is a constructor pattern.
 export const CHEATSHEET: CheatsheetSection[] = [
   {
     title: "modules",

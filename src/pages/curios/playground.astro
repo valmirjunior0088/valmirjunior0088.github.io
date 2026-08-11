@@ -19,14 +19,7 @@ const stripHtml = (html: string) =>
 const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
   [section.title, ...entry.examples.flat().map(stripHtml), entry.note.replace(/`/g, "")].join(" ").toLowerCase();
 
-// The editor pane is the full section width less the gutter and code padding —
-// roomy enough that canonical output fits, so most examples carry `curios format`
-// output verbatim. Four deliberately do not: `cond match`, `erased`, `sym` and
-// `vec` keep the laddered `match`/`choose` that the formatter collapses onto one
-// line once it fits. The ladder is the thing those four are teaching, so they are
-// kept laddered and fail `curios format --check` on purpose. That is a different
-// exemption from the hero and stdlib snippets, which are hand-wrapped because
-// canonical output does not fit their columns at all — budgets in index.astro.
+// The editor pane is the full section width less the gutter and code padding — roomy enough that canonical output fits, so most examples carry `curios format` output verbatim. Four deliberately do not: `cond match`, `erased`, `sym` and `vec` keep the laddered `match`/`choose` that the formatter collapses onto one line once it fits. The ladder is the thing those four are teaching, so they are kept laddered and fail `curios format --check` on purpose. That is a different exemption from the hero and stdlib snippets, which are hand-wrapped because canonical output does not fit their columns at all — budgets in index.astro.
 const EXAMPLE_BUDGET = 122;
 for (const [key, example] of Object.entries(EXAMPLES)) {
   for (const line of example.code.split("\n"))
@@ -140,8 +133,7 @@ for (const section of CHEATSHEET) {
 
   const floating = () => panel.classList.contains("is-floating");
 
-  // `at-start` / `at-end` on the panel drive the cheatsheet's edge fades;
-  // scrollFades also owns the scroll/resize listeners and the initial pass.
+  // `at-start` / `at-end` on the panel drive the cheatsheet's edge fades; scrollFades also owns the scroll/resize listeners and the initial pass.
   const updateFade = scrollFades({ scroller: body, target: panel });
 
   function applyFilter() {
@@ -226,9 +218,7 @@ for (const section of CHEATSHEET) {
         finish();
       } else {
         animating = true;
-        // cancel these once done: a lingering forwards-fill animation can be GC'd into a
-        // state where it still applies its styles but no longer shows up in getAnimations(),
-        // permanently overriding the floating position and backdrop opacity
+        // cancel these once done: a lingering forwards-fill animation can be GC'd into a state where it still applies its styles but no longer shows up in getAnimations(), permanently overriding the floating position and backdrop opacity
         const fade = backdrop.animate([{ opacity: 1 }, { opacity: 0 }], { ...MOTION, fill: "forwards" });
         const slide = panel.animate([edges(first), edges(target)], { ...MOTION, fill: "forwards" });
         const settle = () => {
@@ -413,8 +403,7 @@ for (const section of CHEATSHEET) {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    /* no padding here: it lives on the content below, so the sticky fades pin
-       flush to the body's top and bottom edges and span its full width */
+    /* no padding here: it lives on the content below, so the sticky fades pin flush to the body's top and bottom edges and span its full width */
     padding: 0;
   }
   .cheatsheet-cols {
@@ -529,8 +518,7 @@ for (const section of CHEATSHEET) {
     opacity: 1;
     transition: opacity 150ms ease;
   }
-  /* each fade overlaps its neighbouring content via a negative margin so it
-     adds no height of its own; the sticky edge pins it to the scroll viewport */
+  /* each fade overlaps its neighbouring content via a negative margin so it adds no height of its own; the sticky edge pins it to the scroll viewport */
   .cheatsheet-fade-top {
     top: 0;
     margin-bottom: -34px;

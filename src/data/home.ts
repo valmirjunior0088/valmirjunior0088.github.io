@@ -113,8 +113,7 @@ export const STDLIB_MODULES: StdlibModule[] = [
   },
 ];
 
-// Pre-highlighted HTML lines, same convention as HERO_SNIPPET:
-// .kw keywords, .ty types/sorts, .cm comments, .str strings.
+// Pre-highlighted HTML lines, same convention as HERO_SNIPPET: .kw keywords, .ty types/sorts, .cm comments, .str strings.
 export const STDLIB_SNIPPET = {
   filename: "pulse.crs",
   lines: [

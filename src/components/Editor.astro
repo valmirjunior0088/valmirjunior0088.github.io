@@ -22,11 +22,7 @@ const defaultKey = exampleKeys[0];
 
 const widgetId = editable ? "editor" : "editor-readonly";
 
-// nth-of-type counts by tag name among *all* siblings, not just same-class
-// ones — CodeCard always renders a leading topbar div before the slotted
-// panels, which throws off any nth-of-type-based index by one. Each
-// radio/chip/panel instead carries a matching data-index, so the generated
-// rules select by that instead of fragile sibling position.
+// nth-of-type counts by tag name among *all* siblings, not just same-class ones — CodeCard always renders a leading topbar div before the slotted panels, which throws off any nth-of-type-based index by one. Each radio/chip/panel instead carries a matching data-index, so the generated rules select by that instead of fragile sibling position.
 const positionalTabCSS = editable
     ? ""
     : exampleKeys
@@ -522,8 +518,7 @@ const positionalTabCSS = editable
     }
 
     @media (max-width: 860px) {
-        /* 16px keeps iOS Safari from zooming the page when the textarea is
-           focused; the gutter shares the variable so it stays in sync */
+        /* 16px keeps iOS Safari from zooming the page when the textarea is focused; the gutter shares the variable so it stays in sync */
         .editor-widget[data-editable="true"] {
             --code-fs: 16px;
         }

@@ -12,20 +12,8 @@ const INSTALL_URL = `${GITHUB_URL}/releases/latest/download/install.sh`;
 const INSTALL_COMMAND = `curl -fsSL ${INSTALL_URL} | sh`;
 const USAGE_URL = `${GITHUB_URL}/blob/main/documentation/USAGE.md`;
 
-// These two snippets sit in narrow grid columns, and a code card clips rather
-// than wraps — outgrow the column and it scrolls sideways instead of failing,
-// which is exactly the kind of regression nobody notices. So these two are kept
-// out of `curios format` on width grounds: canonical style unwraps telescopes
-// onto ~90 char lines, which the hero cannot hold at any viewport. Wrap them by
-// hand, and only where the width actually demands it: a line the formatter would
-// leave alone is left alone, so these snippets take no position on shapes the
-// formatter owns. (Four playground examples are also exempt, but for readability
-// rather than width; see playground.astro.) Budgets are the
-// 1280px case, less the 46px
-// gutter and 44px of code padding: .hero splits 1fr/1fr with a 56px gap,
-// .stdlib-grid 1.1fr/0.9fr with 24px. Both narrow further between the 860px
-// breakpoint and ~1130px, where they scroll — accepted, and the reason to
-// spend the headroom these budgets leave rather than sit right on them.
+// These two snippets sit in narrow grid columns, and a code card clips rather than wraps — outgrow the column and it scrolls sideways instead of failing, which is exactly the kind of regression nobody notices. So these two are kept out of `curios format` on width grounds: canonical style unwraps telescopes onto ~90 char lines, which the hero cannot hold at any viewport. Wrap them by hand, and only where the width actually demands it: a line the formatter would leave alone is left alone, so these snippets take no position on shapes the formatter owns. (Four playground examples are also exempt, but for readability rather than width; see playground.astro.)
+// Budgets are the 1280px case, less the 46px gutter and 44px of code padding: .hero splits 1fr/1fr with a 56px gap, .stdlib-grid 1.1fr/0.9fr with 24px. Both narrow further between the 860px breakpoint and ~1130px, where they scroll — accepted, and the reason to spend the headroom these budgets leave rather than sit right on them.
 const ENTITIES: Record<string, string> = { "&gt;": ">", "&lt;": "<", "&amp;": "&", "&hellip;": "…", "&rarr;": "→" };
 const plainWidth = (line: string) =>
   line.replace(/<[^>]+>/g, "").replace(/&\w+;/g, (m) => ENTITIES[m] ?? m).length;
@@ -279,8 +267,7 @@ for (const [name, snippet, budget] of [
     position: relative;
     z-index: 1;
   }
-  /* contain: size zeroes the snippet's intrinsic height, so the copy column
-     alone sets the row — the card stretches to it and the code scrolls */
+  /* contain: size zeroes the snippet's intrinsic height, so the copy column alone sets the row — the card stretches to it and the code scrolls */
   .hero-snippet {
     align-self: stretch;
     contain: size;
@@ -293,8 +280,7 @@ for (const [name, snippet, budget] of [
     display: flex;
     flex-direction: column;
   }
-  /* positioning context for the fades — no padding, so they span the full
-     width and pin to the scroll viewport (below the filename bar) */
+  /* positioning context for the fades — no padding, so they span the full width and pin to the scroll viewport (below the filename bar) */
   .hero-scroll {
     position: relative;
     flex: 1;
@@ -305,13 +291,11 @@ for (const [name, snippet, budget] of [
   .hero-snippet .code-scroll {
     flex: 1;
     min-height: 0;
-    /* the one and only scroll container: the pre below overflows visibly
-       into it, instead of nesting a second scroller */
+    /* the one and only scroll container: the pre below overflows visibly into it, instead of nesting a second scroller */
     overflow: auto;
     align-items: flex-start;
   }
-  /* purple hints that the code keeps going past the fold; each toggle hides
-     its fade once the reader reaches that edge */
+  /* purple hints that the code keeps going past the fold; each toggle hides its fade once the reader reaches that edge */
   .hero-fade {
     position: absolute;
     left: 0;
@@ -356,8 +340,7 @@ for (const [name, snippet, budget] of [
     left: 0;
     background: var(--bg-card);
   }
-  /* the pre-formatted code snippets would otherwise set the tracks' min
-     width and push the single-column layouts past the viewport on phones */
+  /* the pre-formatted code snippets would otherwise set the tracks' min width and push the single-column layouts past the viewport on phones */
   .hero > *,
   .stdlib-grid > *,
   .bench-grid > :global(*) {
@@ -502,8 +485,7 @@ for (const [name, snippet, budget] of [
     padding: 26px;
   }
   .feature-glyph {
-    /* A fixed square token, like the inline code chips: every glyph shares the
-       same box whatever its width. */
+    /* A fixed square token, like the inline code chips: every glyph shares the same box whatever its width. */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -518,8 +500,7 @@ for (const [name, snippet, budget] of [
     flex: none;
   }
   .feature-glyph-mark {
-    /* Trim the line box to the cap/baseline band — the same trick as the
-       cheatsheet title — so each glyph optically centres in the square. */
+    /* Trim the line box to the cap/baseline band — the same trick as the cheatsheet title — so each glyph optically centres in the square. */
     line-height: 1;
     text-box: trim-both cap alphabetic;
   }
@@ -664,11 +645,7 @@ for (const [name, snippet, budget] of [
     align-items: center;
     gap: 14px;
   }
-  /* The install URL is the one line no card width fits. Rather than wrap it
-     or scroll the card, it runs under a fade and stops — the button beside it
-     is what makes that honest, since the tail is to be copied, not read. The
-     visible head still carries the host and most of the path, so nobody is
-     asked to pipe an unreadable URL into a shell. */
+  /* The install URL is the one line no card width fits. Rather than wrap it or scroll the card, it runs under a fade and stops — the button beside it is what makes that honest, since the tail is to be copied, not read. The visible head still carries the host and most of the path, so nobody is asked to pipe an unreadable URL into a shell. */
   .install-cmd {
     flex: 1;
     min-width: 0;
@@ -816,9 +793,7 @@ for (const [name, snippet, budget] of [
 <script>
   import { scrollFades } from "../../scripts/scrollFades";
 
-  // The hero card is copy-height, so its code usually overflows. Fades hint at
-  // more code above/below; `content` is the <pre>, watched because it reflows
-  // taller when the mono web font swaps in (changing overflow with no event).
+  // The hero card is copy-height, so its code usually overflows. Fades hint at more code above/below; `content` is the <pre>, watched because it reflows taller when the mono web font swaps in (changing overflow with no event).
   const snippet = document.querySelector<HTMLElement>(".hero-snippet");
   const scroll = snippet?.querySelector<HTMLElement>(".code-scroll");
 
@@ -830,9 +805,7 @@ for (const [name, snippet, budget] of [
     });
   }
 
-  // The label is the only feedback, so it has to report the failure too:
-  // clipboard writes reject outside a secure context, and a button that
-  // says "copied" when nothing was copied is worse than no button.
+  // The label is the only feedback, so it has to report the failure too: clipboard writes reject outside a secure context, and a button that says "copied" when nothing was copied is worse than no button.
   for (const button of document.querySelectorAll<HTMLButtonElement>(".copy-btn")) {
     let restore: ReturnType<typeof setTimeout>;
 
