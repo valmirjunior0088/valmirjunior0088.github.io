@@ -170,7 +170,7 @@ for (const [name, snippet, budget] of [
 
       <div class="bench-note">
         <p>
-          <span class="fg-full">Reading it straight:</span> Curios lands 1.13&times; off Rust on the integer loop and 1.04&times; off it on allocation &mdash; second in both tables, with checked <span class="fg-full">Nat</span>/<span class="fg-full">Int</span> arithmetic included, work Rust isn't doing. Read that second figure with its uncertainty: the 4.7 ms gap is about the size of Rust's own &plusmn;4.6 ms spread, so it is a near-tie rather than a lead, and Rust &rarr; wasm is still the faster of the two. The two workloads are deliberate extremes &mdash; <span class="fg-full">lcg</span> never allocates, <span class="fg-full">trees</span> does nothing else &mdash; so those two multipliers bracket where a real program should land.
+          <span class="fg-full">Reading it straight:</span> Curios lands 1.13&times; off Rust on the integer loop and 1.04&times; off it on allocation &mdash; second in both tables, with checked <span class="fg-full">Nat</span>/<span class="fg-full">Int</span> arithmetic included, work Rust isn't doing. Read that second figure with its uncertainty: the 4.7 ms gap is about the size of Rust's own &plusmn;4.6 ms spread, so it is a near-tie rather than a lead, and Rust &rarr; WebAssembly is still the faster of the two. The two workloads are deliberate extremes &mdash; <span class="fg-full">lcg</span> never allocates, <span class="fg-full">trees</span> does nothing else &mdash; so those two multipliers bracket where a real program should land.
         </p>
       </div>
     </div>

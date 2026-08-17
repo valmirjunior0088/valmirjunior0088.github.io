@@ -159,7 +159,7 @@ export const BENCHMARKS: Benchmark[] = [
     filename: "lcg — integer loop, N=100,000,000",
     rows: [
       { lang: "language", value: "mean · vs best", variant: "head" },
-      { lang: "Rust → wasm", value: "259.7 ms · 1.00×" },
+      { lang: "Rust → WebAssembly", value: "259.7 ms · 1.00×" },
       { lang: "Curios", value: "293.2 ms · 1.13×", variant: "highlight" },
       { lang: "AssemblyScript", value: "319.3 ms · 1.23×" },
       { lang: "Grain", value: "29,576 ms · 113.9×", variant: "faint" },
@@ -169,7 +169,7 @@ export const BENCHMARKS: Benchmark[] = [
     filename: "trees — allocation, D=21",
     rows: [
       { lang: "language", value: "mean · vs best", variant: "head" },
-      { lang: "Rust → wasm", value: "116.7 ms · 1.00×" },
+      { lang: "Rust → WebAssembly", value: "116.7 ms · 1.00×" },
       { lang: "Curios", value: "121.4 ms · 1.04×", variant: "highlight" },
       { lang: "AssemblyScript", value: "228.6 ms · 1.96×" },
       { lang: "Grain", value: "1,757 ms · 15.1×", variant: "faint" },
