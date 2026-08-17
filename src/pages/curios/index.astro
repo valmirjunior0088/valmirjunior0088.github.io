@@ -10,7 +10,7 @@ import { GITHUB_URL } from "../../data/site";
 const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1</code>");
 const INSTALL_URL = `${GITHUB_URL}/releases/latest/download/install.sh`;
 const INSTALL_COMMAND = `curl -fsSL ${INSTALL_URL} | sh`;
-const USAGE_URL = `${GITHUB_URL}/blob/main/documentation/USAGE.md`;
+const USAGE_URL = `${GITHUB_URL}/blob/main/documentation/usage.md`;
 
 // These two snippets sit in narrow grid columns, and a code card clips rather than wraps — outgrow the column and it scrolls sideways instead of failing, which is exactly the kind of regression nobody notices. So these two are kept out of `curios format` on width grounds: canonical style unwraps telescopes onto ~90 char lines, which the hero cannot hold at any viewport. Wrap them by hand, and only where the width actually demands it: a line the formatter would leave alone is left alone, so these snippets take no position on shapes the formatter owns. (Four playground examples are also exempt, but for readability rather than width; see playground.astro.)
 // Budgets are the 1280px case, less the 46px gutter and 44px of code padding: .hero splits 1fr/1fr with a 56px gap, .stdlib-grid 1.1fr/0.9fr with 24px. Both narrow further between the 860px breakpoint and ~1130px, where they scroll — accepted, and the reason to spend the headroom these budgets leave rather than sit right on them.
@@ -170,7 +170,7 @@ for (const [name, snippet, budget] of [
 
       <div class="bench-note">
         <p>
-          <span class="fg-full">Reading it straight:</span> Curios lands within 1.7&times; of Rust on the integer loop and right at 2&times; on allocation &mdash; with checked <span class="fg-full">Nat</span>/<span class="fg-full">Int</span> arithmetic included, work Rust isn't doing. The two workloads are deliberate extremes &mdash; <span class="fg-full">lcg</span> never allocates, <span class="fg-full">trees</span> does nothing else &mdash; so those two multipliers bracket where a real program should land.
+          <span class="fg-full">Reading it straight:</span> Curios lands 1.13&times; off Rust on the integer loop and 1.04&times; off it on allocation &mdash; second in both tables, with checked <span class="fg-full">Nat</span>/<span class="fg-full">Int</span> arithmetic included, work Rust isn't doing. Read that second figure with its uncertainty: the 4.7 ms gap is about the size of Rust's own &plusmn;4.6 ms spread, so it is a near-tie rather than a lead, and Rust &rarr; wasm is still the faster of the two. The two workloads are deliberate extremes &mdash; <span class="fg-full">lcg</span> never allocates, <span class="fg-full">trees</span> does nothing else &mdash; so those two multipliers bracket where a real program should land.
         </p>
       </div>
     </div>

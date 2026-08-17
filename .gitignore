@@ -6,7 +6,7 @@ dist/
 node_modules/
 
 # fetched from the pinned curios release (see scripts/fetch.sh)
-public/curios/web/
+public/curios/js/
 public/curios/docs/
 
 # editor/OS cruft

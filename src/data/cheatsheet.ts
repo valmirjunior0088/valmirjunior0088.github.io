@@ -74,6 +74,15 @@ export const CHEATSHEET: CheatsheetSection[] = [
         examples: [["a + b"], ["a == b"], ["a &amp;&amp; b"]],
         note: "whitespace required on both sides, left-associative — each dispatches through a concept (`Add`, `Eql`, `And`); a path is the opposite and takes none, so `a / b` divides and `a/b` names",
       },
+      {
+        examples: [[
+          '<span class="kw">match</span> 0 &lt; d',
+          "| true =&gt; n / d",
+          "| false =&gt; 0",
+          '<span class="kw">end</span>',
+        ]],
+        note: "`/` and `%` also demand the precondition their concept's `Ok` field states — on `Nat`, `Nat/Lt(0, b)`. A literal divisor settles it outright and a guard reduces it away inside the arm, so only a bare `n / d` is refused",
+      },
     ],
   },
   {
@@ -255,7 +264,7 @@ export const CHEATSHEET: CheatsheetSection[] = [
   },
   {
     title: "inductive types",
-    column: 2,
+    column: 1,
     entries: [
       {
         examples: [[
@@ -371,6 +380,15 @@ export const CHEATSHEET: CheatsheetSection[] = [
           'sort(<span class="kw">use</span> reverse, values)',
         ]],
         note: "override resolution — pass an ordinary concept value with `use`",
+      },
+      {
+        examples: [[
+          '<span class="kw">pub concept</span> <span class="ty">Div</span>(A: <span class="ty">Type</span>): <span class="kw">pub</span> <span class="ty">Type</span> {',
+          '    <span class="ty">Ok</span>(A) -&gt; <span class="ty">Prop</span>,',
+          '    div(a: A, b: A, @ok: <span class="ty">Ok</span>(b)) -&gt; A',
+          "}",
+        ]],
+        note: "the field list is a dependent telescope — a field returning a sort is an associated type each witness picks, and a field whose type is a proposition about earlier ones is a law `satisfy` cannot register a witness without discharging",
       },
     ],
   },

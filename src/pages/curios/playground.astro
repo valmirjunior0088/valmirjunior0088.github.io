@@ -8,7 +8,7 @@ import { GITHUB_URL } from "../../data/site";
 import type { CheatsheetEntry, CheatsheetSection } from "../../data/cheatsheet";
 
 const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1</code>");
-const SYNTAX_URL = `${GITHUB_URL}/blob/main/documentation/SYNTAX.md`;
+const SYNTAX_URL = `${GITHUB_URL}/blob/main/documentation/syntax.md`;
 
 const stripHtml = (html: string) =>
   html
