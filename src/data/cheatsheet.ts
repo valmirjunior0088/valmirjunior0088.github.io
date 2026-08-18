@@ -49,16 +49,16 @@ export const CHEATSHEET: CheatsheetSection[] = [
         note: "list literal, spread anywhere",
       },
       {
-        examples: [["b[\\1, \\0, \\1]"]],
+        examples: [["b[1, 0, 1]"]],
         note: "packed `Bits`, LSB first — the grain letter glues to the `[`",
       },
       {
-        examples: [["x[\\48, \\69, ..suffix]"]],
-        note: "packed `Bytes` — `\\` marks a constant atom, `..` spreads a whole value",
+        examples: [["x[0x48, 0x69, ..suffix]"]],
+        note: "packed `Bytes` — a numeral is a constant atom, `..` spreads a whole value",
       },
       {
         examples: [["b[flag, ..rest]"], ["x[..acc, byte]"]],
-        note: "an unescaped entry is an ordinary term contributing one atom — cons and append, with no named form",
+        note: "an entry is any term contributing one atom — cons and append, with no named form",
       },
       {
         examples: [['<span class="str">\'λ\'</span>'], ['<span class="str">"hello\\n"</span>'], ["0xFF"], ["1.0e9"]],
