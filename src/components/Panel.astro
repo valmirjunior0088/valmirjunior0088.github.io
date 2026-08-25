@@ -1,0 +1,60 @@
+---
+// The most reused box on the site. The hero's code panel, the hero's error panel, both output panes, and every cheatsheet card are the same three-register box — an optional head strip, a body, an optional foot strip — differing only in what gets slotted in and which of the two tones it wears.
+interface Props {
+  tone?: "neutral" | "accent";
+  class?: string;
+  // Anything else passed in lands on the box itself, which is how a consumer hangs its own data attributes on a panel without this component knowing about them.
+  [key: string]: unknown;
+}
+
+const { tone = "neutral", class: className, ...attrs } = Astro.props;
+
+const hasHead = Astro.slots.has("head");
+const hasFoot = Astro.slots.has("foot");
+---
+
+<div class:list={["panel", tone === "accent" && "panel--accent", className]} {...attrs}>
+  {
+    hasHead && (
+      <div class="panel-head">
+        <slot name="head" />
+      </div>
+    )
+  }
+  <slot />
+  {
+    hasFoot && (
+      <div class="panel-foot">
+        <slot name="foot" />
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .panel {
+    border: 1px solid var(--edge);
+    border-radius: var(--r-panel);
+    background: var(--well);
+    overflow: hidden;
+  }
+
+  /* The one variant: a panel that is itself the bad news, used for the compiler diagnostic in the hero. */
+  .panel--accent {
+    border-color: var(--accent-line);
+    background: var(--accent-wash);
+  }
+
+  .panel-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .panel-foot {
+    padding: 12px 16px;
+    border-top: 1px solid var(--line);
+  }
+</style>

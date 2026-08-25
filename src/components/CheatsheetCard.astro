@@ -1,0 +1,66 @@
+---
+import Panel from "./Panel.astro";
+import { inlineCode, plainText } from "../data/markup";
+import type { CheatsheetCard } from "../data/cheatsheet";
+
+interface Props {
+  card: CheatsheetCard;
+}
+
+const { card } = Astro.props;
+
+// Everything a card says is searchable, not just its title — filtering on the code is how you find `..p` when you cannot remember it is called a spread. Stripped of markup, so a search matches what is on screen, and precomputed so a keystroke costs one substring test.
+const haystack = plainText([card.title, card.tag, card.code.join(" "), card.gloss].join(" ")).toLowerCase();
+---
+
+<Panel class="card" data-card data-search={haystack}>
+  <Fragment slot="head">
+    <span class="title">{card.title}</span>
+    <span class="label label--sm label--accent push">{card.tag}</span>
+  </Fragment>
+
+  <pre class="code" set:html={card.code.join("\n")} />
+
+  <Fragment slot="foot">
+    <span class="gloss" set:html={inlineCode(card.gloss)} />
+  </Fragment>
+</Panel>
+
+<style>
+  .card {
+    animation: cardIn 260ms ease both;
+  }
+
+  @keyframes cardIn {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .title {
+    font-size: 14px;
+    color: var(--fg);
+  }
+
+  /* The code sits in the deepest well on the site: a card is already a panel on a raised rail, so its code needs one more step down to stay legible as code. */
+  .code {
+    padding: 12px 14px;
+    background: var(--well-deep);
+    font-size: 12px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  .gloss {
+    display: block;
+    font-size: var(--ms-code-sm);
+    line-height: 1.55;
+    color: var(--fg-mute);
+    text-wrap: pretty;
+  }
+</style>

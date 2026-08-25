@@ -1,0 +1,30 @@
+---
+// The bare document both shells wrap. Everything page-specific — chrome, scrolling behaviour, whether the body is a scrolling document or a fixed application frame — belongs to PageShell or AppShell, not here.
+import "../styles/tokens.css";
+
+interface Props {
+  title: string;
+  description?: string;
+  bodyClass?: string;
+}
+
+const {
+  title,
+  description = "Curios is a small, dependently typed language that compiles straight to WebAssembly.",
+  bodyClass,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="icon" href="/curios/brand/curios-mark.svg" type="image/svg+xml" />
+  </head>
+  <body class={bodyClass}>
+    <slot />
+  </body>
+</html>

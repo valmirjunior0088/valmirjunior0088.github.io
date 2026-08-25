@@ -1,0 +1,30 @@
+---
+import { ISSUES_URL } from "../data/site";
+---
+
+<footer>
+  <img src="/curios/brand/curios-mark.svg" alt="" width="18" height="19" />
+  <span class="label">CURIOS · APACHE-2.0</span>
+  <a href={ISSUES_URL}>Report something surprising →</a>
+</footer>
+
+<style>
+  footer {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 32px var(--pad);
+    border-top: 1px solid var(--edge);
+  }
+
+  img {
+    display: block;
+  }
+
+  a {
+    margin-left: auto;
+    font-size: 13px;
+  }
+</style>

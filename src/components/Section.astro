@@ -1,0 +1,34 @@
+---
+// Two boxes, always. The outer one runs edge to edge so a banded section's tint and rules reach the window; the inner one caps the width and holds the gutter. Collapsing them into one box works right up until the first banded section, and then it does not.
+interface Props {
+  width?: "wide" | "narrow";
+  banded?: boolean;
+  padding?: string;
+  class?: string;
+}
+
+const { width = "wide", banded = false, padding = "80px var(--pad)", class: className } = Astro.props;
+---
+
+<section class:list={["outer", banded && "outer--banded"]}>
+  <div class:list={["inner", width === "narrow" && "inner--narrow", className]} style={`padding: ${padding}`}>
+    <slot />
+  </div>
+</section>
+
+<style>
+  .outer--banded {
+    background: var(--band);
+    border-top: 1px solid var(--edge);
+    border-bottom: 1px solid var(--edge);
+  }
+
+  .inner {
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .inner--narrow {
+    max-width: 1080px;
+  }
+</style>

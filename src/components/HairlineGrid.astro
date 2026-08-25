@@ -1,0 +1,26 @@
+---
+// Cells separated by single-pixel rules, done with a one-pixel gap over a border-coloured ground rather than per-cell borders — that way adjacent cells share one rule instead of stacking two, and the outer edge stays the same weight as the inner ones.
+interface Props {
+  min?: string;
+}
+
+const { min = "300px" } = Astro.props;
+---
+
+<div class="grid" style={`--cell-min: ${min}`}>
+  <slot />
+</div>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(var(--cell-min), 1fr));
+    gap: 1px;
+    background: var(--edge);
+    border: 1px solid var(--edge);
+  }
+
+  .grid > :global(*) {
+    background: var(--ink);
+  }
+</style>

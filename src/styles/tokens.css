@@ -1,0 +1,287 @@
+/* The design system, quantized from the design canvas. The canvas explored roughly forty distinct alpha values; what survives here is the intent behind them — five text tiers, three line weights, three surface depths — because a token that cannot be named is a token nobody can apply consistently. */
+
+/* Latin subsets of the three variable faces, self-hosted from public/curios/fonts so the page owes nothing to a third-party host. Google serves one file per family across the whole weight axis, so the four Geist weights the design asks for cost one request, not four. */
+@font-face {
+  font-family: "Geist";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/curios/fonts/geist.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/curios/fonts/geist-mono.woff2") format("woff2");
+}
+
+/* Faustina is loaded italic-only, on purpose: every display setting on this site is italic, and the upright face would only ever be a mistake waiting to be made. */
+@font-face {
+  font-family: "Faustina";
+  font-style: italic;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url("/curios/fonts/faustina-italic.woff2") format("woff2");
+}
+
+:root {
+  /* Surfaces, shallowest to deepest. Everything below --ink is a black wash rather than a colour, so a panel nested in a panel keeps reading as "further in". */
+  --ink: #143340;
+  --raise: #112c37;
+  --band: rgba(0, 0, 0, 0.12);
+  --well: rgba(0, 0, 0, 0.2);
+  --well-deep: rgba(0, 0, 0, 0.34);
+
+  /* Text, five tiers. --fg-ghost exists solely for the editor's line numbers, which need to sit below every other dim thing without dragging the whole scale down with them. */
+  --fg: #dee9e9;
+  --fg-code: rgba(222, 233, 233, 0.85);
+  --fg-body: rgba(222, 233, 233, 0.7);
+  --fg-mute: rgba(222, 233, 233, 0.55);
+  --fg-faint: rgba(222, 233, 233, 0.42);
+  --fg-ghost: rgba(222, 233, 233, 0.28);
+
+  /* Lines, by intent rather than by strength: a divider inside a box, the edge of a box, and the edge of something you can click. */
+  --line: rgba(222, 233, 233, 0.1);
+  --edge: rgba(222, 233, 233, 0.14);
+  --edge-strong: rgba(222, 233, 233, 0.22);
+
+  --accent: #f7c577;
+  --accent-hi: #ffdca1;
+  --accent-edge: rgba(247, 197, 119, 0.5);
+  --accent-line: rgba(247, 197, 119, 0.35);
+  --accent-wash: rgba(247, 197, 119, 0.06);
+  --accent-fill: rgba(247, 197, 119, 0.14);
+  --accent-mute: rgba(247, 197, 119, 0.85);
+  --ok: #9fd8b4;
+  --err: #f0a38a;
+
+  --r-chip: 2px;
+  --r-btn: 3px;
+  --r-panel: 4px;
+
+  --display: Faustina, Georgia, serif;
+  --sans: Geist, system-ui, sans-serif;
+  --mono: "Geist Mono", ui-monospace, monospace;
+
+  /* Mono sizes get tokens because the same five sizes recur across labels, chips, and code in both pages; the display and body sizes are mostly one-per-place and stay inline. */
+  --ms-code: 13px;
+  --ms-code-sm: 12.5px;
+  --ms-chip: 11.5px;
+  --ms-label: 11px;
+  --ms-micro: 10.5px;
+
+  --bar: 56px;
+  --editor-gutter: 52px;
+  --pad: 40px;
+  --rail: 880px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* This site is desktop-only by decision, not by neglect. The floor makes that explicit: below it the page scrolls sideways instead of silently deforming layouts that were never drawn for the width. */
+body {
+  min-width: 1100px;
+  background: var(--ink);
+  color: var(--fg);
+  font-family: var(--sans);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-hi);
+}
+
+::selection {
+  background: rgba(247, 197, 119, 0.28);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(222, 233, 233, 0.18);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* The mono caption that labels nearly everything on the site — hero eyebrow, panel titles, section kickers, the footer. No uppercase transform: the same treatment carries filenames like vector.crs, which must keep their case. */
+.label {
+  font-family: var(--mono);
+  font-size: var(--ms-label);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  color: var(--fg-faint);
+}
+
+.label--sm {
+  font-size: var(--ms-micro);
+}
+
+.label--accent {
+  color: var(--accent-mute);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 14px 24px;
+  border: 1px solid transparent;
+  border-radius: var(--r-btn);
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--accent-hi);
+  border-color: var(--accent-hi);
+  color: var(--ink);
+}
+
+.btn--outline {
+  background: none;
+  border-color: var(--edge-strong);
+  color: var(--fg-body);
+}
+
+.btn--outline:hover:not(:disabled) {
+  border-color: var(--accent-edge);
+  color: var(--accent);
+}
+
+.btn--sm {
+  font-size: 13px;
+  padding: 9px 20px;
+}
+
+/* The small mono control: COPY, CLEAR, the cheatsheet toggle, the rail's close button. Same hover contract as everything else — go amber. */
+.btn--chip {
+  font-family: var(--mono);
+  font-size: var(--ms-micro);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  padding: 6px 10px;
+  border-radius: var(--r-chip);
+  background: none;
+  border-color: var(--edge-strong);
+  color: var(--fg-body);
+}
+
+.btn--chip:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.chip {
+  font-family: var(--mono);
+  font-size: var(--ms-chip);
+  font-weight: 400;
+  padding: 7px 12px;
+  background: transparent;
+  border: 1px solid var(--edge);
+  border-radius: var(--r-chip);
+  color: var(--fg-body);
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.chip:hover {
+  border-color: var(--accent-edge);
+  color: var(--accent);
+}
+
+.chip--on {
+  background: var(--accent-fill);
+  border-color: var(--accent-edge);
+  color: var(--accent);
+}
+
+/* A badge that only looks like a chip — the licence tag in the resources column. */
+.chip--static {
+  cursor: default;
+  border-color: var(--accent-line);
+  color: var(--accent);
+  letter-spacing: 0.12em;
+}
+
+.chip--static:hover {
+  border-color: var(--accent-line);
+  color: var(--accent);
+}
+
+.code {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--ms-code);
+  line-height: 1.85;
+  color: var(--fg-code);
+  overflow-x: auto;
+}
+
+/* Highlighting is two classes and no more. The canvas collapsed keywords, types, and strings into a single amber, and holding to that keeps a code block reading as one texture instead of a rainbow. */
+.kw {
+  color: var(--accent);
+}
+
+.cm {
+  color: var(--fg-mute);
+}
+
+code {
+  font-family: var(--mono);
+}
+
+/* Panel heads and toolbars are flex rows filled by slotted content, and scoped styles cannot reach across a slot boundary to push one child to the right. This is the one utility that earns its keep. */
+.push {
+  margin-left: auto;
+}

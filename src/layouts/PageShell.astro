@@ -1,0 +1,21 @@
+---
+// The document archetype: the page scrolls, the header rides along on top of it, and content sits in width-capped sections.
+import Document from "./Document.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<Document title={title} description={description}>
+  <Header current="home" sticky />
+  <main>
+    <slot />
+  </main>
+  <Footer />
+</Document>

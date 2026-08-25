@@ -1,19 +1,16 @@
 export interface CuriosExample {
-  tab: string;
   label: string;
   code: string;
 }
 
 export const EXAMPLES: Record<string, CuriosExample> = {
   hello: {
-    tab: "hello world",
     label: "hello.crs",
     code:
       "use /std/{print};\n\n" +
       'print("Hello, world!\\n")',
   },
   destructure: {
-    tab: "destructuring",
     label: "midpoint.crs",
     code:
       "use /std/{Fmt, Nat};\n\n" +
@@ -31,7 +28,6 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       'Fmt/print("midpoint = (%, %)\\n")(mx)(my)',
   },
   spread: {
-    tab: "spread syntax",
     label: "spread.crs",
     code:
       "use /std/{Fmt, Nat, List};\n\n" +
@@ -50,7 +46,6 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       'Fmt/print("q = (%, %), padded has % elems\\n")(q.x)(q.y)(List/len(padded))',
   },
   patterns: {
-    tab: "nested match",
     label: "combine.crs",
     code:
       "use /std/{Option, Nat, Fmt};\n\n" +
@@ -64,7 +59,6 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       'Fmt/print("combine = %\\n")(combine(Option/some(3), Option/some(4)))',
   },
   "cond match": {
-    tab: "cond match",
     label: "select.crs",
     code:
       "use /std/{Bool, Fmt, Nat, Option};\n\n" +
@@ -77,7 +71,6 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       'Fmt/print("choice = %\\n")(select(true, Option/some(21), 5))',
   },
   map: {
-    tab: "map lookup",
     label: "scores.crs",
     code:
       "use /std/{Fmt, Nat, Map, Option, print};\n\n" +
@@ -95,7 +88,6 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "end",
   },
   donotation: {
-    tab: "do-notation",
     label: "sum_all.crs",
     code:
       "use /std/{Nat, Option, Fmt, print};\n\n" +
@@ -110,7 +102,6 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "end",
   },
   concepts: {
-    tab: "ad-hoc polymorphism",
     label: "point.crs",
     code:
       "use /std/{Nat, Fmt, Add};\n\n" +
@@ -126,7 +117,6 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       'Fmt/print("p.x + p.y = %\\n")(p.x + p.y)',
   },
   erased: {
-    tab: "erased arg",
     label: "erased.crs",
     code:
       "use /std/{Nat, Vec, print};\n\n" +
@@ -137,7 +127,6 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       'print("typechecks: head, n erased\\n")',
   },
   vec: {
-    tab: "vec append",
     label: "vec.crs",
     code:
       "use /std/{Nat, print};\n\n" +
@@ -153,7 +142,6 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       'print("typechecks: Vec/append\\n")',
   },
   sym: {
-    tab: "sym proof",
     label: "sym.crs",
     code:
       "use /std/{Eq, print};\n\n" +
@@ -164,7 +152,6 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       'print("typechecks: sym\\n")',
   },
   goal: {
-    tab: "written goal",
     label: "goal.crs",
     code:
       "use /std/{print};\n\n" +
@@ -173,7 +160,6 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       'print("unreachable\\n")',
   },
   error: {
-    tab: "type error",
     label: "broken.crs",
     code:
       "use /std/{Nat, Vec, print};\n\n" +

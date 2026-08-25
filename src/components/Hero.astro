@@ -1,0 +1,112 @@
+---
+import Section from "./Section.astro";
+import Panel from "./Panel.astro";
+import InstallBox from "./InstallBox.astro";
+import { HERO } from "../data/home";
+import { inlineCode } from "../data/markup";
+import { PAGES, BUILD_URL } from "../data/site";
+---
+
+<Section padding="96px var(--pad)">
+  <div class="hero">
+    <div class="col">
+      <p class="label eyebrow">{HERO.eyebrow}</p>
+      <h1>{HERO.heading[0]}<br />{HERO.heading[1]}</h1>
+      <p class="lead">{HERO.lead}</p>
+      <div class="actions">
+        <a class="btn btn--primary" href={PAGES.playground.href}>Argue with it in a browser tab →</a>
+        <a class="btn btn--outline" href={BUILD_URL}>Build it yourself</a>
+      </div>
+      <InstallBox />
+    </div>
+
+    <div class="col col--panels">
+      <Panel>
+        <Fragment slot="head">
+          <span class="label">{HERO.filename}</span>
+          <span class="label label--accent push">{HERO.caption}</span>
+        </Fragment>
+        <pre class="code decl" set:html={HERO.declaration.join("\n")} />
+        <pre class="code usage" set:html={HERO.usage.join("\n")} />
+      </Panel>
+
+      <Panel tone="accent">
+        <pre class="code diagnostic" set:html={HERO.diagnostic.join("\n")} />
+      </Panel>
+
+      <p class="note" set:html={inlineCode(HERO.note)} />
+    </div>
+  </div>
+</Section>
+
+<style>
+  /* The two columns are stretched to a common height and each distributes its own slack, which is what lines the install box up with the closing note. It only holds because the page is capped at 1440 and floored at 1100 — inside that band the slack stays small enough to read as alignment rather than drift. */
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(360px, 0.85fr) minmax(440px, 1.15fr);
+    gap: 64px;
+    align-items: stretch;
+  }
+
+  /* Both columns distribute their own slack so the install box lands level with the closing note. The left column spaces itself with margins between blocks of prose; only the right one, a stack of peer panels, wants a uniform gap. */
+  .col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .col--panels {
+    gap: 16px;
+  }
+
+  .eyebrow {
+    margin: 0 0 24px;
+  }
+
+  h1 {
+    font-size: 76px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin: 0 0 24px;
+    text-wrap: balance;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--fg-body);
+    max-width: 44ch;
+    margin: 0 0 32px;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  /* Two blocks rather than one so the declaration and the use of it read as separate thoughts, with no rule between them and no gap either. */
+  .decl {
+    padding: 20px 24px;
+  }
+
+  .usage {
+    padding: 0 24px 20px;
+  }
+
+  .diagnostic {
+    padding: 20px 24px;
+    font-size: var(--ms-code-sm);
+    line-height: 1.8;
+  }
+
+  .note {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--fg-mute);
+    max-width: 62ch;
+    margin: 0;
+    text-wrap: pretty;
+  }
+</style>

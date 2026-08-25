@@ -1,0 +1,88 @@
+---
+import Section from "./Section.astro";
+import { RESOURCES, CLOSING } from "../data/home";
+---
+
+<Section padding="80px var(--pad) 96px">
+  <div class="closing">
+    <div>
+      <h2>{CLOSING.heading}</h2>
+      <p>{CLOSING.body}</p>
+      <span class="chip chip--static">{CLOSING.licence}</span>
+    </div>
+
+    <div class="cards">
+      {
+        RESOURCES.map((resource) => (
+          <a class="card" href={resource.href}>
+            <span class="title">{resource.title}</span>
+            <span class="body">{resource.body}</span>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</Section>
+
+<style>
+  .closing {
+    display: grid;
+    grid-template-columns: minmax(300px, 0.7fr) 1.3fr;
+    gap: 64px;
+    align-items: start;
+  }
+
+  h2 {
+    font-size: 38px;
+    margin-bottom: 16px;
+  }
+
+  .closing p {
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--fg-mute);
+    margin: 0 0 24px;
+    text-wrap: pretty;
+  }
+
+  .chip {
+    display: inline-block;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    display: block;
+    padding: 20px 20px 24px;
+    border: 1px solid var(--edge);
+    border-radius: var(--r-panel);
+    color: var(--fg);
+    transition:
+      border-color 120ms ease,
+      background 120ms ease;
+  }
+
+  .card:hover {
+    border-color: var(--accent-edge);
+    background: var(--accent-wash);
+    color: var(--fg);
+  }
+
+  .title {
+    display: block;
+    font-size: 17px;
+    font-weight: 400;
+    margin-bottom: 8px;
+  }
+
+  .body {
+    display: block;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--fg-mute);
+  }
+</style>

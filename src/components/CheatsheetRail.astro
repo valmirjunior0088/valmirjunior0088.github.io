@@ -1,0 +1,229 @@
+---
+import CheatsheetCard from "./CheatsheetCard.astro";
+import { CHEATSHEET } from "../data/cheatsheet";
+import { SYNTAX_URL } from "../data/site";
+---
+
+<div class="backdrop" data-rail-backdrop hidden></div>
+
+<aside class="rail" data-rail aria-label="Cheatsheet" aria-hidden="true">
+  <div class="head">
+    <div class="row">
+      <button class="btn btn--chip close" data-rail-close title="Close the cheatsheet" aria-label="Close the cheatsheet">
+        ›
+      </button>
+      <h2>Cheatsheet</h2>
+      <span class="label count" data-rail-count></span>
+      <input
+        class="search"
+        type="search"
+        placeholder="Search…"
+        aria-label="Search the cheatsheet"
+        autocomplete="off"
+        data-rail-search
+      />
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="cards" data-rail-cards>
+      {CHEATSHEET.map((card) => <CheatsheetCard card={card} />)}
+    </div>
+
+    <p class="empty" hidden data-rail-empty>
+      no matches for &ldquo;<span data-rail-query></span>&rdquo; &mdash;
+      <button class="reset" data-rail-reset>clear the filter</button>
+    </p>
+
+    <a class="reference" href={SYNTAX_URL}>Full language reference →</a>
+  </div>
+</aside>
+
+<style>
+  /* Wide enough for two columns of cards, which is what the corpus needs to be read rather than merely searched. It covers most of the editor while open, and that is the correct trade: you are reading, not typing. */
+  .rail {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    width: var(--rail);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--raise);
+    border-left: 1px solid var(--edge);
+    box-shadow: -18px 0 40px rgba(0, 0, 0, 0.35);
+    transform: translateX(102%);
+    transition: transform 240ms cubic-bezier(0.22, 0.7, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .rail.open {
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 29;
+  }
+
+  /* Matches the app header exactly, so the rail's title row lands on the same line as the wordmark rather than floating a few pixels off it. */
+  .head {
+    flex: none;
+    display: flex;
+    align-items: center;
+    height: var(--bar);
+    padding: 0 16px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* One 28px row: the button, the title, and the count take exactly their own width, and the search field takes everything left over. Stretching the row rather than centring its parts is what makes them share one box. */
+  .row {
+    flex: 1;
+    display: grid;
+    grid-template-columns: max-content max-content max-content 1fr;
+    gap: 8px;
+    height: 28px;
+    align-items: stretch;
+  }
+
+  .count {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+  .close {
+    width: 28px;
+    height: 100%;
+    padding: 0;
+    letter-spacing: 0;
+    font-size: 13px;
+    justify-content: center;
+  }
+
+  h2 {
+    display: flex;
+    align-items: center;
+    font-size: 21px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .search {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    padding: 0 10px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--edge-strong);
+    border-radius: var(--r-chip);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: var(--ms-code-sm);
+    line-height: 1;
+    outline: none;
+  }
+
+  .search:focus {
+    border-color: var(--accent-edge);
+  }
+
+  .body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 16px;
+  }
+
+  /* Row-major, so cards read left to right. Ragged bottoms are the cost — a short card leaves a gap under it when its row-mate runs long — and the alternative, column-major, would need a bounded height this scrolling container does not have. */
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+
+  .empty {
+    font-size: 13px;
+    color: var(--fg-mute);
+    text-align: center;
+    padding: 24px 0;
+  }
+
+  .reset {
+    font: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--accent);
+    cursor: pointer;
+  }
+
+  .reference {
+    display: block;
+    text-align: center;
+    font-size: var(--ms-code-sm);
+    margin-top: 16px;
+    padding: 12px 0 6px;
+    border-top: 1px solid var(--line);
+  }
+</style>
+
+<script>
+  const rail = document.querySelector<HTMLElement>("[data-rail]");
+  const backdrop = document.querySelector<HTMLElement>("[data-rail-backdrop]");
+  const search = document.querySelector<HTMLInputElement>("[data-rail-search]");
+  const empty = document.querySelector<HTMLElement>("[data-rail-empty]");
+  const query = document.querySelector<HTMLElement>("[data-rail-query]");
+  const counter = document.querySelector<HTMLElement>("[data-rail-count]");
+  const cards = [...document.querySelectorAll<HTMLElement>("[data-card]")];
+  const toggles = [...document.querySelectorAll<HTMLElement>("[data-rail-toggle]")];
+  const closers = [...document.querySelectorAll<HTMLElement>("[data-rail-close]")];
+
+  if (rail && backdrop && search && empty && query) {
+    const setOpen = (open: boolean) => {
+      rail.classList.toggle("open", open);
+      rail.setAttribute("aria-hidden", String(!open));
+      backdrop.hidden = !open;
+      if (open) search.focus();
+    };
+
+    const filter = () => {
+      const needle = search.value.trim().toLowerCase();
+      let matches = 0;
+
+      for (const card of cards) {
+        const hit = !needle || (card.dataset.search ?? "").includes(needle);
+        card.hidden = !hit;
+        if (hit) matches++;
+      }
+
+      empty.hidden = matches > 0;
+      query.textContent = search.value.trim();
+
+      // Silent while unfiltered — the full count is the resting state and needs no announcing; it earns its place only once a search has narrowed things.
+      if (counter) counter.textContent = needle ? `${matches} OF ${cards.length}` : "";
+    };
+
+    toggles.forEach((toggle) => toggle.addEventListener("click", () => setOpen(!rail.classList.contains("open"))));
+    closers.forEach((closer) => closer.addEventListener("click", () => setOpen(false)));
+    backdrop.addEventListener("click", () => setOpen(false));
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && rail.classList.contains("open")) setOpen(false);
+    });
+
+    search.addEventListener("input", filter);
+
+    document.querySelector<HTMLElement>("[data-rail-reset]")?.addEventListener("click", () => {
+      search.value = "";
+      filter();
+      search.focus();
+    });
+  }
+</script>

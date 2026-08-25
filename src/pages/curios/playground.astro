@@ -1,601 +1,213 @@
 ---
-import Base from "../../layouts/Base.astro";
-import Nav from "../../components/Nav.astro";
+import AppShell from "../../layouts/AppShell.astro";
+import Toolbar from "../../components/Toolbar.astro";
 import Editor from "../../components/Editor.astro";
-import { CHEATSHEET } from "../../data/cheatsheet";
+import OutputPane from "../../components/OutputPane.astro";
+import CheatsheetRail from "../../components/CheatsheetRail.astro";
 import { EXAMPLES } from "../../data/examples";
-import { GITHUB_URL } from "../../data/site";
-import type { CheatsheetEntry, CheatsheetSection } from "../../data/cheatsheet";
 
-const renderInlineCode = (body: string) => body.replace(/`([^`]+)`/g, "<code>$1</code>");
-const SYNTAX_URL = `${GITHUB_URL}/blob/main/documentation/syntax.md`;
+const keys = Object.keys(EXAMPLES);
+const defaultKey = keys[0];
 
-const stripHtml = (html: string) =>
-  html
-    .replace(/<[^>]+>/g, "")
-    .replace(/&gt;/g, ">")
-    .replace(/&lt;/g, "<")
-    .replace(/&amp;/g, "&");
-const searchText = (section: CheatsheetSection, entry: CheatsheetEntry) =>
-  [section.title, ...entry.examples.flat().map(stripHtml), entry.note.replace(/`/g, "")].join(" ").toLowerCase();
-
-// The editor pane is the full section width less the gutter and code padding — roomy enough that canonical output fits, so most examples carry `curios format` output verbatim. Four deliberately do not: `cond match`, `erased`, `sym` and `vec` keep the laddered `match`/`choose` that the formatter collapses onto one line once it fits. The ladder is the thing those four are teaching, so they are kept laddered and fail `curios format --check` on purpose. That is a different exemption from the hero and stdlib snippets, which are hand-wrapped because canonical output does not fit their columns at all — budgets in index.astro.
-const EXAMPLE_BUDGET = 122;
-for (const [key, example] of Object.entries(EXAMPLES)) {
-  for (const line of example.code.split("\n"))
-    if (line.length > EXAMPLE_BUDGET)
-      console.warn(`[examples] "${key}" line is ${line.length} chars (budget ${EXAMPLE_BUDGET}), will scroll: ${line.trim().slice(0, 40)}`);
-}
-
-// widest row that fits a two-column layout at full width; side-by-side examples pay ~4 chars for the separator
-const LINE_BUDGET = 58;
-for (const section of CHEATSHEET) {
-  for (const entry of section.entries) {
-    const widths = entry.examples.map((example) => Math.max(...example.map((line) => stripHtml(line).length)));
-    const width = widths.reduce((total, w) => total + w, 0) + (widths.length - 1) * 4;
-    if (width > LINE_BUDGET)
-      console.warn(`[cheatsheet] "${section.title}" entry is ${width} chars wide (budget ${LINE_BUDGET}), will clip: ${stripHtml(entry.examples[0][0]).trim().slice(0, 40)}`);
-  }
-}
+const DIAGNOSTICS_PLACEHOLDER = 'No complaints yet. Hit "Run" and the compiler will find some.';
+const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it just might show up here.";
 ---
 
-<Base
-  title="Playground — Curios"
-  description="Write and run Curios in the browser — it typechecks and compiles to WebAssembly right here, nothing leaves your browser."
->
-  <div class="page">
-    <Nav crumb="playground" />
+<AppShell title="Playground · Curios">
+  <div class="frame">
+    <Toolbar scroll>
+      <span class="label">EXAMPLES</span>
+      {
+        keys.map((key) => (
+          <button class:list={["chip", key === defaultKey && "chip--on"]} data-example={key}>
+            {EXAMPLES[key].label}
+          </button>
+        ))
+      }
+    </Toolbar>
 
-    <div class="main">
-      <div class="intro">
-        <h1 class="h-serif">Playground</h1>
-        <p>Pick an example or write your own Curios — it typechecks and compiles to WebAssembly right here, nothing leaves your browser.<br /><strong>One caveat:</strong> abstract modules like <code>pub mod Name;</code> only resolve in the native compiler, where a file system backs them — the playground has none.</p>
-      </div>
+    <Editor />
 
-      <Editor />
+    <Toolbar>
+      <button class="btn btn--primary btn--sm" data-run>Run ▸</button>
+      <span class="status" data-status data-tone="idle">ready</span>
+      <button class="btn btn--chip push" data-rail-toggle>‹ CHEATSHEET</button>
+    </Toolbar>
 
-      <section class="cheatsheet-panel code-card at-start" id="cheatsheet" aria-label="Cheatsheet">
-        <header class="cheatsheet-head">
-          <div class="cheatsheet-headline">
-            <button class="btn btn-outline cheatsheet-toggle" aria-expanded="false" aria-controls="cheatsheet" aria-label="Enlarge the cheatsheet">
-              <svg class="cheatsheet-icon-enlarge" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
-                <path d="M9.5 2.5h4v4" />
-                <path d="M13.5 2.5 9.5 6.5" />
-                <path d="M6.5 13.5h-4v-4" />
-                <path d="M2.5 13.5 6.5 9.5" />
-              </svg>
-              <svg class="cheatsheet-icon-close" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
-                <path d="M4 4l8 8" />
-                <path d="M12 4l-8 8" />
-              </svg>
-            </button>
-            <h2 class="cheatsheet-title">Cheatsheet</h2>
-            <span class="cheatsheet-hint" aria-hidden="true">esc or click outside to close</span>
-          </div>
-          <span class="cheatsheet-count" aria-live="polite"></span>
-          <input class="cheatsheet-filter" type="search" placeholder='filter… try "match"' aria-label="Filter the cheatsheet" autocomplete="off" />
-        </header>
-
-        <div class="cheatsheet-body" tabindex="0">
-          <div class="cheatsheet-fade cheatsheet-fade-top" aria-hidden="true"></div>
-          <div class="cheatsheet-cols">
-            {
-              [1, 2].map((column) => (
-                <div class="cheatsheet-col">
-                  {CHEATSHEET.filter((section) => section.column === column).map((section) => (
-                    <section class="cheatsheet-sec">
-                      <h3 class="cheatsheet-sec-title">{section.title}</h3>
-                      {section.entries.map((entry) => (
-                        <div class="cheatsheet-row" data-search={searchText(section, entry)}>
-                          <div class="cheatsheet-code">
-                            {entry.examples.map((example) => (
-                              <pre class="cheatsheet-example" set:html={example.join("\n")} />
-                            ))}
-                          </div>
-                          <div class="cheatsheet-note" set:html={renderInlineCode(entry.note)} />
-                        </div>
-                      ))}
-                    </section>
-                  ))}
-                </div>
-              ))
-            }
-          </div>
-          <p class="cheatsheet-empty" hidden>no matches for &ldquo;<span class="cheatsheet-empty-q"></span>&rdquo; &mdash; <button class="cheatsheet-clear">clear the filter</button></p>
-          <div class="cheatsheet-fade cheatsheet-fade-bottom" aria-hidden="true"></div>
-        </div>
-
-        <footer class="cheatsheet-foot">
-          <p>lifted straight from the <a href={SYNTAX_URL} target="_blank" rel="noopener">language reference</a> &mdash; when the two disagree, that's a conformance bug in one of them.</p>
-        </footer>
-      </section>
-      <div class="cheatsheet-placeholder" hidden aria-hidden="true"></div>
+    <div class="outputs">
+      <OutputPane name="diagnostics" label="DIAGNOSTICS" placeholder={DIAGNOSTICS_PLACEHOLDER} count />
+      <OutputPane name="stdout" label="STDOUT" placeholder={STDOUT_PLACEHOLDER} />
     </div>
   </div>
 
-  <div class="cheatsheet-backdrop" hidden></div>
-</Base>
-
-<script>
-  import { scrollFades } from "../../scripts/scrollFades";
-
-  const panel = document.getElementById("cheatsheet")!;
-  const backdrop = document.querySelector<HTMLElement>(".cheatsheet-backdrop")!;
-  const toggle = panel.querySelector<HTMLButtonElement>(".cheatsheet-toggle")!;
-  const filter = panel.querySelector<HTMLInputElement>(".cheatsheet-filter")!;
-  const count = panel.querySelector<HTMLElement>(".cheatsheet-count")!;
-  const body = panel.querySelector<HTMLElement>(".cheatsheet-body")!;
-  const empty = panel.querySelector<HTMLElement>(".cheatsheet-empty")!;
-  const emptyQuery = panel.querySelector<HTMLElement>(".cheatsheet-empty-q")!;
-  const clear = panel.querySelector<HTMLButtonElement>(".cheatsheet-clear")!;
-  const rows = [...panel.querySelectorAll<HTMLElement>(".cheatsheet-row")];
-  const sections = [...panel.querySelectorAll<HTMLElement>(".cheatsheet-sec")];
-
-  const floating = () => panel.classList.contains("is-floating");
-
-  // `at-start` / `at-end` on the panel drive the cheatsheet's edge fades; scrollFades also owns the scroll/resize listeners and the initial pass.
-  const updateFade = scrollFades({ scroller: body, target: panel });
-
-  function applyFilter() {
-    const query = filter.value.trim().toLowerCase();
-    let shown = 0;
-    for (const row of rows) {
-      const hit = !query || (row.dataset.search ?? "").includes(query);
-      row.hidden = !hit;
-      if (hit) shown++;
-    }
-    for (const section of sections) {
-      section.hidden = !section.querySelector(".cheatsheet-row:not([hidden])");
-    }
-    count.textContent = query ? `${shown} of ${rows.length}` : "";
-    empty.hidden = shown > 0;
-    emptyQuery.textContent = query;
-    body.scrollTop = 0;
-    updateFade();
-  }
-
-  function clearFilter() {
-    filter.value = "";
-    applyFilter();
-  }
-
-  const placeholder = document.querySelector<HTMLElement>(".cheatsheet-placeholder")!;
-  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
-  const MOTION: KeyframeAnimationOptions = { duration: 240, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" };
-  const edges = (rect: DOMRect) => ({
-    top: `${rect.top}px`,
-    bottom: `${window.innerHeight - rect.bottom}px`,
-  });
-  let animating = false;
-
-  function setFloating(on: boolean) {
-    if (on === floating() || animating) return;
-    const first = panel.getBoundingClientRect();
-
-    if (on) {
-      toggle.setAttribute("aria-label", "Close the cheatsheet");
-      toggle.setAttribute("aria-expanded", "true");
-      placeholder.style.height = `${first.height}px`;
-      placeholder.hidden = false;
-      panel.classList.add("is-floating");
-      panel.setAttribute("role", "dialog");
-      panel.setAttribute("aria-modal", "true");
-      backdrop.hidden = false;
-      document.documentElement.style.overflow = "hidden";
-      backdrop.getAnimations().forEach((animation) => animation.cancel());
-      panel.getAnimations().forEach((animation) => animation.cancel());
-      if (!reduceMotion.matches) {
-        const last = panel.getBoundingClientRect();
-        animating = true;
-        backdrop.animate([{ opacity: 0 }, { opacity: 1 }], MOTION);
-        const slide = panel.animate([edges(first), edges(last)], MOTION);
-        slide.finished.finally(() => {
-          animating = false;
-          panel.classList.add("show-hint");
-          updateFade();
-        });
-      } else {
-        panel.classList.add("show-hint");
-      }
-      filter.focus();
-    } else {
-      panel.classList.remove("show-hint");
-      const target = placeholder.getBoundingClientRect();
-      const finish = () => {
-        toggle.setAttribute("aria-label", "Enlarge the cheatsheet");
-        toggle.setAttribute("aria-expanded", "false");
-        panel.classList.remove("is-floating");
-        panel.removeAttribute("role");
-        panel.removeAttribute("aria-modal");
-        placeholder.hidden = true;
-        backdrop.hidden = true;
-        document.documentElement.style.overflow = "";
-        animating = false;
-        toggle.focus();
-        updateFade();
-      };
-      if (reduceMotion.matches) {
-        finish();
-      } else {
-        animating = true;
-        // cancel these once done: a lingering forwards-fill animation can be GC'd into a state where it still applies its styles but no longer shows up in getAnimations(), permanently overriding the floating position and backdrop opacity
-        const fade = backdrop.animate([{ opacity: 1 }, { opacity: 0 }], { ...MOTION, fill: "forwards" });
-        const slide = panel.animate([edges(first), edges(target)], { ...MOTION, fill: "forwards" });
-        const settle = () => {
-          finish();
-          fade.cancel();
-          slide.cancel();
-        };
-        slide.finished.then(settle, settle);
-      }
-    }
-    updateFade();
-  }
-
-  toggle.addEventListener("click", () => setFloating(!floating()));
-  backdrop.addEventListener("click", () => setFloating(false));
-  filter.addEventListener("input", applyFilter);
-  clear.addEventListener("click", () => {
-    clearFilter();
-    filter.focus();
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      if (filter.value && (floating() || document.activeElement === filter)) {
-        clearFilter();
-        event.preventDefault();
-      } else if (floating()) {
-        setFloating(false);
-        event.preventDefault();
-      }
-      return;
-    }
-    if (event.key === "Tab" && floating()) {
-      const focusables = [...panel.querySelectorAll<HTMLElement>("a[href], button, input, [tabindex]")].filter(
-        (el) => el.offsetParent !== null,
-      );
-      if (focusables.length === 0) return;
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        last.focus();
-        event.preventDefault();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        first.focus();
-        event.preventDefault();
-      }
-    }
-  });
-</script>
+  <CheatsheetRail />
+</AppShell>
 
 <style>
-  :global(html) {
-    scrollbar-gutter: stable;
-  }
-  .page {
-    display: flex;
-    flex-direction: column;
-    min-height: 100dvh;
-  }
-  .main {
-    width: 100%;
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 40px clamp(20px, 4vw, 64px);
+  /* The frame fills whatever the header leaves and hands its slack to the editor. Nothing here scrolls; the editor and the two panes scroll inside themselves, which is what keeps the toolbars where you left them. */
+  .frame {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
   }
-  .intro {
-    margin-bottom: 28px;
-  }
-  .intro h1 {
-    font-size: clamp(28px, 3.4vw, 38px);
-    margin: 0 0 10px;
-  }
-  .intro p {
-    font-size: 15.5px;
-    color: var(--fg-dimmer);
-    margin: 0;
-  }
-  .intro p code {
-    font-family: var(--mono);
-    font-size: 0.85em;
-    color: var(--fg-dim);
-  }
 
-  .cheatsheet-panel {
-    margin-top: 36px;
-    flex: 1;
-    min-height: 340px;
-    max-height: calc(100dvh - 80px);
-    display: flex;
-    flex-direction: column;
-  }
-  .cheatsheet-placeholder {
-    min-height: 340px;
-    margin-top: 36px;
-  }
-  .cheatsheet-placeholder[hidden] {
-    display: none;
-  }
-
-  .cheatsheet-head {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 12px 18px;
-    border-bottom: 1px solid var(--border-soft);
-  }
-  .cheatsheet-headline {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-right: auto;
-  }
-  .cheatsheet-title {
-    font-family: var(--mono);
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 1;
-    text-box: trim-both cap alphabetic;
-    margin: 0;
-  }
-  .cheatsheet-count {
-    font-family: var(--mono);
-    font-size: 12.5px;
-    color: var(--fg-faint);
-    white-space: nowrap;
-  }
-  .cheatsheet-filter {
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--fg);
-    background: var(--bg-output);
-    border: 1px solid var(--border-strong);
-    border-radius: 8px;
-    padding: 8px 12px;
-    width: clamp(150px, 22vw, 250px);
-  }
-  .cheatsheet-filter::placeholder {
-    color: var(--fg-faint);
-  }
-  .cheatsheet-filter:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 1px;
-  }
-  .cheatsheet-hint {
-    display: none;
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--fg-faint);
-    white-space: nowrap;
-  }
-  .cheatsheet-panel.show-hint .cheatsheet-hint {
-    display: inline;
-  }
-  .cheatsheet-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    padding: 0;
-  }
-  .cheatsheet-toggle svg {
-    width: 14px;
-    height: 14px;
-  }
-  .cheatsheet-icon-close {
-    display: none;
-  }
-  .cheatsheet-panel.is-floating .cheatsheet-icon-enlarge {
-    display: none;
-  }
-  .cheatsheet-panel.is-floating .cheatsheet-icon-close {
-    display: block;
-  }
-
-  .cheatsheet-body {
-    position: relative;
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    /* no padding here: it lives on the content below, so the sticky fades pin flush to the body's top and bottom edges and span its full width */
-    padding: 0;
-  }
-  .cheatsheet-cols {
+  .outputs {
+    flex: 0 1 260px;
+    min-height: 120px;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 32px;
-    align-items: start;
-    padding: 18px 22px 0;
+    grid-template-columns: 1fr 1fr;
   }
-  .cheatsheet-sec {
-    margin-bottom: 24px;
-  }
-  .cheatsheet-sec[hidden] {
-    display: none;
-  }
-  .cheatsheet-sec-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+
+  .status {
     font-family: var(--mono);
-    font-size: 11.5px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.09em;
-    color: var(--accent);
-    margin: 0 0 2px;
+    font-size: var(--ms-chip);
   }
-  .cheatsheet-sec-title::after {
-    content: "";
-    flex: 1;
-    border-top: 2px solid var(--accent);
-  }
-  .cheatsheet-row {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 3px;
-    padding: 9px 0;
-  }
-  .cheatsheet-row:not([hidden]) ~ .cheatsheet-row:not([hidden]) {
-    border-top: 1px solid var(--border-soft);
-  }
-  .cheatsheet-row[hidden] {
-    display: none;
-  }
-  .cheatsheet-code {
-    display: flex;
-    align-items: baseline;
-    min-width: 0;
-    overflow-x: auto;
-  }
-  .cheatsheet-example {
-    margin: 0;
-    font-family: var(--mono);
-    font-size: 13px;
-    line-height: 1.7;
-    color: var(--fg);
-    white-space: pre;
-  }
-  .cheatsheet-example + .cheatsheet-example {
-    margin-left: 14px;
-    padding-left: 14px;
-    border-left: 1px solid var(--border-strong);
-  }
-  .cheatsheet-code :global(.kw) {
-    color: oklch(74% 0.18 306);
-  }
-  .cheatsheet-code :global(.ty) {
-    color: oklch(82% 0.09 300);
-  }
-  .cheatsheet-code :global(.cm) {
+
+  .status[data-tone="idle"] {
     color: var(--fg-faint);
   }
-  .cheatsheet-code :global(.str) {
-    color: var(--green);
-  }
-  .cheatsheet-note {
-    font-size: 13.5px;
-    font-style: italic;
-    line-height: 1.5;
-    color: var(--fg-dimmer);
-    text-wrap: pretty;
-  }
-  .cheatsheet-note :global(code) {
-    font-family: var(--mono);
-    font-size: 0.85em;
-    font-style: normal;
-    color: var(--fg-dim);
-  }
 
-  .cheatsheet-empty {
-    font-size: 14px;
-    color: var(--fg-dimmer);
-    margin: 8px 0 24px;
-    padding-inline: 22px;
-  }
-  .cheatsheet-clear {
-    font: inherit;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    color: var(--accent);
-    text-decoration: underline;
-  }
-
-  .cheatsheet-fade {
-    position: sticky;
-    display: block;
-    height: 34px;
-    pointer-events: none;
-    opacity: 1;
-    transition: opacity 150ms ease;
-  }
-  /* each fade overlaps its neighbouring content via a negative margin so it adds no height of its own; the sticky edge pins it to the scroll viewport */
-  .cheatsheet-fade-top {
-    top: 0;
-    margin-bottom: -34px;
-    background: linear-gradient(to top, transparent, color-mix(in srgb, var(--accent) 50%, var(--bg-card)) 90%);
-  }
-  .cheatsheet-fade-bottom {
-    bottom: 0;
-    margin-top: -34px;
-    background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--accent) 50%, var(--bg-card)) 90%);
-  }
-  .cheatsheet-panel.at-start .cheatsheet-fade-top {
-    opacity: 0;
-  }
-  .cheatsheet-panel.at-end .cheatsheet-fade-bottom {
-    opacity: 0;
-  }
-
-  .cheatsheet-foot {
-    border-top: 1px solid var(--border-soft);
-    padding: 11px 22px;
-    background: var(--bg-card);
-  }
-  .cheatsheet-foot p {
-    margin: 0;
-    font-size: 13px;
-    color: var(--fg-faint);
-  }
-  .cheatsheet-foot a {
+  .status[data-tone="working"] {
     color: var(--accent);
   }
 
-  .cheatsheet-panel.is-floating {
-    position: fixed;
-    z-index: 80;
-    top: 20px;
-    bottom: 20px;
-    max-height: none;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(min(1280px, 100vw) - clamp(40px, 8vw, 128px));
-    margin: 0;
-    box-shadow: 0 40px 120px oklch(5% 0.01 285 / 60%);
-  }
-  .cheatsheet-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 70;
-    background: oklch(5% 0.01 285 / 62%);
-    backdrop-filter: blur(3px);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .cheatsheet-fade {
-      transition: none;
-    }
-  }
-
-  @media (max-width: 860px) {
-    .cheatsheet-cols {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .cheatsheet-head {
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .cheatsheet-filter {
-      width: 100%;
-      order: 10;
-      /* 16px keeps iOS Safari from zooming the page when the filter is focused */
-      font-size: 16px;
-    }
-    .cheatsheet-panel.show-hint .cheatsheet-hint {
-      display: none;
-    }
-    .cheatsheet-panel.is-floating {
-      top: 10px;
-      bottom: 10px;
-      width: calc(100vw - 20px);
-    }
+  .status[data-tone="error"] {
+    color: var(--err);
   }
 </style>
+
+<script is:inline type="module" define:vars={{ EXAMPLES, defaultKey }}>
+  // The compiler is a published asset rather than a source module, so this script stays inline and imports it at runtime. If the bundle was never fetched, the loader reports a load-phase failure and the diagnostics pane says so — the page still works, it just cannot compile.
+  import { compileAndReport } from "/curios/loader.js";
+
+  const source = document.querySelector("[data-source]");
+  const gutter = document.querySelector("[data-gutter]");
+  const runButton = document.querySelector("[data-run]");
+  const status = document.querySelector("[data-status]");
+  const chips = [...document.querySelectorAll("[data-example]")];
+  const count = document.querySelector('[data-pane="diagnostics"] [data-count]');
+
+  const panes = {
+    diagnostics: document.querySelector('[data-pane="diagnostics"] [data-body]'),
+    stdout: document.querySelector('[data-pane="stdout"] [data-body]'),
+  };
+
+  let running = false;
+
+  function renderGutter() {
+    const lines = source.value.split("\n").length;
+    gutter.textContent = Array.from({ length: lines }, (_, index) => index + 1).join("\n");
+  }
+
+  function setPane(name, text, tone) {
+    const pane = panes[name];
+    const empty = !text;
+    pane.textContent = empty ? pane.dataset.placeholder : text;
+    pane.classList.toggle("empty", empty);
+    pane.classList.toggle("error", !empty && tone === "error");
+  }
+
+  function setStatus(text, tone) {
+    status.textContent = text;
+    status.dataset.tone = tone;
+  }
+
+  function setCount(text, tone) {
+    count.textContent = text;
+    count.dataset.tone = tone ?? "";
+  }
+
+  function clearOutput() {
+    setPane("diagnostics", "");
+    setPane("stdout", "");
+    setStatus("ready", "idle");
+    setCount("");
+  }
+
+  function pick(key) {
+    source.value = EXAMPLES[key].code;
+    renderGutter();
+    chips.forEach((chip) => chip.classList.toggle("chip--on", chip.dataset.example === key));
+    clearOutput();
+  }
+
+  // Editing detaches the buffer from whichever example it started as, so no chip stays lit: what is in the editor is no longer that file.
+  source.addEventListener("input", () => {
+    renderGutter();
+    chips.forEach((chip) => chip.classList.remove("chip--on"));
+  });
+
+  source.addEventListener("scroll", () => {
+    gutter.scrollTop = source.scrollTop;
+  });
+
+  chips.forEach((chip) => chip.addEventListener("click", () => pick(chip.dataset.example)));
+
+  document.querySelectorAll("[data-clear]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const name = button.dataset.clear;
+      setPane(name, "");
+      if (name === "diagnostics") {
+        setCount("");
+        setStatus("ready", "idle");
+      }
+    });
+  });
+
+  runButton.addEventListener("click", async () => {
+    if (running) return;
+    running = true;
+    runButton.disabled = true;
+    runButton.textContent = "Running…";
+    setStatus("compiling…", "working");
+    setPane("diagnostics", "");
+    setPane("stdout", "");
+    setCount("");
+
+    // The timings are the success message. Saying "accepted" beside them would only be a worse way of saying what they already say, so they take that slot outright and the status line reads ready → compiling… → the numbers. They accumulate as phases arrive, and the load phase only ever fires once, on the run that downloads the compiler.
+    const timings = [];
+    const showTimings = () => setStatus(timings.join(" · "), "idle");
+
+    try {
+      const result = await compileAndReport(source.value, (event) => {
+        if (event.phase === "load") {
+          timings.push(`compiler ${event.loadMs.toFixed(0)}ms`, `warm ${event.warmMs.toFixed(0)}ms`);
+        } else if (event.phase === "compile") {
+          // Only the durations here. The output size belongs to the diagnostics pane, which states it in full, and printing it twice would make the two readouts look like they were measuring different things.
+          timings.push(`compile ${event.wasmMs.toFixed(1)}ms`);
+        }
+        showTimings();
+      });
+
+      if (!result.ok) {
+        setPane("diagnostics", result.error, "error");
+        setStatus("rejected", "error");
+        setCount("1 ERROR", "error");
+        return;
+      }
+
+      timings.push(`run ${result.runMs.toFixed(1)}ms`);
+      showTimings();
+
+      // stderr joins stdout rather than the diagnostics pane: both are the program talking, and only the compiler's complaints belong on the left.
+      setPane("stdout", `${result.run.stdout}${result.run.stderr}`.trimEnd());
+
+      const notes = [`No diagnostics — compiled to ${result.bytes.length} bytes of wasm`];
+      const trapped = Boolean(result.run.trap);
+      if (trapped) notes.push(result.run.trap);
+      else if (result.run.exitCode) notes.push(`Process exited with code ${result.run.exitCode}`);
+
+      setPane("diagnostics", notes.join("\n"), trapped ? "error" : "ok");
+      setCount(trapped ? "1 ERROR" : "CLEAN", trapped ? "error" : "ok");
+      // A trap is the one success-path outcome the timings cannot convey on their own, so it overrides them; otherwise showTimings() has already left the numbers standing.
+      if (trapped) setStatus("rejected", "error");
+    } finally {
+      running = false;
+      runButton.disabled = false;
+      runButton.textContent = "Run ▸";
+    }
+  });
+
+  pick(defaultKey);
+</script>

@@ -1,178 +1,113 @@
+import { GITHUB_URL } from "./site";
+
+// Code shown on the landing page is pre-highlighted markup rather than plain text run through a highlighter at build time: there are exactly three snippets, they never change without someone editing this file, and a highlighter for a language this young would be a large amount of machinery to get four keywords amber. Two classes only — .kw for anything the language reserves, .cm for anything the compiler is telling you about itself.
+export const HERO = {
+  eyebrow: "DEPENDENTLY TYPED · COMPILES TO WEBASSEMBLY",
+  heading: ["Small language.", "Big opinions about your arithmetic."],
+  lead: "Types can depend on values, proofs live beside ordinary code, and the compiler is happy to double-check your math homework.",
+  filename: "vector.crs",
+  caption: "a length that is not a comment",
+  declaration: [
+    '<span class="kw">pub induct</span> Vec(T: <span class="kw">Type</span>): (Nat) -> <span class="kw">pub Type</span>',
+    "| nil(): (0)",
+    "| cons(@m: Nat, x: T, xs: Vec(T, m)): (m + 1)",
+    '<span class="kw">end</span>',
+  ],
+  usage: [
+    '<span class="kw">use</span> /std/{Nat, Vec};',
+    '<span class="kw">let</span> empty: Vec(Nat, 0) = Vec/nil();',
+    '<span class="kw">let</span> single: Vec(Nat, 1) = empty;',
+  ],
+  diagnostic: [
+    "while elaborating /single:",
+    '<span class="kw">type mismatch</span>',
+    "  inferred: Vec(Nat, 0)",
+    "  expected: Vec(Nat, 1)",
+    "",
+    "   --> vector.crs:4:27",
+    "    4 | let single: Vec(Nat, 1) = empty;",
+    '      |                           <span class="kw">^^^^^</span>',
+  ],
+  note: "Two different types, so the off-by-one never reaches the generated program. There is nothing to test for, because there is nothing to run — and the `@m` that made it work does its thinking at compile time, then goes home.",
+};
+
 export interface Feature {
-  glyph: string;
-  title: string;
+  kicker: string;
   body: string;
 }
 
 export const FEATURES: Feature[] = [
   {
-    glyph: "ΠΣ",
-    title: "Dependent by design",
-    body: "Function and tuple types are Π/Σ types — a type can mention a value that came before it, like a vector indexed by its own length.",
+    kicker: "DEPENDENT TYPES",
+    body: "Dependent function and tuple types, indexed inductive families, and pattern matching that works out exhaustiveness so you do not have to pretend you did.",
   },
   {
-    glyph: "μ",
-    title: "Indexed inductive types",
-    body: "Declare your own data and proof families with index telescopes and per-constructor targets — the same machinery `Vec` and `Eq` are built from.",
+    kicker: "UNIVERSES",
+    body: "A cumulative hierarchy of `Type`, with levels inferred rather than written by hand — nobody has ever enjoyed writing one down.",
   },
   {
-    glyph: "≡",
-    title: "Proofs, not comments",
-    body: "A proof-irrelevant `Prop` sort, propositional equality, and the `refl` / `sym` / `trans` / `cong` toolkit, ready in the standard library — state an equation as a type and prove it by matching.",
+    kicker: "PROP",
+    body: "A proof-irrelevant `Prop`, so proofs weigh nothing at runtime. It is the only fair price for a proof.",
   },
   {
-    glyph: "@",
-    title: "Erased at runtime",
-    body: "Mark an argument `@` and it vanishes after type-checking — type parameters, lengths, and proofs steer the checker, then leave no trace in the compiled WebAssembly. Zero runtime cost.",
+    kicker: "ERASURE",
+    body: "Erased arguments — anything marked `@` — guide the checking and then vanish from the output without saying goodbye.",
   },
   {
-    glyph: "{·}",
-    title: "Patterns, not just tags",
-    body: "Destructure tuples and structs in a `let`, lambda, or parameter, and nest match arms across several scrutinees — checked for overlap and completeness. Match on plain literals and packed `Bits`/`Bytes`, not only constructor tags.",
+    kicker: "CONCEPTS",
+    body: "`concept` and `satisfy` for ad-hoc polymorphism: one witness per key, program-wide, so which implementation runs is never a surprise about the call site.",
   },
   {
-    glyph: "=>",
-    title: "Ad-hoc polymorphism",
-    body: "`concept` and `satisfy` declarations give you typeclass-style interfaces — every operator (`+`, `==`, `<`) dispatches through one. Mark a concept's sort `pub` to expose its witness record, or leave it sealed behind the interface.",
+    kicker: "STANDARD LIBRARY",
+    body: "Collections, formatting, IO, networking, tasks, time, randomness, arbitrary-precision integers, JSON, and TOML. Yes, TOML.",
   },
   {
-    glyph: "≤",
-    title: "Universes, inferred",
-    body: "`Type` is a cumulative hierarchy, so a type of types is just another type — and the levels are inferred rather than written. You never annotate one to make a definition fit.",
-  },
-  {
-    glyph: "⊢",
-    title: "A second opinion",
-    body: "An independent kernel re-checks every compilation from the finished terms alone — strict positivity, termination, erasure, universes. Still being refined, and a second opinion rather than a proof of soundness.",
-  },
-  {
-    glyph: "Io",
-    title: "Effects are data",
-    body: "Every host operation — printing, clocks, sockets — returns an `Io` description; calling one performs nothing, and nothing turns an `Io(T)` back into a `T`. The program's tail is the one description the runtime forces.",
-  },
-  {
-    glyph: "!",
-    title: "Do-notation everywhere",
-    body: "Postfix `!` is monadic bind, so every body is a do-block — `Option`, `Parse`, `Async`, `Io` alike. An action from another monad lifts through a declared `Lift` edge: `/std/Async` embeds `Io`, so a fiber prints without ceremony.",
+    kicker: "ONE PIPELINE",
+    body: "One lowering pipeline from source to WebAssembly, in a terminal or a browser tab. There is no second pipeline waiting to disagree with the first.",
   },
 ];
 
-export interface StdlibModule {
-  name: string;
+export interface Resource {
+  title: string;
   body: string;
+  href: string;
 }
 
-export const STDLIB_MODULES: StdlibModule[] = [
+export const RESOURCES: Resource[] = [
   {
-    name: "/std/http",
-    body: "Request/response over TCP or TLS, every call an `Async`.",
+    title: "Language reference",
+    body: "The complete surface language — what something means and how to spell it.",
+    href: `${GITHUB_URL}/blob/main/documentation/syntax.md`,
   },
   {
-    name: "/std/Json",
-    body: "A full codec — encode, decode, and the `Json` tree between.",
+    title: "Usage",
+    body: "Every subcommand, flag, and package concept the command line offers.",
+    href: `${GITHUB_URL}/blob/main/documentation/usage.md`,
   },
   {
-    name: "/std/Toml",
-    body: "A full TOML 1.0.0 codec — parse, print, and every conflict caught.",
+    title: "Design decisions",
+    body: "One file per decision — why Curios is the way it is.",
+    href: `${GITHUB_URL}/tree/main/documentation/design`,
   },
   {
-    name: "/std/Async",
-    body: "Cooperative fibers and tasks — `spawn`, `join`, `cancel`, `race`.",
+    title: "Soundness perimeter",
+    body: "Every rule that can admit a term, and how far it has actually been checked.",
+    href: `${GITHUB_URL}/blob/main/documentation/soundness.md`,
   },
   {
-    name: "/std/Io",
-    body: "Host effects as descriptions — performed once, at the program's tail.",
+    title: "Roadmap",
+    body: "What exists, what is pending, and the specifications for the pending half.",
+    href: `${GITHUB_URL}/blob/main/documentation/roadmap.md`,
   },
   {
-    name: "/std/State",
-    body: "Pure state threading — a region that provably performs nothing.",
-  },
-  {
-    name: "/std/Throw",
-    body: "Short-circuiting failure — `!` as checked early return over `Result`.",
-  },
-  {
-    name: "/std/Parse",
-    body: "Parser combinators — the HTTP decoder is written in them.",
-  },
-  {
-    name: "/std/Map",
-    body: "A canonical crit-bit trie: same entries, same shape.",
-  },
-  {
-    name: "/std/Fmt",
-    body: "Format strings whose argument types are computed by the checker.",
-  },
-  {
-    name: "/std/Str",
-    body: "Proof-carrying UTF-8; every `Char` is a certified Unicode scalar.",
-  },
-  {
-    name: "/std/BigNat",
-    body: "Arbitrary precision, with machine-checked arithmetic laws.",
+    title: "Benchmarks",
+    body: "Methodology and results, including what the abstractions cost.",
+    href: `${GITHUB_URL}/blob/main/benchmarks/README.md`,
   },
 ];
 
-// Pre-highlighted HTML lines, same convention as HERO_SNIPPET: .kw keywords, .ty types/sorts, .cm comments, .str strings.
-export const STDLIB_SNIPPET = {
-  filename: "pulse.crs",
-  lines: [
-    '<span class="kw">use</span> /std/{<span class="ty">Async</span>, http, <span class="ty">Parse</span>, <span class="ty">Json</span>, <span class="ty">Result</span>, <span class="ty">Fmt</span>, <span class="ty">Io</span>, print};',
-    "",
-    '<span class="cm">-- race two TLS mirrors, decode whichever answers first</span>',
-    '<span class="kw">let</span> pulse: <span class="ty">Async</span>({}) =',
-    '    <span class="kw">let</span> reply = Async/race([',
-    '        http/perform(http/get_tls(<span class="str">"eu.api.dev"</span>, 443, <span class="str">"/"</span>)),',
-    '        http/perform(http/get_tls(<span class="str">"us.api.dev"</span>, 443, <span class="str">"/"</span>))',
-    "    ])!;",
-    '    <span class="cm">-- build the report as an Io description&hellip;</span>',
-    '    <span class="kw">let</span> report: <span class="ty">Io</span>({}) = <span class="kw">match</span> reply',
-    "    | success(r) =&gt;",
-    '        <span class="kw">match</span> Parse/run(Json/decode, r.body)',
-    '        | success(j) =&gt;',
-    '            Fmt/print(<span class="str">"pulse = %\\n"</span>)(Json/encode(j))',
-    '        | failure(e) =&gt; Fmt/print(<span class="str">"bad json: %\\n"</span>)(e)',
-    '        <span class="kw">end</span>',
-    '    | failure(_) =&gt; print(<span class="str">"both mirrors down\\n"</span>)',
-    '    <span class="kw">end</span>;',
-    '    <span class="cm">-- &hellip;the ! sequences it here, lifted Io &rarr; Async</span>',
-    '    <span class="kw">let</span> _ = report!;',
-    "    Async/pure(());",
-    "",
-    "Async/run(pulse)",
-  ],
+export const CLOSING = {
+  heading: "If you are still here",
+  body: "Curios is early, experimental, and under active development — syntax, standard library, and compiler may all change without notice.",
+  licence: "APACHE-2.0",
 };
-
-export interface BenchmarkRow {
-  lang: string;
-  value: string;
-  variant?: "head" | "highlight" | "faint";
-}
-
-export interface Benchmark {
-  filename: string;
-  rows: BenchmarkRow[];
-}
-
-export const BENCHMARKS: Benchmark[] = [
-  {
-    filename: "lcg — integer loop, N=100,000,000",
-    rows: [
-      { lang: "language", value: "mean · vs best", variant: "head" },
-      { lang: "Rust → WebAssembly", value: "259.7 ms · 1.00×" },
-      { lang: "Curios", value: "293.2 ms · 1.13×", variant: "highlight" },
-      { lang: "AssemblyScript", value: "319.3 ms · 1.23×" },
-      { lang: "Grain", value: "29,576 ms · 113.9×", variant: "faint" },
-    ],
-  },
-  {
-    filename: "trees — allocation, D=21",
-    rows: [
-      { lang: "language", value: "mean · vs best", variant: "head" },
-      { lang: "Rust → WebAssembly", value: "116.7 ms · 1.00×" },
-      { lang: "Curios", value: "121.4 ms · 1.04×", variant: "highlight" },
-      { lang: "AssemblyScript", value: "228.6 ms · 1.96×" },
-      { lang: "Grain", value: "1,757 ms · 15.1×", variant: "faint" },
-    ],
-  },
-];

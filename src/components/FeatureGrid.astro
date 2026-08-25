@@ -1,0 +1,55 @@
+---
+import Section from "./Section.astro";
+import HairlineGrid from "./HairlineGrid.astro";
+import { FEATURES } from "../data/home";
+import { inlineCode } from "../data/markup";
+---
+
+<Section banded>
+  <div class="head">
+    <h2>What is actually in the box</h2>
+    <span class="label">SHIPPED, NOT PLANNED</span>
+  </div>
+
+  <HairlineGrid>
+    {
+      FEATURES.map((feature) => (
+        <div class="cell">
+          <span class="label label--accent kicker">{feature.kicker}</span>
+          <p set:html={inlineCode(feature.body)} />
+        </div>
+      ))
+    }
+  </HairlineGrid>
+</Section>
+
+<style>
+  /* Baseline-aligned rather than centred, so the mono kicker sits on the same line the heading's letters stand on. */
+  .head {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    margin-bottom: 48px;
+  }
+
+  h2 {
+    font-size: 38px;
+  }
+
+  .cell {
+    padding: 28px 24px 32px;
+  }
+
+  .kicker {
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .cell p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--fg-code);
+    margin: 0;
+    text-wrap: pretty;
+  }
+</style>

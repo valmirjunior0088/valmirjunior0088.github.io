@@ -1,0 +1,26 @@
+---
+// The application archetype, and the exact opposite of PageShell's box model: the frame is pinned to the viewport and never scrolls. Anything that overflows scrolls inside its own pane, which is what lets the toolbars stay put while the editor and the output panes move independently.
+import Document from "./Document.astro";
+import Header from "../components/Header.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<Document title={title} description={description} bodyClass="app">
+  <Header current="playground" />
+  <slot />
+</Document>
+
+<style is:global>
+  body.app {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+</style>

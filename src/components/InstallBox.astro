@@ -1,0 +1,72 @@
+---
+import { INSTALL_COMMAND } from "../data/site";
+---
+
+<div class="install">
+  <span class="label">INSTALL THE CLI</span>
+  <div class="well">
+    <code>{INSTALL_COMMAND}</code>
+    <button class="btn btn--chip push" data-install-copy>COPY</button>
+  </div>
+</div>
+
+<style>
+  .install {
+    border-top: 1px solid var(--edge);
+    padding-top: 20px;
+  }
+
+  .label {
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .well {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--well);
+    border: 1px solid var(--edge);
+    border-radius: var(--r-btn);
+  }
+
+  /* The command is longer than the box and always will be. Rather than wrap it or shrink it, it scrolls, and the mask tells you so by fading the last stretch out instead of guillotining it at the border. */
+  code {
+    font-size: var(--ms-code-sm);
+    color: var(--fg);
+    white-space: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent);
+  }
+
+  code::-webkit-scrollbar {
+    display: none;
+  }
+
+  .btn {
+    flex: none;
+  }
+</style>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>("[data-install-copy]");
+  const command = document.querySelector<HTMLElement>(".install code");
+
+  if (button && command) {
+    let revert: ReturnType<typeof setTimeout>;
+
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(command.textContent ?? "");
+        button.textContent = "COPIED";
+      } catch {
+        // Clipboard access can be refused outright — an insecure origin, a permissions policy, a browser that simply says no. Saying so is more use than a button that silently pretends it worked.
+        button.textContent = "COPY FAILED";
+      }
+      clearTimeout(revert);
+      revert = setTimeout(() => (button.textContent = "COPY"), 1600);
+    });
+  }
+</script>

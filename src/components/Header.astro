@@ -1,0 +1,78 @@
+---
+import { PAGES, EXTERNAL_NAV, type PageId } from "../data/site";
+
+interface Props {
+  current: PageId;
+  sticky?: boolean;
+}
+
+const { current, sticky = false } = Astro.props;
+
+const page = PAGES[current];
+
+// Whichever page you are on becomes the chip beside the wordmark, so listing it again in the nav would only offer you a link to where you already are.
+const internal = (Object.keys(PAGES) as PageId[])
+  .filter((id) => id !== current)
+  .map((id) => ({ label: PAGES[id].label, href: PAGES[id].href }));
+
+const links = [...internal, ...EXTERNAL_NAV];
+---
+
+<header class:list={["bar", sticky && "bar--sticky"]}>
+  <a href={PAGES.home.href} class="brand">
+    <img src="/curios/brand/curios-wordmark.svg" alt="Curios" width="99" height="26" />
+  </a>
+  <span class="label crumb">{page.chip}</span>
+  <nav>
+    {links.map((link) => <a href={link.href}>{link.label}</a>)}
+  </nav>
+</header>
+
+<style>
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: var(--bar);
+    padding: 0 28px;
+    border-bottom: 1px solid var(--edge);
+  }
+
+  /* Only the scrolling document needs to hold the bar in place and blur what passes under it; the playground's frame never scrolls, so it takes the plain opaque version. */
+  .bar--sticky {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(20, 51, 64, 0.88);
+    backdrop-filter: blur(14px);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+  }
+
+  .brand img {
+    display: block;
+  }
+
+  .crumb {
+    padding-left: 20px;
+    border-left: 1px solid var(--edge-strong);
+  }
+
+  nav {
+    display: flex;
+    gap: 24px;
+    margin-left: auto;
+    font-size: 14px;
+  }
+
+  nav a {
+    color: var(--fg-body);
+  }
+
+  nav a:hover {
+    color: var(--accent);
+  }
+</style>
