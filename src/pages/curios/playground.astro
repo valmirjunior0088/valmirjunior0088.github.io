@@ -193,7 +193,7 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
       // stderr joins stdout rather than the diagnostics pane: both are the program talking, and only the compiler's complaints belong on the left.
       setPane("stdout", `${result.run.stdout}${result.run.stderr}`.trimEnd());
 
-      const notes = [`No diagnostics — compiled to ${result.bytes.length} bytes of wasm`];
+      const notes = [`No diagnostics — compiled to ${result.bytes.length} bytes of WebAssembly`];
       const trapped = Boolean(result.run.trap);
       if (trapped) notes.push(result.run.trap);
       else if (result.run.exitCode) notes.push(`Process exited with code ${result.run.exitCode}`);
