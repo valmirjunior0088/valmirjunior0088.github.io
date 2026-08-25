@@ -68,6 +68,10 @@ export const FEATURES: Feature[] = [
     kicker: "ONE PIPELINE",
     body: "One lowering pipeline from source to WebAssembly, in a terminal or a browser tab. There is no second pipeline waiting to disagree with the first.",
   },
+  {
+    kicker: "EDITOR SUPPORT",
+    body: "Zed and VS Code extensions highlight `.crs` and launch `curios wonder server`, so the compiler you already have can interrupt you sooner.",
+  },
 ];
 
 export interface Resource {
