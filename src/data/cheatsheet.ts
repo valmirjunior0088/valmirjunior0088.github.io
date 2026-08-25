@@ -54,21 +54,22 @@ export const CHEATSHEET: CheatsheetCard[] = [
   {
     title: "Packed Bits literal",
     tag: "LITERALS",
-    code: ["b[\\1, \\0, \\1]"],
+    code: ["b[1, 0, 1]"],
     gloss: "Packed `Bits`, LSB first — the grain letter glues to the `[`",
   },
   {
     title: "Packed Bytes literal",
     tag: "LITERALS",
-    code: ["x[\\48, \\69, ..suffix]"],
-    gloss: "Packed `Bytes` — `\\` marks a constant atom, `..` spreads a whole value",
+    code: ["x[0x48, 0x69, ..suffix]"],
+    gloss:
+      "Packed `Bytes` — a constant atom is a numeric literal at the grain's element type, in any radix, and `..` spreads a whole packed value. Adjacent constant atoms lower to one packed constant, so a literal written entirely from numerals is constant data with nothing needed to mark it as such",
   },
   {
     title: "Terms inside a packed literal",
     tag: "LITERALS",
     code: ["b[flag, ..rest]", "x[..acc, byte]"],
     gloss:
-      "An unescaped entry is an ordinary term contributing one atom — cons and append, with no named form",
+      "An entry is an ordinary term contributing one atom — a `Bool` in a `Bits` literal, a `Byte` in a `Bytes` literal. `b[h, ..t]` conses and `x[..acc, b]` appends, with no named form",
   },
   {
     title: "Characters, strings, and numbers",
