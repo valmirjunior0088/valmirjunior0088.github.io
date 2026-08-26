@@ -1,39 +1,43 @@
-// The compiler's thread. `compile` is a synchronous WebAssembly call that holds whichever thread runs it for as long as the type checker takes, and `run` is much the same behind a promise — so both happen here, off the page, and the page only ever hears about them through messages. Each request is `{ id, source }`; the answers are `{ id, kind: "phase", event }` for every phase that finishes and one `{ id, kind: "done", result }` at the end, in the same shape loader.js hands the page.
+// The compiler's thread. `compile` is a synchronous WebAssembly call that holds whichever thread runs it for as long as the type checker takes, and `run` is much the same behind a promise — so both happen here, off the page, and the page only ever hears about them through messages. Each request is `{ id, source }`; the answers are `{ id, kind: "phase", event }` around every step and one `{ id, kind: "done", result }` at the end, in the same shape loader.js hands the page.
 
 let modulePromise = null;
 
-function warmUp(mod) {
-  const start = performance.now();
-  try {
-    mod.compile("/std/Io/pure(())");
-  } catch {}
-  return performance.now() - start;
-}
+// Every step is announced twice: `{ phase: "begin", step }` before it starts and `{ phase: "end", step, ms }` once it is timed. The page draws a breadcrumb from that — finished steps behind, the one in play on the end — which it cannot do from durations alone, since a duration only exists after the wait it is measuring is over.
+function loadModule(onPhase) {
+  if (modulePromise) return modulePromise;
 
-function loadModule() {
-  const startedNow = !modulePromise;
-  if (startedNow) {
-    modulePromise = import("/curios/js/curios_js.js")
-      .then(async (mod) => {
-        await mod.default();
-        return { mod, warmMs: warmUp(mod) };
-      })
-      .catch((error) => {
-        modulePromise = null;
-        throw error;
-      });
-  }
-  return { promise: modulePromise, startedNow };
+  // Only the request that starts the load narrates it. One that arrives mid-load waits on the same promise and its line starts at the compile, which is the truth of what that request paid for.
+  modulePromise = (async () => {
+    onPhase({ phase: "begin", step: "load" });
+    const loadStart = performance.now();
+    const mod = await import("/curios/js/curios_js.js");
+    await mod.default();
+    onPhase({ phase: "end", step: "load", ms: performance.now() - loadStart });
+
+    // The first compile pays whatever the module defers until it is asked for real work. Spending that on a throwaway program keeps it out of the number reported for the program you actually wrote — and it is a wait worth naming, because on a cold page it is long enough to see.
+    onPhase({ phase: "begin", step: "warm" });
+    const warmStart = performance.now();
+    try {
+      mod.compile("/std/Io/pure(())");
+    } catch {}
+    onPhase({ phase: "end", step: "warm", ms: performance.now() - warmStart });
+
+    return mod;
+  })().catch((error) => {
+    modulePromise = null;
+    throw error;
+  });
+
+  return modulePromise;
 }
 
 const utf8 = new TextDecoder();
 
 async function compileAndReport(source, onPhase) {
-  const { promise, startedNow } = loadModule();
   const loadStart = performance.now();
-  let mod, warmMs;
+  let mod;
   try {
-    ({ mod, warmMs } = await promise);
+    mod = await loadModule(onPhase);
   } catch (error) {
     return {
       ok: false,
@@ -42,10 +46,8 @@ async function compileAndReport(source, onPhase) {
       error: `Couldn't load the curios compiler: ${error.message || error}`,
     };
   }
-  const loadMs = startedNow ? performance.now() - loadStart - warmMs : undefined;
-  if (!startedNow) warmMs = undefined;
-  if (loadMs !== undefined) onPhase({ phase: "load", loadMs, warmMs });
 
+  onPhase({ phase: "begin", step: "compile" });
   const t1 = performance.now();
   let bytes;
   try {
@@ -53,9 +55,9 @@ async function compileAndReport(source, onPhase) {
   } catch (error) {
     return { ok: false, phase: "compile", ms: performance.now() - t1, error: String(error) };
   }
-  const wasmMs = performance.now() - t1;
-  onPhase({ phase: "compile", wasmMs, byteLength: bytes.length });
+  onPhase({ phase: "end", step: "compile", ms: performance.now() - t1 });
 
+  onPhase({ phase: "begin", step: "run" });
   const t2 = performance.now();
   let outcome;
   try {
@@ -63,7 +65,8 @@ async function compileAndReport(source, onPhase) {
   } catch (error) {
     return { ok: false, phase: "run", ms: performance.now() - t2, error: `Couldn't run the program: ${error.message || error}` };
   }
-  const runMs = performance.now() - t2;
+  onPhase({ phase: "end", step: "run", ms: performance.now() - t2 });
+
   const run = {
     stdout: utf8.decode(outcome.stdout),
     stderr: utf8.decode(outcome.stderr),
@@ -71,7 +74,8 @@ async function compileAndReport(source, onPhase) {
     trap: outcome.trap,
   };
 
-  return { ok: true, loadMs, warmMs, wasmMs, runMs, bytes, run };
+  // The timings have all been sent as they happened; what is left for the end is what the panes need.
+  return { ok: true, bytes, run };
 }
 
 self.addEventListener("message", async ({ data: { id, source } }) => {

@@ -29,9 +29,12 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     <Editor />
 
     <Toolbar class="actions">
-      <button class="btn btn--primary btn--sm" data-run>Run ▸</button>
-      <span class="status" data-status data-tone="idle">ready</span>
-      <button class="btn btn--chip push" data-rail-toggle>‹ CHEATSHEET</button>
+      <button class="btn btn--primary btn--sm run" data-run>Run ›</button>
+      <span class="status">
+        <span class="trail" data-trail>ready</span>
+        <span class="step" data-step></span>
+      </span>
+      <button class="btn btn--chip push toggle" data-rail-toggle>‹ CHEATSHEET</button>
     </Toolbar>
 
     <div class="outputs">
@@ -59,30 +62,63 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     grid-template-columns: 1fr 1fr;
   }
 
-  /* The timings can run to four phases; on a narrow bar they truncate rather than push the cheatsheet toggle out of the frame — and the buttons on either side hold their width, so it is only ever the numbers that give. */
+  /* The trail can run to four steps; on a narrow bar it truncates rather than push the cheatsheet toggle out of the frame — and the buttons on either side hold their width, so it is only ever the numbers that give. */
   .frame :global(.actions) .btn {
     flex: none;
   }
 
+  /* Run swaps its label mid-run, so its width is pinned above the longer of the two: "Running…" measures 59px in Geist at this size and weight, plus 40px of padding and the border. Left to size itself the button would grow by a third the moment it was clicked and shove the breadcrumb sideways just as the breadcrumb started saying something.
+
+     The glyph is "›" rather than a play triangle for the same reason: Geist's latin subset carries no "▸", so that label was part fallback face, and a fallback face brings its own metrics — the button lost height when the text swapped to an all-Geist "Running…". One font, one line box, one height. It also matches the "‹" on the cheatsheet toggle at the other end of the bar. */
+  .run {
+    justify-content: center;
+    min-width: 104px;
+  }
+
+  /* A chip is shorter than the button it shares the bar with. Rather than hand it a height of its own to keep in step, it stretches to the row — which is Run's height, and stays Run's height whatever its label says. */
+  .toggle {
+    align-self: stretch;
+  }
+
   .status {
     min-width: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    display: flex;
     font-family: var(--mono);
     font-size: var(--ms-chip);
   }
 
-  .status[data-tone="idle"] {
+  /* The steps already paid for. These are what gives when the bar runs short — they clip from the right, so a cramped window keeps the waits you have been sitting through and loses the tail of the trail rather than the step in play, which never shrinks. */
+  .trail {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     color: var(--fg-faint);
   }
 
-  .status[data-tone="working"] {
+  /* The end of the breadcrumb: whatever is happening now, or — once nothing is — how it went wrong. It never shrinks, and it is empty on a run that worked, because the trail has already said everything there is to say about one of those. */
+  .step {
+    flex: none;
+  }
+
+  .step[data-tone="working"] {
     color: var(--accent);
   }
 
-  .status[data-tone="error"] {
+  /* The same green the diagnostics count goes when it says CLEAN, and for the same reason: this is the other end of the one verdict the page gives. */
+  .step[data-tone="ok"] {
+    color: var(--ok);
+  }
+
+  .step[data-tone="error"] {
     color: var(--err);
+  }
+
+  /* The separator belongs to the step, and only when there is a trail in front of it to be separated from — the first step of a run leads the line rather than trailing a dot. It needs `pre` to keep its own spaces: generated content sits at the start of the step's line box, and a leading space there is collapsible whitespace, which the line box strips. The dot would otherwise arrive wearing only its right-hand space. */
+  .trail:not(:empty) + .step:not(:empty)::before {
+    content: " · ";
+    white-space: pre;
+    color: var(--fg-faint);
   }
 
   /* Below the breakpoint AppShell has let the body scroll, so the editor takes a fixed share of the screen and the panes stack under it at whatever height their output wants. The action bar sticks, one bar's height down so it parks under the sticky header rather than sliding beneath it: Run has to stay in reach while you scroll down to read what it produced. */
@@ -118,7 +154,8 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
   const source = document.querySelector("[data-source]");
   const gutter = document.querySelector("[data-gutter]");
   const runButton = document.querySelector("[data-run]");
-  const status = document.querySelector("[data-status]");
+  const trail = document.querySelector("[data-trail]");
+  const stepLine = document.querySelector("[data-step]");
   const chips = [...document.querySelectorAll("[data-example]")];
   const count = document.querySelector('[data-pane="diagnostics"] [data-count]');
 
@@ -142,9 +179,24 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     pane.classList.toggle("error", !empty && tone === "error");
   }
 
-  function setStatus(text, tone) {
-    status.textContent = text;
-    status.dataset.tone = tone;
+  // Every step the compiler goes through, in the three forms the line needs: the one it wears while it is happening, the one it leaves behind when it finishes, and the plain one it leaves behind when it doesn't. The past tense is reserved for the step that earned it — "compiled" is a claim about the program, and a compile that was refused has no business making it.
+  const STEPS = {
+    load: { doing: "downloading…", done: (ms) => `downloaded ${ms.toFixed(0)}ms`, stopped: (ms) => `download ${ms.toFixed(0)}ms` },
+    warm: { doing: "initializing…", done: (ms) => `initialized ${ms.toFixed(0)}ms`, stopped: (ms) => `init ${ms.toFixed(0)}ms` },
+    compile: { doing: "compiling…", done: (ms) => `compiled ${ms.toFixed(1)}ms`, stopped: (ms) => `compile ${ms.toFixed(1)}ms` },
+    run: { doing: "running…", done: (ms) => `ran ${ms.toFixed(1)}ms`, stopped: (ms) => `run ${ms.toFixed(1)}ms` },
+  };
+
+  // Whether the compiler is already in the worker, which decides what the first step of the next run will be. The worker's own events settle it either way; this only spares the line from starting blank.
+  let loaded = false;
+
+  function setTrail(text) {
+    trail.textContent = text;
+  }
+
+  function setStep(text, tone) {
+    stepLine.textContent = text;
+    stepLine.dataset.tone = tone ?? "";
   }
 
   function setCount(text, tone) {
@@ -155,7 +207,8 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
   function clearOutput() {
     setPane("diagnostics", "");
     setPane("stdout", "");
-    setStatus("ready", "idle");
+    setTrail("ready");
+    setStep("");
     setCount("");
   }
 
@@ -184,7 +237,8 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
       setPane(name, "");
       if (name === "diagnostics") {
         setCount("");
-        setStatus("ready", "idle");
+        setTrail("ready");
+        setStep("");
       }
     });
   });
@@ -194,37 +248,57 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     running = true;
     runButton.disabled = true;
     runButton.textContent = "Running…";
-    setStatus("compiling…", "working");
     setPane("diagnostics", "");
     setPane("stdout", "");
     setCount("");
 
-    // The timings are the success message. Saying "accepted" beside them would only be a worse way of saying what they already say, so they take that slot outright and the status line reads ready → compiling… → the numbers. They accumulate as phases arrive, and the load phase only ever fires once, on the run that downloads the compiler.
-    const timings = [];
-    const showTimings = () => setStatus(timings.join(" · "), "idle");
+    // The line is a breadcrumb: each step names itself as it starts, then settles into a measurement and hands the end of the line to the next one. There is no separate success message at the end because none is needed — a line that reached "ran" is a program that compiled and ran, and it says so in more detail than "accepted" would, so that last crumb simply goes green and stands as the verdict.
+    const done = [];
+    let ran = "";
+    setTrail("");
+
+    // Named here rather than waited for: spawning the worker and fetching its script takes long enough on a cold page to leave the line blank, and the first "begin" from the worker overwrites this the moment it lands, so guessing wrong costs nothing.
+    setStep(loaded ? STEPS.compile.doing : STEPS.load.doing, "working");
 
     try {
-      const result = await compileAndReport(source.value, (event) => {
-        if (event.phase === "load") {
-          timings.push(`compiler ${event.loadMs.toFixed(0)}ms`, `warm ${event.warmMs.toFixed(0)}ms`);
-        } else if (event.phase === "compile") {
-          // Only the durations here. The output size belongs to the diagnostics pane, which states it in full, and printing it twice would make the two readouts look like they were measuring different things.
-          timings.push(`compile ${event.wasmMs.toFixed(1)}ms`);
+      const result = await compileAndReport(source.value, ({ phase, step, ms }) => {
+        if (phase === "begin") {
+          setStep(STEPS[step].doing, "working");
+          return;
         }
-        showTimings();
+        // Only the durations here. The output size belongs to the diagnostics pane, which states it in full, and printing it twice would make the two readouts look like they were measuring different things.
+        const crumb = STEPS[step].done(ms);
+        if (step === "load") loaded = true;
+
+        // The run is the last step there is, so its crumb stays where the outcome goes rather than falling back into the trail: green, unshrinkable, and holding the slot an error would otherwise have taken.
+        if (step === "run") {
+          ran = crumb;
+          setStep(crumb, "ok");
+          return;
+        }
+
+        done.push(crumb);
+        setTrail(done.join(" · "));
+        setStep("");
       });
 
       if (!result.ok) {
         setPane("diagnostics", result.error, "error");
         // A compiler that never arrived has judged nothing, so the count says so rather than ERROR — on a phone it is the only verdict in view, and this one is not the program's fault.
         const unavailable = result.phase === "load";
-        setStatus(unavailable ? "compiler unavailable" : "rejected", "error");
+        if (unavailable) loaded = false;
+
+        // The step that failed still leaves its crumb. How long the compiler spent before refusing is worth as much as how long it spends accepting, and without this the commonest failure there is — a typo, on a page that is already warm — would put "error" on an otherwise empty line, which is the whole thing this line was built to stop doing. Only a failure that measured nothing skips it: if the worker never started, there is no duration to report and the verdict stands alone honestly.
+        const failed = STEPS[result.phase];
+        if (failed && result.ms > 0) {
+          done.push(failed.stopped(result.ms));
+          setTrail(done.join(" · "));
+        }
+
+        setStep(unavailable ? "compiler unavailable" : "error", "error");
         setCount(unavailable ? "UNAVAILABLE" : "ERROR", "error");
         return;
       }
-
-      timings.push(`run ${result.runMs.toFixed(1)}ms`);
-      showTimings();
 
       // stderr joins stdout rather than the diagnostics pane: both are the program talking, and only the compiler's complaints belong on the left.
       setPane("stdout", `${result.run.stdout}${result.run.stderr}`.trimEnd());
@@ -236,12 +310,16 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
 
       setPane("diagnostics", notes.join("\n"), trapped ? "error" : "ok");
       setCount(trapped ? "ERROR" : "CLEAN", trapped ? "error" : "ok");
-      // A trap is the one success-path outcome the timings cannot convey on their own, so it overrides them; otherwise showTimings() has already left the numbers standing.
-      if (trapped) setStatus("rejected", "error");
+      // A trap is the one outcome the crumbs cannot convey on their own. It is not a clean finish, so the run's crumb gives up the outcome slot and falls back into the trail — how long the program took to reach the trap is still worth reading — and the verdict takes its place.
+      if (trapped) {
+        done.push(ran);
+        setTrail(done.join(" · "));
+        setStep("error", "error");
+      }
     } finally {
       running = false;
       runButton.disabled = false;
-      runButton.textContent = "Run ▸";
+      runButton.textContent = "Run ›";
     }
   });
 
