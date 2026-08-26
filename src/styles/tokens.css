@@ -78,7 +78,8 @@
   --editor-gutter: clamp(40px, 8vw, 52px);
   --pad: clamp(20px, 4vw, 40px);
   --sec-y: clamp(56px, 7vw, 96px);
-  --rail: min(880px, 100vw);
+  /* The cheatsheet rail is as wide as the cards it holds and no wider. A column is 455px — the longest line in the corpus plus the card around it — gaps are 12px, and the frame is 32px of padding, a 1px border, and 17px kept back for the widest scrollbar it might wear. That puts two columns at 972px and three at 1439px, and the rail steps between those rather than sliding: a rail wider than its cards would only pad them, and one narrower would break their lines. Below two columns' worth it takes the whole screen, which is what a phone gets. */
+  --rail: 100vw;
 }
 
 * {
@@ -294,5 +295,18 @@ code {
 @media (max-width: 720px) {
   .btn--chip {
     min-height: 40px;
+  }
+}
+
+/* The rail's two steps up, each the exact width of the columns it is about to show. The queries sit at those same widths, so the step happens the moment the screen can hold it and never before — one pixel under, the rail is still the whole screen and already that wide. */
+@media (min-width: 972px) {
+  :root {
+    --rail: 972px;
+  }
+}
+
+@media (min-width: 1439px) {
+  :root {
+    --rail: 1439px;
   }
 }

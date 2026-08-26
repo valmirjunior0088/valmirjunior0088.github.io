@@ -40,7 +40,7 @@ import { SYNTAX_URL } from "../data/site";
 </aside>
 
 <style>
-  /* Wide enough for two columns of cards, which is what the corpus needs to be read rather than merely searched. It covers most of the editor while open — all of it on a phone — and that is the correct trade: you are reading, not typing. */
+  /* Wide enough for two columns of cards, which is what the corpus needs to be read rather than merely searched, and for a third where the screen allows one — --rail carries the arithmetic. It covers most of the editor while open, all of it on a phone, and that is the correct trade: you are reading, not typing. */
   .rail {
     position: fixed;
     top: 0;
@@ -141,10 +141,12 @@ import { SYNTAX_URL } from "../data/site";
     padding: 16px;
   }
 
-  /* Row-major, so cards read left to right. Ragged bottoms are the cost — a short card leaves a gap under it when its row-mate runs long — and the alternative, column-major, would need a bounded height this scrolling container does not have. Two columns at full width, one once a column would drop under 240px and the code would wrap on every line. */
+  /* Row-major, so cards read left to right. Ragged bottoms are the cost — a short card leaves a gap under it when its row-mate runs long — and the alternative, column-major, would need a bounded height this scrolling container does not have.
+
+     455px is the longest line in the corpus plus the card around it: 420px of Geist Mono at 12.5px, 56 characters, and 30px for the code's padding and the panel's border. Narrower than that and a line breaks, so the count drops as soon as another whole column will not fit rather than squeezing one in — and whatever does fit spreads to fill the rail, which --rail has already sized to hold a round number of them. The min() is what keeps the track from overflowing a screen narrower than a single card, where 455px has stopped being a floor worth holding. */
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(455px, 100%), 1fr));
     gap: 12px;
     align-items: start;
   }
