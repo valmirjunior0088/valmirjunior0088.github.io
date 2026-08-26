@@ -47,4 +47,16 @@
     white-space: pre;
     overflow: auto;
   }
+
+  /* Same rule for both, and it has to be: under 16px iOS zooms the page in on focus, and the gutter must match the textarea exactly or the numbers drift off their lines. */
+  @media (max-width: 720px) {
+    .gutter,
+    .input {
+      font-size: 16px;
+    }
+
+    .input {
+      padding: 16px 12px;
+    }
+  }
 </style>

@@ -1,0 +1,27 @@
+---
+// The wordmark and the one thing every placement of it needs: the optical lift. Its box is 99×26, but the dot on the i owns the top 6.5px and the body of the word sits below it, so a box set where it belongs puts the word a few pixels low. Pulling the top margin in by a little under the dot's height sets the word right by eye and leaves the dot floating above where it belongs. The lift scales with the width, so a doubled wordmark gets a doubled lift without anyone redoing the arithmetic.
+interface Props {
+  width?: number;
+}
+
+const { width = 99 } = Astro.props;
+
+const scale = width / 99;
+const height = Math.round(26 * scale);
+const lift = -5 * scale;
+---
+
+<img
+  class="wordmark"
+  src="/curios/brand/curios-wordmark.svg"
+  alt="Curios"
+  width={width}
+  height={height}
+  style={`margin-top: ${lift}px`}
+/>
+
+<style>
+  .wordmark {
+    display: block;
+  }
+</style>

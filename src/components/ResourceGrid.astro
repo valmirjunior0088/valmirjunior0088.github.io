@@ -3,7 +3,7 @@ import Section from "./Section.astro";
 import { RESOURCES, CLOSING } from "../data/home";
 ---
 
-<Section padding="80px var(--pad) 96px">
+<Section padding="var(--sec-y) var(--pad)">
   <div class="closing">
     <div>
       <h2>{CLOSING.heading}</h2>
@@ -27,13 +27,13 @@ import { RESOURCES, CLOSING } from "../data/home";
 <style>
   .closing {
     display: grid;
-    grid-template-columns: minmax(300px, 0.7fr) 1.3fr;
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
     gap: 64px;
     align-items: start;
   }
 
   h2 {
-    font-size: 38px;
+    font-size: clamp(28px, 3.4vw, 38px);
     margin-bottom: 16px;
   }
 
@@ -51,7 +51,7 @@ import { RESOURCES, CLOSING } from "../data/home";
 
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
     gap: 16px;
   }
 
@@ -84,5 +84,12 @@ import { RESOURCES, CLOSING } from "../data/home";
     font-size: 14px;
     line-height: 1.55;
     color: var(--fg-mute);
+  }
+
+  @media (max-width: 720px) {
+    .closing {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
   }
 </style>

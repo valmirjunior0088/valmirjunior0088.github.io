@@ -33,6 +33,9 @@ import { INSTALL_COMMAND } from "../data/site";
 
   /* The command is longer than the box and always will be. Rather than wrap it or shrink it, it scrolls, and the mask tells you so by fading the last stretch out instead of guillotining it at the border. */
   code {
+    flex: 1;
+    min-width: 0;
+    contain: inline-size;
     font-size: var(--ms-code-sm);
     color: var(--fg);
     white-space: nowrap;

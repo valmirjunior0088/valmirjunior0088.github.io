@@ -7,7 +7,7 @@ interface Props {
   class?: string;
 }
 
-const { width = "wide", banded = false, padding = "80px var(--pad)", class: className } = Astro.props;
+const { width = "wide", banded = false, padding = "var(--sec-y) var(--pad)", class: className } = Astro.props;
 ---
 
 <section class:list={["outer", banded && "outer--banded"]}>

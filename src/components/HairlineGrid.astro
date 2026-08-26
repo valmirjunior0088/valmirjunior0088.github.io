@@ -14,7 +14,7 @@ const { min = "300px" } = Astro.props;
 <style>
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(var(--cell-min), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(var(--cell-min), 100%), 1fr));
     gap: 1px;
     background: var(--edge);
     border: 1px solid var(--edge);

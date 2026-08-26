@@ -12,7 +12,7 @@ const { title, description } = Astro.props;
 ---
 
 <Document title={title} description={description} bodyClass="app">
-  <Header current="playground" />
+  <Header current="playground" sticky />
   <slot />
 </Document>
 
@@ -22,5 +22,14 @@ const { title, description } = Astro.props;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+  }
+
+  /* On a phone the frame stops being an application and becomes a document again. A frame pinned to 100dvh fights the on-screen keyboard, which resizes only the visual viewport; a page that scrolls has nothing to fight with. The playground's own styles pick up from here and give the editor a fixed height instead of the slack. */
+  @media (max-width: 720px) {
+    body.app {
+      height: auto;
+      min-height: 100dvh;
+      overflow: visible;
+    }
   }
 </style>

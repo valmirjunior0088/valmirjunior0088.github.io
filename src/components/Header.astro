@@ -1,4 +1,5 @@
 ---
+import Wordmark from "./Wordmark.astro";
 import { PAGES, EXTERNAL_NAV, type PageId } from "../data/site";
 
 interface Props {
@@ -20,7 +21,8 @@ const links = [...internal, ...EXTERNAL_NAV];
 
 <header class:list={["bar", sticky && "bar--sticky"]}>
   <a href={PAGES.home.href} class="brand">
-    <img src="/curios/brand/curios-wordmark.svg" alt="Curios" width="99" height="26" />
+    <Wordmark />
+    <img class="mark" src="/curios/brand/curios-mark.svg" alt="Curios" width="24" height="25" />
   </a>
   <span class="label crumb">{page.chip}</span>
   <nav>
@@ -38,7 +40,7 @@ const links = [...internal, ...EXTERNAL_NAV];
     border-bottom: 1px solid var(--edge);
   }
 
-  /* Only the scrolling document needs to hold the bar in place and blur what passes under it; the playground's frame never scrolls, so it takes the plain opaque version. */
+  /* Both pages hold the bar in place and blur what passes under it. On a wide screen the playground's frame never scrolls, so this is inert there; on a phone the frame becomes a scrolling document and the bar behaves exactly as it does on the landing page. */
   .bar--sticky {
     position: sticky;
     top: 0;
@@ -52,8 +54,8 @@ const links = [...internal, ...EXTERNAL_NAV];
     align-items: center;
   }
 
-  .brand img {
-    display: block;
+  .brand .mark {
+    display: none;
   }
 
   .crumb {
@@ -74,5 +76,31 @@ const links = [...internal, ...EXTERNAL_NAV];
 
   nav a:hover {
     color: var(--accent);
+  }
+
+  /* The bar keeps its height at every width — the cheatsheet rail's title row is drawn to it — so nothing here may wrap. The crumb goes first: it only restates which page you are on, which the nav already implies by omission. */
+  @media (max-width: 720px) {
+    .bar {
+      gap: 16px;
+      padding: 0 var(--pad);
+    }
+
+    .crumb {
+      display: none;
+    }
+
+    nav {
+      gap: 16px;
+      font-size: 13px;
+    }
+
+    /* The wordmark gives way to the mark: the row is short of room, and a monogram beside three links reads as a mobile header rather than a desktop one squeezed. */
+    .brand :global(.wordmark) {
+      display: none;
+    }
+
+    .brand .mark {
+      display: block;
+    }
   }
 </style>

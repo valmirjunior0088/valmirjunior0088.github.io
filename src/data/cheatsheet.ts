@@ -14,19 +14,19 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "PATHS",
     code: ["Nat", "Option/some", "/std/List"],
     gloss:
-      "A leading `/` makes the path absolute. Paths are whitespace-free, so `a/b` is the path and `a / b` is the division.",
+      "A leading `/` makes the path absolute. Paths are whitespace-free, so `a/b` is the path and `a / b` is the division",
   },
   {
     title: "Bring modules into scope",
     tag: "MODULES",
     code: ['<span class="kw">use</span> /std/{<span class="kw">Nat</span>, <span class="kw">Bool</span>};'],
-    gloss: "There is no bare `use path;` form — imports always come through a group.",
+    gloss: "There is no bare `use path;` form — imports always come through a group",
   },
   {
     title: "Re-export a module's contents",
     tag: "MODULES",
     code: ['<span class="kw">pub use</span> Option/*;'],
-    gloss: "Prefixing with `pub` re-exports what it imports; a glob imports the exported surface only.",
+    gloss: "Prefixing with `pub` re-exports what it imports; a glob imports the exported surface only",
   },
   {
     title: "Load a submodule from disk",

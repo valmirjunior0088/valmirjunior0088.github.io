@@ -27,13 +27,14 @@ import { inlineCode } from "../data/markup";
   /* Baseline-aligned rather than centred, so the mono kicker sits on the same line the heading's letters stand on. */
   .head {
     display: flex;
+    flex-wrap: wrap;
     align-items: baseline;
-    gap: 20px;
+    gap: 12px 20px;
     margin-bottom: 48px;
   }
 
   h2 {
-    font-size: 38px;
+    font-size: clamp(28px, 3.4vw, 38px);
   }
 
   .cell {

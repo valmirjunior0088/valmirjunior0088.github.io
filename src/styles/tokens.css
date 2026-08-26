@@ -38,8 +38,8 @@
   --fg: #dee9e9;
   --fg-code: rgba(222, 233, 233, 0.85);
   --fg-body: rgba(222, 233, 233, 0.7);
-  --fg-mute: rgba(222, 233, 233, 0.55);
-  --fg-faint: rgba(222, 233, 233, 0.42);
+  --fg-mute: rgba(222, 233, 233, 0.62);
+  --fg-faint: rgba(222, 233, 233, 0.57);
   --fg-ghost: rgba(222, 233, 233, 0.28);
 
   /* Lines, by intent rather than by strength: a divider inside a box, the edge of a box, and the edge of something you can click. */
@@ -73,9 +73,12 @@
   --ms-micro: 10.5px;
 
   --bar: 56px;
-  --editor-gutter: 52px;
-  --pad: 40px;
-  --rail: 880px;
+
+  /* Spacing that has to flex with the viewport lives here rather than in media queries, because Section takes its padding as a prop that lands in an inline style — a place no query can reach. The clamps hold the drawn values from 1000px up and shrink smoothly below. */
+  --editor-gutter: clamp(40px, 8vw, 52px);
+  --pad: clamp(20px, 4vw, 40px);
+  --sec-y: clamp(56px, 7vw, 96px);
+  --rail: min(880px, 100vw);
 }
 
 * {
@@ -88,13 +91,12 @@ body {
   padding: 0;
 }
 
-/* This site is desktop-only by decision, not by neglect. The floor makes that explicit: below it the page scrolls sideways instead of silently deforming layouts that were never drawn for the width. */
 body {
-  min-width: 1100px;
   background: var(--ink);
   color: var(--fg);
   font-family: var(--sans);
-  font-weight: 300;
+  /* Regular, not Light: on a dark ground light strokes thin out further, and the smallest prose on the site — glosses, resource blurbs — is where that costs the most. The hero lead opts back into Light on its own, at a size that can carry it. */
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -259,6 +261,7 @@ h3 {
   color: var(--accent);
 }
 
+/* A code block scrolls sideways rather than dictating the width of whatever holds it. The containment is what makes that true on a phone: mobile Chrome sizes its layout viewport to the page's min-content width, and without it a long line is a long page. */
 .code {
   margin: 0;
   font-family: var(--mono);
@@ -266,6 +269,7 @@ h3 {
   line-height: 1.85;
   color: var(--fg-code);
   overflow-x: auto;
+  contain: inline-size;
 }
 
 /* Highlighting is two classes and no more. The canvas collapsed keywords, types, and strings into a single amber, and holding to that keeps a code block reading as one texture instead of a rainbow. */
@@ -284,4 +288,11 @@ code {
 /* Panel heads and toolbars are flex rows filled by slotted content, and scoped styles cannot reach across a slot boundary to push one child to the right. This is the one utility that earns its keep. */
 .push {
   margin-left: auto;
+}
+
+/* Fingers, not pointers: the mono chips compute to a 24px target, which is fine under a mouse and hopeless under a thumb. */
+@media (max-width: 720px) {
+  .btn--chip {
+    min-height: 40px;
+  }
 }

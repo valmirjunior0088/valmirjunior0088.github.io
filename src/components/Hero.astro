@@ -2,14 +2,18 @@
 import Section from "./Section.astro";
 import Panel from "./Panel.astro";
 import InstallBox from "./InstallBox.astro";
+import Wordmark from "./Wordmark.astro";
 import { HERO } from "../data/home";
 import { inlineCode } from "../data/markup";
 import { PAGES, BUILD_URL } from "../data/site";
 ---
 
-<Section padding="96px var(--pad)">
+<Section padding="var(--sec-y) var(--pad)">
   <div class="hero">
     <div class="col">
+      <div class="lockup">
+        <Wordmark width={198} />
+      </div>
       <p class="label eyebrow">{HERO.eyebrow}</p>
       <h1>{HERO.heading[0]}<br />{HERO.heading[1]}</h1>
       <p class="lead">{HERO.lead}</p>
@@ -26,8 +30,7 @@ import { PAGES, BUILD_URL } from "../data/site";
           <span class="label">{HERO.filename}</span>
           <span class="label label--accent push">{HERO.caption}</span>
         </Fragment>
-        <pre class="code decl" set:html={HERO.declaration.join("\n")} />
-        <pre class="code usage" set:html={HERO.usage.join("\n")} />
+        <pre class="code file" set:html={[...HERO.declaration, ...HERO.usage].join("\n")} />
       </Panel>
 
       <Panel tone="accent">
@@ -40,10 +43,10 @@ import { PAGES, BUILD_URL } from "../data/site";
 </Section>
 
 <style>
-  /* The two columns are stretched to a common height and each distributes its own slack, which is what lines the install box up with the closing note. It only holds because the page is capped at 1440 and floored at 1100 — inside that band the slack stays small enough to read as alignment rather than drift. */
+  /* The two columns are stretched to a common height and each distributes its own slack, which is what lines the install box up with the closing note. It only holds between the 1440 cap and the 960 breakpoint — inside that band the slack stays small enough to read as alignment rather than drift; below it the columns stack and the trick is switched off. No pixel floors on the tracks: mobile Chrome sizes its layout viewport to the page's min-content width before it evaluates a single media query, so a floor wide enough to matter here is a floor that keeps the breakpoint from ever firing. */
   .hero {
     display: grid;
-    grid-template-columns: minmax(360px, 0.85fr) minmax(440px, 1.15fr);
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
     gap: 64px;
     align-items: stretch;
   }
@@ -59,12 +62,17 @@ import { PAGES, BUILD_URL } from "../data/site";
     gap: 16px;
   }
 
+  /* The wordmark opens the page only on a phone, where the header has given it up for the mark; on a wider screen it is already in the bar, and repeating it a few pixels lower would say the name twice. Same breakpoint as the header's swap, so exactly one wordmark is on screen at every width. */
+  .lockup {
+    display: none;
+  }
+
   .eyebrow {
     margin: 0 0 24px;
   }
 
   h1 {
-    font-size: 76px;
+    font-size: clamp(40px, 7.2vw, 76px);
     line-height: 1;
     letter-spacing: -0.02em;
     margin: 0 0 24px;
@@ -73,6 +81,7 @@ import { PAGES, BUILD_URL } from "../data/site";
 
   .lead {
     font-size: 19px;
+    font-weight: 300;
     line-height: 1.6;
     color: var(--fg-body);
     max-width: 44ch;
@@ -81,18 +90,15 @@ import { PAGES, BUILD_URL } from "../data/site";
 
   .actions {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 12px;
     margin-bottom: 32px;
   }
 
-  /* Two blocks rather than one so the declaration and the use of it read as separate thoughts, with no rule between them and no gap either. */
-  .decl {
+  /* One block, though the data keeps the declaration and its use apart: two blocks would each grow their own scrollbar on a phone, and a scrollbar through the middle of a file is a worse seam than none. */
+  .file {
     padding: 20px 24px;
-  }
-
-  .usage {
-    padding: 0 24px 20px;
   }
 
   .diagnostic {
@@ -108,5 +114,41 @@ import { PAGES, BUILD_URL } from "../data/site";
     max-width: 62ch;
     margin: 0;
     text-wrap: pretty;
+  }
+
+  @media (max-width: 960px) {
+    .hero {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+
+    .col {
+      justify-content: flex-start;
+    }
+
+    .col--panels {
+      gap: 12px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    /* The section's own top padding is a document's worth of air, too much for a logo that is meant to sit just under the bar. Pulling it back to the same 32px that sits below gives the wordmark equal room on both sides; the padding itself lives in an inline style this query cannot reach. The wordmark's own optical lift happens inside this box. */
+    .lockup {
+      display: block;
+      width: 198px;
+      margin: calc(32px - var(--sec-y)) auto 32px;
+    }
+
+    /* Centred under the centred wordmark, so the two read as one lockup before the left-set heading begins. */
+    .eyebrow {
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .actions .btn {
+      width: 100%;
+      justify-content: center;
+    }
   }
 </style>

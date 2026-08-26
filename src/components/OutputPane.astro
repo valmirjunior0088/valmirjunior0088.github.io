@@ -66,4 +66,18 @@ const { name, label, placeholder, count = false } = Astro.props;
   .body.error {
     color: var(--err);
   }
+
+  /* Stacked on a phone, the pane grows to fit its output rather than scrolling inside a box that is barely taller than its own header. */
+  @media (max-width: 720px) {
+    .pane[data-pane="diagnostics"] {
+      border-right: none;
+      border-bottom: 1px solid var(--edge);
+    }
+
+    .body {
+      flex: none;
+      min-height: 96px;
+      overflow: visible;
+    }
+  }
 </style>

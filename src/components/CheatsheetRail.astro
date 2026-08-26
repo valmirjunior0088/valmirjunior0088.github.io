@@ -40,7 +40,7 @@ import { SYNTAX_URL } from "../data/site";
 </aside>
 
 <style>
-  /* Wide enough for two columns of cards, which is what the corpus needs to be read rather than merely searched. It covers most of the editor while open, and that is the correct trade: you are reading, not typing. */
+  /* Wide enough for two columns of cards, which is what the corpus needs to be read rather than merely searched. It covers most of the editor while open — all of it on a phone — and that is the correct trade: you are reading, not typing. */
   .rail {
     position: fixed;
     top: 0;
@@ -97,9 +97,10 @@ import { SYNTAX_URL } from "../data/site";
     white-space: nowrap;
   }
 
+  /* Square at whatever height the row is — 28px on a desktop, 40px on a phone — so its width is derived rather than declared twice. */
   .close {
-    width: 28px;
     height: 100%;
+    aspect-ratio: 1;
     padding: 0;
     letter-spacing: 0;
     font-size: 13px;
@@ -140,10 +141,10 @@ import { SYNTAX_URL } from "../data/site";
     padding: 16px;
   }
 
-  /* Row-major, so cards read left to right. Ragged bottoms are the cost — a short card leaves a gap under it when its row-mate runs long — and the alternative, column-major, would need a bounded height this scrolling container does not have. */
+  /* Row-major, so cards read left to right. Ragged bottoms are the cost — a short card leaves a gap under it when its row-mate runs long — and the alternative, column-major, would need a bounded height this scrolling container does not have. Two columns at full width, one once a column would drop under 240px and the code would wrap on every line. */
   .cards {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 12px;
     align-items: start;
   }
@@ -171,6 +172,28 @@ import { SYNTAX_URL } from "../data/site";
     margin-top: 16px;
     padding: 12px 0 6px;
     border-top: 1px solid var(--line);
+  }
+
+  /* Under 16px, iOS zooms the page in on focus and leaves it there. The row grows to the 40px the close chip takes at this width, so it stays centred in the bar instead of spilling out the bottom of it. */
+  @media (max-width: 720px) {
+    .row {
+      height: 40px;
+    }
+
+    .search {
+      font-size: 16px;
+    }
+  }
+
+  /* On a phone the title and the search field fight over one row; the search wins, since the heading is repeated on the toggle that opened the rail. */
+  @media (max-width: 480px) {
+    .row {
+      grid-template-columns: max-content max-content 1fr;
+    }
+
+    h2 {
+      display: none;
+    }
   }
 </style>
 

@@ -28,7 +28,7 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
 
     <Editor />
 
-    <Toolbar>
+    <Toolbar class="actions">
       <button class="btn btn--primary btn--sm" data-run>Run ▸</button>
       <span class="status" data-status data-tone="idle">ready</span>
       <button class="btn btn--chip push" data-rail-toggle>‹ CHEATSHEET</button>
@@ -59,7 +59,16 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     grid-template-columns: 1fr 1fr;
   }
 
+  /* The timings can run to four phases; on a narrow bar they truncate rather than push the cheatsheet toggle out of the frame — and the buttons on either side hold their width, so it is only ever the numbers that give. */
+  .frame :global(.actions) .btn {
+    flex: none;
+  }
+
   .status {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     font-family: var(--mono);
     font-size: var(--ms-chip);
   }
@@ -74,6 +83,26 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
 
   .status[data-tone="error"] {
     color: var(--err);
+  }
+
+  /* Below the breakpoint AppShell has let the body scroll, so the editor takes a fixed share of the screen and the panes stack under it at whatever height their output wants. The action bar sticks, one bar's height down so it parks under the sticky header rather than sliding beneath it: Run has to stay in reach while you scroll down to read what it produced. */
+  @media (max-width: 720px) {
+    .frame :global(.editor) {
+      flex: none;
+      height: 55dvh;
+    }
+
+    .frame :global(.actions) {
+      position: sticky;
+      top: var(--bar);
+      z-index: 10;
+      background: var(--raise);
+    }
+
+    .outputs {
+      flex: none;
+      grid-template-columns: 1fr;
+    }
   }
 </style>
 
@@ -182,8 +211,13 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
 
       if (!result.ok) {
         setPane("diagnostics", result.error, "error");
-        setStatus("rejected", "error");
-        setCount("1 ERROR", "error");
+        // A compiler that never arrived has diagnosed nothing, so the count stays empty and the status names the compiler rather than the program.
+        if (result.phase === "load") {
+          setStatus("compiler unavailable", "error");
+        } else {
+          setStatus("rejected", "error");
+          setCount("1 ERROR", "error");
+        }
         return;
       }
 
