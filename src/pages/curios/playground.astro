@@ -99,6 +99,11 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
       background: var(--raise);
     }
 
+    /* No room for the timings between two thumb-sized buttons, and no good way to wrap four phases under them either. The diagnostics pane's count carries the verdict on a phone; the numbers are a desktop luxury. */
+    .status {
+      display: none;
+    }
+
     .outputs {
       flex: none;
       grid-template-columns: 1fr;
@@ -211,13 +216,9 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
 
       if (!result.ok) {
         setPane("diagnostics", result.error, "error");
-        // A compiler that never arrived has diagnosed nothing, so the count stays empty and the status names the compiler rather than the program.
-        if (result.phase === "load") {
-          setStatus("compiler unavailable", "error");
-        } else {
-          setStatus("rejected", "error");
-          setCount("1 ERROR", "error");
-        }
+        // The count says ERROR either way — on a phone it is the only verdict in view — while the status names the compiler rather than the program when it is the compiler that never arrived.
+        setStatus(result.phase === "load" ? "compiler unavailable" : "rejected", "error");
+        setCount("ERROR", "error");
         return;
       }
 
@@ -233,7 +234,7 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
       else if (result.run.exitCode) notes.push(`Process exited with code ${result.run.exitCode}`);
 
       setPane("diagnostics", notes.join("\n"), trapped ? "error" : "ok");
-      setCount(trapped ? "1 ERROR" : "CLEAN", trapped ? "error" : "ok");
+      setCount(trapped ? "ERROR" : "CLEAN", trapped ? "error" : "ok");
       // A trap is the one success-path outcome the timings cannot convey on their own, so it overrides them; otherwise showTimings() has already left the numbers standing.
       if (trapped) setStatus("rejected", "error");
     } finally {
