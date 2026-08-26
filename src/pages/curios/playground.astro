@@ -216,9 +216,10 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
 
       if (!result.ok) {
         setPane("diagnostics", result.error, "error");
-        // The count says ERROR either way — on a phone it is the only verdict in view — while the status names the compiler rather than the program when it is the compiler that never arrived.
-        setStatus(result.phase === "load" ? "compiler unavailable" : "rejected", "error");
-        setCount("ERROR", "error");
+        // A compiler that never arrived has judged nothing, so the count says so rather than ERROR — on a phone it is the only verdict in view, and this one is not the program's fault.
+        const unavailable = result.phase === "load";
+        setStatus(unavailable ? "compiler unavailable" : "rejected", "error");
+        setCount(unavailable ? "UNAVAILABLE" : "ERROR", "error");
         return;
       }
 
