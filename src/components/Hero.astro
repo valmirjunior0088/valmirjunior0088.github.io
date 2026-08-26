@@ -28,7 +28,7 @@ import { PAGES, BUILD_URL } from "../data/site";
       <Panel>
         <Fragment slot="head">
           <span class="label">{HERO.filename}</span>
-          <span class="label label--accent push">{HERO.caption}</span>
+          <span class="label label--accent push caption">{HERO.caption}</span>
         </Fragment>
         <pre class="code file" set:html={[...HERO.declaration, ...HERO.usage].join("\n")} />
       </Panel>
@@ -94,6 +94,11 @@ import { PAGES, BUILD_URL } from "../data/site";
     align-items: center;
     gap: 12px;
     margin-bottom: 32px;
+  }
+
+  /* On a narrow panel the head runs out of room and the caption wraps; margin-left: auto has only moved the box, so the ragged edge inside it needs sending right as well. */
+  .caption {
+    text-align: right;
   }
 
   /* One block, though the data keeps the declaration and its use apart: two blocks would each grow their own scrollbar on a phone, and a scrollbar through the middle of a file is a worse seam than none. */
