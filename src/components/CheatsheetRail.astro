@@ -6,22 +6,24 @@ import { SYNTAX_URL } from "../data/site";
 
 <div class="backdrop" data-rail-backdrop hidden></div>
 
-<aside class="rail" data-rail aria-label="Cheatsheet" aria-hidden="true">
+<aside class="rail" data-rail aria-label="Cheatsheet" aria-hidden="true" inert>
   <div class="head">
     <div class="row">
+      <h2>Cheatsheet</h2>
+      <div class="field">
+        <input
+          class="search"
+          type="search"
+          placeholder="Search…"
+          aria-label="Search the cheatsheet"
+          autocomplete="off"
+          data-rail-search
+        />
+        <span class="label count" data-rail-count></span>
+      </div>
       <button class="btn btn--chip close" data-rail-close title="Close the cheatsheet" aria-label="Close the cheatsheet">
         ›
       </button>
-      <h2>Cheatsheet</h2>
-      <span class="label count" data-rail-count></span>
-      <input
-        class="search"
-        type="search"
-        placeholder="Search…"
-        aria-label="Search the cheatsheet"
-        autocomplete="off"
-        data-rail-search
-      />
     </div>
   </div>
 
@@ -71,6 +73,13 @@ import { SYNTAX_URL } from "../data/site";
     z-index: 29;
   }
 
+  /* The slide is decoration: the rail is in the same place at the end of it either way. Anyone who has asked their system for less movement gets it arriving instead of travelling. */
+  @media (prefers-reduced-motion: reduce) {
+    .rail {
+      transition: none;
+    }
+  }
+
   /* Matches the app header exactly, so the rail's title row lands on the same line as the wordmark rather than floating a few pixels off it. */
   .head {
     flex: none;
@@ -81,29 +90,41 @@ import { SYNTAX_URL } from "../data/site";
     border-bottom: 1px solid var(--line);
   }
 
-  /* One 28px row: the button, the title, and the count take exactly their own width, and the search field takes everything left over. Stretching the row rather than centring its parts is what makes them share one box. */
+  /* One 28px row: the title and the close chip take exactly their own width, and the search field takes everything left over. Stretching the row rather than centring its parts is what makes them share one box. The way out sits last, on the edge the rail came in from and nearest the thumb that opened it. */
   .row {
     flex: 1;
     display: grid;
-    grid-template-columns: max-content max-content max-content 1fr;
-    gap: 8px;
+    grid-template-columns: max-content 1fr max-content;
+    gap: 16px;
     height: 28px;
     align-items: stretch;
   }
 
+  /* The count belongs to the field rather than to the row. As a track of its own it was empty until you typed and then suddenly 63px wide, which shoved the input sideways on the first keystroke — the one thing a search field must never do while you are typing into it. Overlaid, it costs the field a constant inset instead of a moving one. */
+  .field {
+    position: relative;
+    min-width: 0;
+  }
+
+  /* The same 10px the text keeps from the left, mirrored. It is a readout, not a control: clicks fall through it to the field underneath. */
   .count {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 10px;
     display: flex;
     align-items: center;
     white-space: nowrap;
+    pointer-events: none;
   }
 
-  /* Square at whatever height the row is — 28px on a desktop, 40px on a phone — so its width is derived rather than declared twice. */
+  /* Square at whatever height the row is — 28px on a desktop, 40px on a phone — so its width is derived rather than declared twice. The glyph is set well above the chip's own size: it is the whole label, it has a square to fill, and at the micro size the rest of the chips wear it read as a stray piece of punctuation rather than a way out. No letter-spacing, or the tracking after the glyph would push it off the centre it was placed in. */
   .close {
     height: 100%;
     aspect-ratio: 1;
     padding: 0;
     letter-spacing: 0;
-    font-size: 13px;
+    font-size: 18px;
     justify-content: center;
   }
 
@@ -115,11 +136,12 @@ import { SYNTAX_URL } from "../data/site";
     white-space: nowrap;
   }
 
+  /* 82px of right padding is the corner kept clear for the count, which the text would otherwise scroll under: the longest reading this corpus can produce is "54 of 54", eight characters of Geist Mono at 11px — a 0.6em advance and 0.12em of tracking, so 7.92px each — plus the 10px inset it sits at and 8px of air before the query runs into it. */
   .search {
     width: 100%;
     height: 100%;
     min-width: 0;
-    padding: 0 10px;
+    padding: 0 82px 0 10px;
     background: rgba(0, 0, 0, 0.25);
     border: 1px solid var(--edge-strong);
     border-radius: var(--r-chip);
@@ -132,6 +154,12 @@ import { SYNTAX_URL } from "../data/site";
 
   .search:focus {
     border-color: var(--accent-edge);
+  }
+
+  /* Chrome and Safari park a cancel button in that same corner, and it appears under exactly the condition the count does — a field with something in it. Firefox draws none at all, so the design could never lean on it; the corner goes to the count in every browser instead. */
+  .search::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    display: none;
   }
 
   .body {
@@ -187,10 +215,10 @@ import { SYNTAX_URL } from "../data/site";
     }
   }
 
-  /* On a phone the title and the search field fight over one row; the search wins, since the heading is repeated on the toggle that opened the rail. */
+  /* On a phone the title and the search field fight over one row; the search wins, since the heading is repeated on the toggle that opened the rail. Two items left, so two tracks: with the third still declared, the field took the max-content track and the close chip was left holding the flexible one. */
   @media (max-width: 480px) {
     .row {
-      grid-template-columns: max-content max-content 1fr;
+      grid-template-columns: 1fr max-content;
     }
 
     h2 {
@@ -211,11 +239,17 @@ import { SYNTAX_URL } from "../data/site";
   const closers = [...document.querySelectorAll<HTMLElement>("[data-rail-close]")];
 
   if (rail && backdrop && search && empty && query) {
+    // What opened the rail, so closing it can hand the focus back rather than dropping it at the top of the document.
+    let opener: HTMLElement | null = null;
+
+    // A closed rail is off-screen, not gone: its field, its buttons, and its link stay in the tab order, and aria-hidden over focusable content is both an ARIA violation and, in practice, a tab that lands somewhere invisible. `inert` is what actually puts them out of reach — and it is on the markup from the start, since a rail nothing has opened cannot be used anyway.
     const setOpen = (open: boolean) => {
       rail.classList.toggle("open", open);
       rail.setAttribute("aria-hidden", String(!open));
+      rail.inert = !open;
       backdrop.hidden = !open;
       if (open) search.focus();
+      else opener?.focus();
     };
 
     const filter = () => {
@@ -232,10 +266,15 @@ import { SYNTAX_URL } from "../data/site";
       query.textContent = search.value.trim();
 
       // Silent while unfiltered — the full count is the resting state and needs no announcing; it earns its place only once a search has narrowed things.
-      if (counter) counter.textContent = needle ? `${matches} OF ${cards.length}` : "";
+      if (counter) counter.textContent = needle ? `${matches} of ${cards.length}` : "";
     };
 
-    toggles.forEach((toggle) => toggle.addEventListener("click", () => setOpen(!rail.classList.contains("open"))));
+    toggles.forEach((toggle) =>
+      toggle.addEventListener("click", () => {
+        opener = toggle;
+        setOpen(!rail.classList.contains("open"));
+      }),
+    );
     closers.forEach((closer) => closer.addEventListener("click", () => setOpen(false)));
     backdrop.addEventListener("click", () => setOpen(false));
 

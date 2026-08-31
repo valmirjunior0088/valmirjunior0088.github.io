@@ -18,7 +18,7 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
       <span class="label">EXAMPLES</span>
       {
         keys.map((key) => (
-          <button class:list={["chip", key === defaultKey && "chip--on"]} data-example={key}>
+          <button class:list={["chip", key === defaultKey && "chip--on"]} aria-pressed={key === defaultKey} data-example={key}>
             {EXAMPLES[key].label}
           </button>
         ))
@@ -28,12 +28,12 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     <Editor />
 
     <Toolbar class="actions">
-      <button class="btn btn--primary btn--sm run" data-run>Run ›</button>
+      <button class="btn btn--primary btn--sm run" data-run>Run</button>
       <span class="status">
         <span class="trail" data-trail>ready</span>
         <span class="step" data-step></span>
       </span>
-      <button class="btn btn--chip push toggle" data-rail-toggle>‹ CHEATSHEET</button>
+      <button class="btn btn--sm push toggle" data-rail-toggle aria-label="Cheatsheet">Cheatsheet</button>
     </Toolbar>
 
     <OutputPane placeholder={OUTPUT_PLACEHOLDER} />
@@ -51,22 +51,58 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     min-height: 0;
   }
 
-  /* The trail can run to four steps; on a narrow bar it truncates rather than push the cheatsheet toggle out of the frame — and the buttons on either side hold their width, so it is only ever the numbers that give. */
+  /* The trail can run to four steps; on a narrow bar it truncates rather than push the cheatsheet toggle out of the frame — and the buttons on either side hold their width, so it is only ever the numbers that give. Both are built from the one --sm recipe and stand the same height without either being handed one. */
   .frame :global(.actions) .btn {
     flex: none;
   }
 
-  /* Run swaps its label mid-run, so its width is pinned above the longer of the two: "Running…" measures 59px in Geist at this size and weight, plus 40px of padding and the border. Left to size itself the button would grow by a third the moment it was clicked and shove the breadcrumb sideways just as the breadcrumb started saying something.
+  /* Run swaps its label mid-run, so its width is pinned above the longer of the two: "Running…" measures 59px in Geist at this size and weight, plus 40px of padding and the border. Left to size itself the button would more than double the moment it was clicked and shove the breadcrumb sideways just as the breadcrumb started saying something.
 
-     The glyph is "›" rather than a play triangle for the same reason: Geist's latin subset carries no "▸", so that label was part fallback face, and a fallback face brings its own metrics — the button lost height when the text swapped to an all-Geist "Running…". One font, one line box, one height. It also matches the "‹" on the cheatsheet toggle at the other end of the bar. */
+     A play triangle is not what the "›" is standing in for: Geist's latin subset carries no "▸", so a label wearing one would be part fallback face, and a fallback face brings its own metrics — the button lost height when the text swapped to an all-Geist "Running…". The guillemet is in the face, so the label stays one font, one line box, one height. */
   .run {
     justify-content: center;
     min-width: 104px;
   }
 
-  /* A chip is shorter than the button it shares the bar with. Rather than hand it a height of its own to keep in step, it stretches to the row — which is Run's height, and stays Run's height whatever its label says. */
+  /* The sigil belongs to the waiting button, not to the running one: a run that is under way is not pointing anywhere. It rides as a pseudo-element so the script that swaps the word never has to carry it around, and it leaves on `:disabled`, which is the exact state a run puts the button in — the label and the sigil change on the same event without either knowing about the other. The 10px between it and the word is the button's own gap, the same one the cheatsheet toggle uses at the far end of the bar. */
+  .run::after {
+    content: "›";
+  }
+
+  .run:disabled::after {
+    content: none;
+  }
+
+  /* The cheatsheet's own heading, lifted onto the button that opens it: Faustina italic at the 21px the rail's own h2 wears, the same weight, and the same single word. No sigil — the word is doing the work, and the rail's "›" is what sends it back. Opening the rail should feel like the heading grew into a panel rather than like a new thing appeared.
+
+     It carries the rail head's surface too, which on this bar is nearly the toolbar's own colour, so what reads is the writing rather than a button. That is the point: there is one call to action here and it is Run.
+
+     The padding is what keeps the two the same height. Run is 13px of Geist in a 1.3em line box plus 9px either side; this is 21px of Faustina held to a line box of 1, so 7px either side lands both on 37px. The size is the rail heading's own, and a fixed one on purpose: set to the height the bar leaves it, the word came out twice the heading it is quoting.
+
+     The negative margin is optical alignment. Run's fill is visible, so its block edge is what the eye measures against the bar's 20px padding; this button's fill is not, so the eye measures the word — and the word sat 40px in, its own padding on top of the bar's, reading as a wider margin than Run's. Pulling the box out by exactly its own padding puts the word where Run's block edge is, and spends the padding on a click target that reaches into the gutter instead of on empty space. */
   .toggle {
-    align-self: stretch;
+    padding: 7px 20px;
+    margin-right: -20px;
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 21px;
+    line-height: 1;
+    background: var(--raise);
+    color: var(--fg);
+  }
+
+  /* The hover contract the whole site keeps: go amber. */
+  .toggle:hover {
+    color: var(--accent);
+  }
+
+  /* The mirror of the "›" the rail closes with: that one points at where the panel goes, this one at where it comes from. It is a flex item of the button like the word beside it, so the 10px between them is the button's own gap — the same one Run keeps to its own sigil at the other end of the bar.
+
+     Faustina carries both guillemets, so this stays in the same face as the word rather than dragging in a fallback for one glyph — the mistake Run's label made with a play triangle.
+
+     The aria-label is what keeps the button's accessible name to the word: generated content counts toward the name, and a screen reader has no use for a piece of punctuation. */
+  .toggle::before {
+    content: "‹";
   }
 
   .status {
@@ -221,17 +257,23 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     setStep("");
   }
 
+  // Lit and pressed are the same fact: which example is in the buffer. Colour alone would leave a screen reader with thirteen identical buttons.
+  function light(chip, on) {
+    chip.classList.toggle("chip--on", on);
+    chip.setAttribute("aria-pressed", String(on));
+  }
+
   function pick(key) {
     source.value = EXAMPLES[key].code;
     renderGutter();
-    chips.forEach((chip) => chip.classList.toggle("chip--on", chip.dataset.example === key));
+    chips.forEach((chip) => light(chip, chip.dataset.example === key));
     clearOutput();
   }
 
   // Editing detaches the buffer from whichever example it started as, so no chip stays lit: what is in the editor is no longer that file.
   source.addEventListener("input", () => {
     renderGutter();
-    chips.forEach((chip) => chip.classList.remove("chip--on"));
+    chips.forEach((chip) => light(chip, false));
   });
 
   source.addEventListener("scroll", () => {
@@ -318,7 +360,7 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     } finally {
       running = false;
       runButton.disabled = false;
-      runButton.textContent = "Run ›";
+      runButton.textContent = "Run";
     }
   });
 

@@ -24,7 +24,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "    (p.x, p.y);\n\n" +
       "let m: Point =\n" +
       "    midpoint(Point { x = 0, y = 0 }, Point { x = 4, y = 10 });\n\n" +
-      "let (mx, my) = bounds(m);\n" +
+      "let (mx, my) = bounds(m);\n\n" +
       'Fmt/print("midpoint = (%, %)\\n")(mx)(my)',
   },
   spread: {

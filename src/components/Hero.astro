@@ -8,7 +8,7 @@ import { inlineCode } from "../data/markup";
 import { PAGES, BUILD_URL } from "../data/site";
 ---
 
-<Section padding="var(--sec-y) var(--pad)">
+<Section>
   <div class="hero">
     <div class="col">
       <div class="lockup">
@@ -26,11 +26,11 @@ import { PAGES, BUILD_URL } from "../data/site";
 
     <div class="col col--panels">
       <Panel>
-        <Fragment slot="head">
-          <span class="label">{HERO.filename}</span>
-          <span class="label label--accent push caption">{HERO.caption}</span>
-        </Fragment>
-        <pre class="code file" set:html={[...HERO.declaration, ...HERO.usage].join("\n")} />
+        <pre class="code file" set:html={HERO.declaration.join("\n")} />
+      </Panel>
+
+      <Panel>
+        <pre class="code file" set:html={HERO.usage.join("\n")} />
       </Panel>
 
       <Panel tone="accent">
@@ -96,12 +96,7 @@ import { PAGES, BUILD_URL } from "../data/site";
     margin-bottom: 32px;
   }
 
-  /* On a narrow panel the head runs out of room and the caption wraps; margin-left: auto has only moved the box, so the ragged edge inside it needs sending right as well. */
-  .caption {
-    text-align: right;
-  }
-
-  /* One block, though the data keeps the declaration and its use apart: two blocks would each grow their own scrollbar on a phone, and a scrollbar through the middle of a file is a worse seam than none. */
+  /* Two blocks, because they are two files: the standard library's declaration and the program that imports it. Each can grow its own scrollbar on a phone, which is the cost — and worth paying here, where the seam between them is the point being made. Neither carries a head strip; the comment that opens each one says what it is, and a label above it would say it twice. */
   .file {
     padding: 20px 24px;
   }

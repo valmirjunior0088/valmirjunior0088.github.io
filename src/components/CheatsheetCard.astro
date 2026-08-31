@@ -31,6 +31,13 @@ const haystack = plainText([card.title, card.tag, card.code.join(" "), card.glos
     animation: cardIn 260ms ease both;
   }
 
+  /* The cards replay this every time the filter narrows, which is a lot of movement for something a keystroke away. Under a reduced-motion preference they simply appear — no less legible, and no less filtered. */
+  @media (prefers-reduced-motion: reduce) {
+    .card {
+      animation: none;
+    }
+  }
+
   @keyframes cardIn {
     from {
       opacity: 0;

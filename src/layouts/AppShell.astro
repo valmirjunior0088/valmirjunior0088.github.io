@@ -2,6 +2,7 @@
 // The application archetype, and the exact opposite of PageShell's box model: the frame is pinned to the viewport and never scrolls. Anything that overflows scrolls inside its own pane, which is what lets the toolbars stay put while the editor and the output pane move independently.
 import Document from "./Document.astro";
 import Header from "../components/Header.astro";
+import { PAGES } from "../data/site";
 
 interface Props {
   title: string;
@@ -13,6 +14,8 @@ const { title, description } = Astro.props;
 
 <Document title={title} description={description} bodyClass="app">
   <Header current="playground" sticky />
+  {/* The frame has no room for a heading and the crumb beside the wordmark goes at the first narrow screen, so the page's one h1 is here, for the outline only. Without it the document's headings start at the rail's h2, inside a panel that is closed and inert nearly all the time. */}
+  <h1 class="sr-only">{PAGES.playground.label}</h1>
   <slot />
 </Document>
 

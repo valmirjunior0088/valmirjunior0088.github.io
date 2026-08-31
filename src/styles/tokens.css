@@ -204,7 +204,7 @@ h3 {
   padding: 9px 20px;
 }
 
-/* The small mono control: COPY, CLEAR, the cheatsheet toggle, the rail's close button. Same hover contract as everything else — go amber. */
+/* The small mono control: COPY, the cheatsheet toggle, the rail's close button. Same hover contract as everything else — go amber. */
 .btn--chip {
   font-family: var(--mono);
   font-size: var(--ms-micro);
@@ -273,17 +273,30 @@ h3 {
   contain: inline-size;
 }
 
-/* Highlighting is two classes and no more. The canvas collapsed keywords, types, and strings into a single amber, and holding to that keeps a code block reading as one texture instead of a rainbow. */
+/* Highlighting is two classes and no more. The canvas collapsed keywords, types, and strings into a single amber, and holding to that keeps a code block reading as one texture instead of a rainbow — the compiler's own voice in the hero's diagnostic included. */
 .kw {
   color: var(--accent);
 }
 
+/* The other one: a comment, which is prose sitting in a code block and reads a tier down from the code it is explaining. */
 .cm {
   color: var(--fg-mute);
 }
 
 code {
   font-family: var(--mono);
+}
+
+/* Text for the outline rather than for the page: the playground's own heading, which the design has no room for and the document cannot do without. Clipped rather than hidden, because display: none and visibility: hidden would take it out of the accessibility tree along with everything else. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* Panel heads and toolbars are flex rows filled by slotted content, and scoped styles cannot reach across a slot boundary to push one child to the right. This is the one utility that earns its keep. */

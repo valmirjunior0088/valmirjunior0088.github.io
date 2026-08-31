@@ -1,34 +1,34 @@
-import { GITHUB_URL } from "./site";
+import { GITHUB_URL, SYNTAX_URL } from "./site";
 
-// Code shown on the landing page is pre-highlighted markup rather than plain text run through a highlighter at build time: there are exactly three snippets, they never change without someone editing this file, and a highlighter for a language this young would be a large amount of machinery to get four keywords amber. Two classes only — .kw for anything the language reserves, .cm for anything the compiler is telling you about itself.
+// Code shown on the landing page is pre-highlighted markup rather than plain text run through a highlighter at build time: there are exactly three snippets, they never change without someone editing this file, and a highlighter for a language this young would be a large amount of machinery to get four keywords amber. Two classes only — .kw for anything the language reserves, .cm for the comments that open each block.
 export const HERO = {
   eyebrow: "DEPENDENTLY TYPED · COMPILES TO WEBASSEMBLY",
   heading: ["Small language.", "Big opinions about your arithmetic."],
   lead: "Types can depend on values, proofs live beside ordinary code, and the compiler is happy to double-check your math homework.",
-  filename: "vector.crs",
-  caption: "a length that is not a comment",
-  // The two blocks are one file read top to bottom, so the import opens it and `Vec` is the one declared just below — importing /std/Vec as well would have the snippet contradict itself. The diagnostic underneath is transcribed from the real compiler against exactly these lines, which is why it reads /Vec (a local declaration, absolute from the root) and points at line 9.
+  // Two files, not one read top to bottom: the first quotes the standard library's own Vec so the length in the type is on the page, the second is the program that imports it. Both are true of the shipped compiler — /std/Vec's cons really does take (x, xs) with the length erased, and the declaration below compiles as written.
   declaration: [
-    '<span class="kw">use</span> /std/{Nat};',
-    "",
+    '<span class="cm">-- This is how Vec is represented in the /std...</span>',
     '<span class="kw">pub induct</span> Vec(T: <span class="kw">Type</span>): (Nat) -> <span class="kw">pub Type</span>',
     "| nil(): (0)",
     "| cons(@m: Nat, x: T, xs: Vec(T, m)): (m + 1)",
     '<span class="kw">end</span>',
-    "",
   ],
   usage: [
+    '<span class="kw">use</span> /std/{Nat, Vec};',
+    "",
+    '<span class="cm">-- ...and this is what happens when you get the length wrong</span>',
     '<span class="kw">let</span> empty: Vec(Nat, 0) = Vec/nil();',
     '<span class="kw">let</span> single: Vec(Nat, 1) = empty;',
   ],
+  // Transcribed from the real compiler against exactly the five lines above, which is why it reads a bare Vec — an imported name, not the /Vec a local declaration would print — and points at line 5. The --> line is the only part the browser build cannot produce, having no filename to name.
   diagnostic: [
     "while elaborating /single:",
     '<span class="kw">type mismatch</span>',
-    "  inferred: /Vec(Nat, 0)",
-    "  expected: /Vec(Nat, 1)",
+    "  inferred: Vec(Nat, 0)",
+    "  expected: Vec(Nat, 1)",
     "",
-    "   --> vector.crs:9:27",
-    "    9 | let single: Vec(Nat, 1) = empty;",
+    "   --> vector.crs:5:27",
+    "    5 | let single: Vec(Nat, 1) = empty;",
     '      |                           <span class="kw">^^^^^</span>',
   ],
   note: "Two different types, so the off-by-one never reaches the generated program. There is nothing to test for, because there is nothing to run — and the `@m` that made it work does its thinking at compile time, then goes home.",
@@ -84,7 +84,7 @@ export const RESOURCES: Resource[] = [
   {
     title: "Language reference",
     body: "The complete surface language — what something means and how to spell it.",
-    href: `${GITHUB_URL}/blob/main/documentation/syntax.md`,
+    href: SYNTAX_URL,
   },
   {
     title: "Usage",
