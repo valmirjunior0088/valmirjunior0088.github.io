@@ -1,53 +1,19 @@
 ---
+// Markup and metrics only, like the editor above it: everything that writes here lives in the playground page. One pane, no header — what the compiler says and what the program prints are the same transcript, and the breadcrumb on the action bar already names which of the two you are looking at.
 interface Props {
-  name: string;
-  label: string;
   placeholder: string;
-  count?: boolean;
 }
 
-const { name, label, placeholder, count = false } = Astro.props;
+const { placeholder } = Astro.props;
 ---
 
-<section class="pane" data-pane={name}>
-  <div class="head">
-    <span class="label">{label}</span>
-    {count && <span class="label label--sm count" data-count />}
-    <button class="btn btn--chip push" data-clear={name}>CLEAR</button>
-  </div>
-  <pre class="body empty" data-body data-placeholder={placeholder} aria-live="polite">{placeholder}</pre>
-</section>
+<pre class="output empty" data-output data-placeholder={placeholder} aria-live="polite">{placeholder}</pre>
 
 <style>
-  .pane {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-
-  .pane[data-pane="diagnostics"] {
-    border-right: 1px solid var(--edge);
-  }
-
-  .head {
-    flex: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .count[data-tone="ok"] {
-    color: var(--ok);
-  }
-
-  .count[data-tone="error"] {
-    color: var(--err);
-  }
-
-  .body {
-    flex: 1;
+  /* Takes what the editor leaves and gives it back first when the frame runs short: the editor is the half you are working in. */
+  .output {
+    flex: 0 1 260px;
+    min-height: 120px;
     margin: 0;
     padding: 16px;
     overflow: auto;
@@ -59,22 +25,17 @@ const { name, label, placeholder, count = false } = Astro.props;
   }
 
   /* The placeholder is prose, not output, and says so by sitting a tier dimmer than anything the compiler actually printed. */
-  .body.empty {
+  .output.empty {
     color: var(--fg-mute);
   }
 
-  .body.error {
+  .output.error {
     color: var(--err);
   }
 
-  /* Stacked on a phone, the pane grows to fit its output rather than scrolling inside a box that is barely taller than its own header. */
+  /* Stacked on a phone, the pane grows to fit its output rather than scrolling inside a box barely taller than a couple of lines. */
   @media (max-width: 720px) {
-    .pane[data-pane="diagnostics"] {
-      border-right: none;
-      border-bottom: 1px solid var(--edge);
-    }
-
-    .body {
+    .output {
       flex: none;
       min-height: 96px;
       overflow: visible;

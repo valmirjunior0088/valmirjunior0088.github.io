@@ -9,8 +9,7 @@ import { EXAMPLES } from "../../data/examples";
 const keys = Object.keys(EXAMPLES);
 const defaultKey = keys[0];
 
-const DIAGNOSTICS_PLACEHOLDER = 'No complaints yet. Hit "Run" and the compiler will find some.';
-const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it just might show up here.";
+const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it just might show up here.";
 ---
 
 <AppShell title="Playground · Curios">
@@ -37,29 +36,19 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
       <button class="btn btn--chip push toggle" data-rail-toggle>‹ CHEATSHEET</button>
     </Toolbar>
 
-    <div class="outputs">
-      <OutputPane name="diagnostics" label="DIAGNOSTICS" placeholder={DIAGNOSTICS_PLACEHOLDER} count />
-      <OutputPane name="stdout" label="STDOUT" placeholder={STDOUT_PLACEHOLDER} />
-    </div>
+    <OutputPane placeholder={OUTPUT_PLACEHOLDER} />
   </div>
 
   <CheatsheetRail />
 </AppShell>
 
 <style>
-  /* The frame fills whatever the header leaves and hands its slack to the editor. Nothing here scrolls; the editor and the two panes scroll inside themselves, which is what keeps the toolbars where you left them. */
+  /* The frame fills whatever the header leaves and hands its slack to the editor. Nothing here scrolls; the editor and the output pane scroll inside themselves, which is what keeps the toolbars where you left them. */
   .frame {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
-  }
-
-  .outputs {
-    flex: 0 1 260px;
-    min-height: 120px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
   }
 
   /* The trail can run to four steps; on a narrow bar it truncates rather than push the cheatsheet toggle out of the frame — and the buttons on either side hold their width, so it is only ever the numbers that give. */
@@ -105,7 +94,7 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     color: var(--accent);
   }
 
-  /* The same green the diagnostics count goes when it says CLEAN, and for the same reason: this is the other end of the one verdict the page gives. */
+  /* Green is the whole verdict, now that nothing sits beside the output to give a second one: a line that reached "ran" is a program that compiled, ran, and printed whatever is in the pane below. */
   .step[data-tone="ok"] {
     color: var(--ok);
   }
@@ -121,7 +110,7 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     color: var(--fg-faint);
   }
 
-  /* Below the breakpoint AppShell has let the body scroll, so the editor takes a fixed share of the screen and the panes stack under it at whatever height their output wants. The action bar sticks, one bar's height down so it parks under the sticky header rather than sliding beneath it: Run has to stay in reach while you scroll down to read what it produced. */
+  /* Below the breakpoint AppShell has let the body scroll, so the editor takes a fixed share of the screen and the pane sits under it at whatever height its output wants. The action bar sticks, one bar's height down so it parks under the sticky header rather than sliding beneath it: Run has to stay in reach while you scroll down to read what it produced. */
   @media (max-width: 720px) {
     .frame :global(.editor) {
       flex: none;
@@ -135,20 +124,15 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
       background: var(--raise);
     }
 
-    /* No room for the timings between two thumb-sized buttons, and no good way to wrap four phases under them either. The diagnostics pane's count carries the verdict on a phone; the numbers are a desktop luxury. */
+    /* No room for the timings between two thumb-sized buttons, and no good way to wrap four phases under them either. On a phone the pane carries the outcome by itself — it turns red and says what went wrong — and the numbers are a desktop luxury. */
     .status {
       display: none;
-    }
-
-    .outputs {
-      flex: none;
-      grid-template-columns: 1fr;
     }
   }
 </style>
 
 <script is:inline type="module" define:vars={{ EXAMPLES, defaultKey }}>
-  // The compiler is a published asset rather than a source module, so this script stays inline and imports it at runtime. If the bundle was never fetched, the loader reports a load-phase failure and the diagnostics pane says so — the page still works, it just cannot compile.
+  // The compiler is a published asset rather than a source module, so this script stays inline and imports it at runtime. If the bundle was never fetched, the loader reports a load-phase failure and the output pane says so — the page still works, it just cannot compile.
   import { compileAndReport } from "/curios/loader.js";
 
   const source = document.querySelector("[data-source]");
@@ -157,12 +141,7 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
   const trail = document.querySelector("[data-trail]");
   const stepLine = document.querySelector("[data-step]");
   const chips = [...document.querySelectorAll("[data-example]")];
-  const count = document.querySelector('[data-pane="diagnostics"] [data-count]');
-
-  const panes = {
-    diagnostics: document.querySelector('[data-pane="diagnostics"] [data-body]'),
-    stdout: document.querySelector('[data-pane="stdout"] [data-body]'),
-  };
+  const output = document.querySelector("[data-output]");
 
   let running = false;
 
@@ -171,12 +150,11 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     gutter.textContent = Array.from({ length: lines }, (_, index) => index + 1).join("\n");
   }
 
-  function setPane(name, text, tone) {
-    const pane = panes[name];
+  function setOutput(text, tone) {
     const empty = !text;
-    pane.textContent = empty ? pane.dataset.placeholder : text;
-    pane.classList.toggle("empty", empty);
-    pane.classList.toggle("error", !empty && tone === "error");
+    output.textContent = empty ? output.dataset.placeholder : text;
+    output.classList.toggle("empty", empty);
+    output.classList.toggle("error", !empty && tone === "error");
   }
 
   // Every step the compiler goes through, in the three forms the line needs: the one it wears while it is happening, the one it leaves behind when it finishes, and the plain one it leaves behind when it doesn't. The past tense is reserved for the step that earned it — "compiled" is a claim about the program, and a compile that was refused has no business making it.
@@ -184,7 +162,7 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     load: { doing: "downloading…", done: (ms) => `downloaded ${ms.toFixed(0)}ms`, stopped: (ms) => `download ${ms.toFixed(0)}ms` },
     warm: { doing: "initializing…", done: (ms) => `initialized ${ms.toFixed(0)}ms`, stopped: (ms) => `init ${ms.toFixed(0)}ms` },
     compile: { doing: "compiling…", done: (ms) => `compiled ${ms.toFixed(1)}ms`, stopped: (ms) => `compile ${ms.toFixed(1)}ms` },
-    run: { doing: "running…", done: (ms) => `ran ${ms.toFixed(1)}ms`, stopped: (ms) => `run ${ms.toFixed(1)}ms` },
+    run: { doing: "running…", done: (ms, bytes) => `ran ${(bytes / 1024).toFixed(1)}kb of WebAssembly in ${ms.toFixed(1)}ms`, stopped: (ms) => `run ${ms.toFixed(1)}ms` },
   };
 
   // Whether the compiler is already in the worker, which decides what the first step of the next run will be. The worker's own events settle it either way; this only spares the line from starting blank.
@@ -199,17 +177,10 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     stepLine.dataset.tone = tone ?? "";
   }
 
-  function setCount(text, tone) {
-    count.textContent = text;
-    count.dataset.tone = tone ?? "";
-  }
-
   function clearOutput() {
-    setPane("diagnostics", "");
-    setPane("stdout", "");
+    setOutput("");
     setTrail("ready");
     setStep("");
-    setCount("");
   }
 
   function pick(key) {
@@ -231,26 +202,12 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
 
   chips.forEach((chip) => chip.addEventListener("click", () => pick(chip.dataset.example)));
 
-  document.querySelectorAll("[data-clear]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const name = button.dataset.clear;
-      setPane(name, "");
-      if (name === "diagnostics") {
-        setCount("");
-        setTrail("ready");
-        setStep("");
-      }
-    });
-  });
-
   runButton.addEventListener("click", async () => {
     if (running) return;
     running = true;
     runButton.disabled = true;
     runButton.textContent = "Running…";
-    setPane("diagnostics", "");
-    setPane("stdout", "");
-    setCount("");
+    setOutput("");
 
     // The line is a breadcrumb: each step names itself as it starts, then settles into a measurement and hands the end of the line to the next one. There is no separate success message at the end because none is needed — a line that reached "ran" is a program that compiled and ran, and it says so in more detail than "accepted" would, so that last crumb simply goes green and stands as the verdict.
     const done = [];
@@ -261,13 +218,13 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     setStep(loaded ? STEPS.compile.doing : STEPS.load.doing, "working");
 
     try {
-      const result = await compileAndReport(source.value, ({ phase, step, ms }) => {
+      const result = await compileAndReport(source.value, ({ phase, step, ms, bytes }) => {
         if (phase === "begin") {
           setStep(STEPS[step].doing, "working");
           return;
         }
-        // Only the durations here. The output size belongs to the diagnostics pane, which states it in full, and printing it twice would make the two readouts look like they were measuring different things.
-        const crumb = STEPS[step].done(ms);
+        // The run step is handed the size of the module it ran alongside its duration: with no second pane to state it, the breadcrumb is the only place the compiler's output gets measured at all.
+        const crumb = STEPS[step].done(ms, bytes);
         if (step === "load") loaded = true;
 
         // The run is the last step there is, so its crumb stays where the outcome goes rather than falling back into the trail: green, unshrinkable, and holding the slot an error would otherwise have taken.
@@ -283,8 +240,8 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
       });
 
       if (!result.ok) {
-        setPane("diagnostics", result.error, "error");
-        // A compiler that never arrived has judged nothing, so the count says so rather than ERROR — on a phone it is the only verdict in view, and this one is not the program's fault.
+        setOutput(result.error, "error");
+        // A compiler that never arrived has judged nothing, so the line says as much rather than laying the failure at the program's door.
         const unavailable = result.phase === "load";
         if (unavailable) loaded = false;
 
@@ -296,20 +253,17 @@ const STDOUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
         }
 
         setStep(unavailable ? "compiler unavailable" : "error", "error");
-        setCount(unavailable ? "UNAVAILABLE" : "ERROR", "error");
         return;
       }
 
-      // stderr joins stdout rather than the diagnostics pane: both are the program talking, and only the compiler's complaints belong on the left.
-      setPane("stdout", `${result.run.stdout}${result.run.stderr}`.trimEnd());
-
-      const notes = [`Compiled to ${result.bytes.length} bytes of WebAssembly`];
+      // stderr joins stdout, and the way the process ended joins both: the pane holds the transcript of the run, not a feed of one stream.
+      const printed = [`${result.run.stdout}${result.run.stderr}`.trimEnd()];
       const trapped = Boolean(result.run.trap);
-      if (trapped) notes.push(result.run.trap);
-      else if (result.run.exitCode) notes.push(`Process exited with code ${result.run.exitCode}`);
+      if (trapped) printed.push(result.run.trap);
+      else if (result.run.exitCode) printed.push(`Process exited with code ${result.run.exitCode}`);
 
-      setPane("diagnostics", notes.join("\n"), trapped ? "error" : "ok");
-      setCount(trapped ? "ERROR" : "CLEAN", trapped ? "error" : "ok");
+      // A run that trapped is a failed run, and the whole transcript is coloured as one: whatever the program managed to print before it died is part of the failure rather than output standing on its own.
+      setOutput(printed.filter(Boolean).join("\n"), trapped ? "error" : undefined);
       // A trap is the one outcome the crumbs cannot convey on their own. It is not a clean finish, so the run's crumb gives up the outcome slot and falls back into the trail — how long the program took to reach the trap is still worth reading — and the verdict takes its place.
       if (trapped) {
         done.push(ran);

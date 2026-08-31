@@ -65,7 +65,8 @@ async function compileAndReport(source, onPhase) {
   } catch (error) {
     return { ok: false, phase: "run", ms: performance.now() - t2, error: `Couldn't run the program: ${error.message || error}` };
   }
-  onPhase({ phase: "end", step: "run", ms: performance.now() - t2 });
+  // The size rides along with the run's timing because that is where the page reads it out: one crumb for how much WebAssembly ran and how long it took.
+  onPhase({ phase: "end", step: "run", ms: performance.now() - t2, bytes: bytes.length });
 
   const run = {
     stdout: utf8.decode(outcome.stdout),
@@ -74,7 +75,7 @@ async function compileAndReport(source, onPhase) {
     trap: outcome.trap,
   };
 
-  // The timings have all been sent as they happened; what is left for the end is what the panes need.
+  // The timings have all been sent as they happened; what is left for the end is what the pane needs.
   return { ok: true, bytes, run };
 }
 
