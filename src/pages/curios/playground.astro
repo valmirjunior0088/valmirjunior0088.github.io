@@ -103,6 +103,16 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     color: var(--err);
   }
 
+  /* The size doubles as a link to the module itself, and it keeps whatever colour the crumb is wearing rather than taking the site's accent, hover included: the tone of this line is a verdict, and a green "ran" that turned orange halfway through would be reporting something it does not mean. An underline is the whole of what marks it — offset far enough to clear the descenders it runs under.
+
+     Global because the anchor is minted by the script rather than written in the template above, so it never carries the scope attribute a scoped selector would look for. */
+  .status :global(a),
+  .status :global(a):hover {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
   /* The separator belongs to the step, and only when there is a trail in front of it to be separated from — the first step of a run leads the line rather than trailing a dot. It needs `pre` to keep its own spaces: generated content sits at the start of the step's line box, and a leading space there is collapsible whitespace, which the line box strips. The dot would otherwise arrive wearing only its right-hand space. */
   .trail:not(:empty) + .step:not(:empty)::before {
     content: " · ";
@@ -162,24 +172,52 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     load: { doing: "downloading…", done: (ms) => `downloaded ${ms.toFixed(0)}ms`, stopped: (ms) => `download ${ms.toFixed(0)}ms` },
     warm: { doing: "initializing…", done: (ms) => `initialized ${ms.toFixed(0)}ms`, stopped: (ms) => `init ${ms.toFixed(0)}ms` },
     compile: { doing: "compiling…", done: (ms) => `compiled ${ms.toFixed(1)}ms`, stopped: (ms) => `compile ${ms.toFixed(1)}ms` },
-    run: { doing: "running…", done: (ms, bytes) => `ran ${(bytes / 1024).toFixed(1)}kb of WebAssembly in ${ms.toFixed(1)}ms`, stopped: (ms) => `run ${ms.toFixed(1)}ms` },
+    run: { doing: "running…", done: moduleCrumb, stopped: (ms) => `run ${ms.toFixed(1)}ms` },
   };
 
   // Whether the compiler is already in the worker, which decides what the first step of the next run will be. The worker's own events settle it either way; this only spares the line from starting blank.
   let loaded = false;
 
-  function setTrail(text) {
-    trail.textContent = text;
+  // The module from the last successful run, and the crumb that offers it. The URL lives exactly as long as that crumb is on the line: minted when the bytes arrive, dropped the moment the line is cleared, so a session of runs leaves one blob alive rather than one per run.
+  let moduleUrl = null;
+  let moduleLink = null;
+
+  function dropModule() {
+    if (moduleUrl) URL.revokeObjectURL(moduleUrl);
+    moduleUrl = null;
+    moduleLink = null;
   }
 
-  function setStep(text, tone) {
-    stepLine.textContent = text;
+  // Crumbs rather than a string, because one of them is a link. Both of these clear with an empty `replaceChildren` rather than an empty string: the separator between the trail and the step keys off `:empty`, and an empty text node is still a child.
+  function setTrail(parts) {
+    trail.replaceChildren();
+    parts.forEach((part, index) => {
+      if (index) trail.append(" · ");
+      trail.append(part);
+    });
+  }
+
+  function setStep(content, tone) {
+    if (content) stepLine.replaceChildren(content);
+    else stepLine.replaceChildren();
     stepLine.dataset.tone = tone ?? "";
   }
 
+  // "ran 12.4kb of WebAssembly in 0.3ms", with the size standing in for the module it measures. The anchor is minted without an href and kept aside for the result to arm: the bytes only reach the page a moment after this is drawn, and until then there is nothing to hand over — an anchor with no href is inert and unstyled, which is the truth of that moment.
+  function moduleCrumb(ms, bytes) {
+    moduleLink = document.createElement("a");
+    moduleLink.textContent = `${(bytes / 1024).toFixed(1)}kb of WebAssembly`;
+    moduleLink.title = "Download the compiled module";
+
+    const crumb = document.createElement("span");
+    crumb.append("ran ", moduleLink, ` in ${ms.toFixed(1)}ms`);
+    return crumb;
+  }
+
   function clearOutput() {
+    dropModule();
     setOutput("");
-    setTrail("ready");
+    setTrail(["ready"]);
     setStep("");
   }
 
@@ -207,12 +245,14 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     running = true;
     runButton.disabled = true;
     runButton.textContent = "Running…";
+    // The last run's module goes with the last run's output: its crumb is about to be cleared off the line, and nothing else holds the URL.
+    dropModule();
     setOutput("");
 
     // The line is a breadcrumb: each step names itself as it starts, then settles into a measurement and hands the end of the line to the next one. There is no separate success message at the end because none is needed — a line that reached "ran" is a program that compiled and ran, and it says so in more detail than "accepted" would, so that last crumb simply goes green and stands as the verdict.
     const done = [];
-    let ran = "";
-    setTrail("");
+    let ran = null;
+    setTrail([]);
 
     // Named here rather than waited for: spawning the worker and fetching its script takes long enough on a cold page to leave the line blank, and the first "begin" from the worker overwrites this the moment it lands, so guessing wrong costs nothing.
     setStep(loaded ? STEPS.compile.doing : STEPS.load.doing, "working");
@@ -223,7 +263,7 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
           setStep(STEPS[step].doing, "working");
           return;
         }
-        // The run step is handed the size of the module it ran alongside its duration: with no second pane to state it, the breadcrumb is the only place the compiler's output gets measured at all.
+        // The run step is handed the size of the module it ran alongside its duration: with no second pane to state it, the breadcrumb is the only place the compiler's output gets measured — or offered.
         const crumb = STEPS[step].done(ms, bytes);
         if (step === "load") loaded = true;
 
@@ -235,7 +275,7 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
         }
 
         done.push(crumb);
-        setTrail(done.join(" · "));
+        setTrail(done);
         setStep("");
       });
 
@@ -249,12 +289,17 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
         const failed = STEPS[result.phase];
         if (failed && result.ms > 0) {
           done.push(failed.stopped(result.ms));
-          setTrail(done.join(" · "));
+          setTrail(done);
         }
 
         setStep(unavailable ? "compiler unavailable" : "error", "error");
         return;
       }
+
+      // The bytes only travel with the result, so the crumb's link is armed here rather than where it was drawn — a few milliseconds of an anchor that does not lead anywhere, on a line nobody has had time to reach for yet.
+      moduleUrl = URL.createObjectURL(new Blob([result.bytes], { type: "application/wasm" }));
+      moduleLink.href = moduleUrl;
+      moduleLink.download = "program.wasm";
 
       // stderr joins stdout, and the way the process ended joins both: the pane holds the transcript of the run, not a feed of one stream.
       const printed = [`${result.run.stdout}${result.run.stderr}`.trimEnd()];
@@ -267,7 +312,7 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
       // A trap is the one outcome the crumbs cannot convey on their own. It is not a clean finish, so the run's crumb gives up the outcome slot and falls back into the trail — how long the program took to reach the trap is still worth reading — and the verdict takes its place.
       if (trapped) {
         done.push(ran);
-        setTrail(done.join(" · "));
+        setTrail(done);
         setStep("error", "error");
       }
     } finally {
