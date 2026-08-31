@@ -3,7 +3,8 @@ import { GITHUB_URL, SYNTAX_URL } from "./site";
 // Code shown on the landing page is pre-highlighted markup rather than plain text run through a highlighter at build time: there are exactly three snippets, they never change without someone editing this file, and a highlighter for a language this young would be a large amount of machinery to get four keywords amber. Two classes only — .kw for anything the language reserves, .cm for the comments that open each block.
 export const HERO = {
   eyebrow: "DEPENDENTLY TYPED · COMPILES TO WEBASSEMBLY",
-  heading: ["Small language.", "Big opinions about your arithmetic."],
+  // Three lines, broken where they are meant to break rather than wherever the box runs out: "your arithmetic." opens a line instead of trailing the one above it, at every width.
+  heading: ["Small language.", "Big opinions about", "your arithmetic."],
   lead: "Types can depend on values, proofs live beside ordinary code, and the compiler is happy to double-check your math homework.",
   // Two files, not one read top to bottom: the first quotes the standard library's own Vec so the length in the type is on the page, the second is the program that imports it. Both are true of the shipped compiler — /std/Vec's cons really does take (x, xs) with the length erased, and the declaration below compiles as written.
   declaration: [

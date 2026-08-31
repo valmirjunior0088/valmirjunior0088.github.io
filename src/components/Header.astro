@@ -22,7 +22,7 @@ const links = [...internal, ...EXTERNAL_NAV];
 <header class:list={["bar", sticky && "bar--sticky"]}>
   <a href={PAGES.home.href} class="brand">
     <Wordmark />
-    <img class="mark" src="/curios/brand/curios-mark.svg" alt="Curios" width="24" height="25" />
+    <img class="mark" src="/curios/brand/curios-mark.svg" alt="Curios" width="30" height="32" />
   </a>
   <span class="label crumb">{page.chip}</span>
   <nav>
@@ -94,7 +94,7 @@ const links = [...internal, ...EXTERNAL_NAV];
       font-size: 13px;
     }
 
-    /* The wordmark gives way to the mark: the row is short of room, and a monogram beside three links reads as a mobile header rather than a desktop one squeezed. */
+    /* The wordmark gives way to the mark: the row is short of room, and a monogram beside three links reads as a mobile header rather than a desktop one squeezed. It is drawn at 30×32 rather than the wordmark's 26px of height — a monogram alone in the corner can carry more weight than one standing next to its own name, and the bar has 56px to spend. The box follows the artwork's 18:19, so nothing is stretched to get there. */
     .brand :global(.wordmark) {
       display: none;
     }

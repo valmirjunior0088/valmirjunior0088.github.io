@@ -31,7 +31,7 @@ import { INSTALL_COMMAND } from "../data/site";
     border-radius: var(--r-btn);
   }
 
-  /* The command is longer than the box and always will be. Rather than wrap it or shrink it, it scrolls, and the mask tells you so by fading the last stretch out instead of guillotining it at the border. */
+  /* The command is longer than the box and always will be. Rather than wrap it or shrink it, it scrolls, and the mask tells you so by fading the last stretch out instead of guillotining it at the border. The fade is a promise that there is more to the right, so it lifts once there is not — at the end of the scroll, or on a screen wide enough that the command never had to scroll at all. */
   code {
     flex: 1;
     min-width: 0;
@@ -42,6 +42,10 @@ import { INSTALL_COMMAND } from "../data/site";
     overflow-x: auto;
     scrollbar-width: none;
     mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent);
+  }
+
+  code.ended {
+    mask-image: none;
   }
 
   code::-webkit-scrollbar {
@@ -58,6 +62,14 @@ import { INSTALL_COMMAND } from "../data/site";
   const command = document.querySelector<HTMLElement>(".install code");
 
   if (button && command) {
+    // A one-pixel slack, because a scroller at its end can land a fraction short of its own scrollWidth.
+    const atEnd = () => command.scrollWidth - command.scrollLeft - command.clientWidth <= 1;
+    const syncFade = () => command.classList.toggle("ended", atEnd());
+
+    command.addEventListener("scroll", syncFade, { passive: true });
+    window.addEventListener("resize", syncFade);
+    syncFade();
+
     let revert: ReturnType<typeof setTimeout>;
 
     button.addEventListener("click", async () => {

@@ -15,10 +15,17 @@ import { PAGES, BUILD_URL } from "../data/site";
         <Wordmark width={198} />
       </div>
       <p class="label eyebrow">{HERO.eyebrow}</p>
-      <h1>{HERO.heading[0]}<br />{HERO.heading[1]}</h1>
+      <h1>
+        {HERO.heading.map((line, index) => (
+          <>
+            {index > 0 && <br />}
+            {line}
+          </>
+        ))}
+      </h1>
       <p class="lead">{HERO.lead}</p>
       <div class="actions">
-        <a class="btn btn--primary" href={PAGES.playground.href}>Argue with it in a browser tab →</a>
+        <a class="btn btn--primary" href={PAGES.playground.href}>Argue with it in a browser tab</a>
         <a class="btn btn--outline" href={BUILD_URL}>Build it yourself</a>
       </div>
       <InstallBox />
@@ -46,7 +53,7 @@ import { PAGES, BUILD_URL } from "../data/site";
   /* The two columns are stretched to a common height and each distributes its own slack, which is what lines the install box up with the closing note. It only holds between the 1440 cap and the 960 breakpoint — inside that band the slack stays small enough to read as alignment rather than drift; below it the columns stack and the trick is switched off. No pixel floors on the tracks: mobile Chrome sizes its layout viewport to the page's min-content width before it evaluates a single media query, so a floor wide enough to matter here is a floor that keeps the breakpoint from ever firing. */
   .hero {
     display: grid;
-    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
     gap: 64px;
     align-items: stretch;
   }
@@ -71,6 +78,7 @@ import { PAGES, BUILD_URL } from "../data/site";
     margin: 0 0 24px;
   }
 
+  /* Three lines at every width, which is the whole point of breaking them by hand — so the size is chosen against the longest of them, "Big opinions about", which measures 6.89× the font size. */
   h1 {
     font-size: clamp(40px, 7.2vw, 76px);
     line-height: 1;
@@ -96,6 +104,13 @@ import { PAGES, BUILD_URL } from "../data/site";
     margin-bottom: 32px;
   }
 
+  /* The primary takes whatever the row has left over and the secondary keeps the width of its own words, so the pair reaches both edges of the column instead of trailing off mid-line. The label is held on one line: a growing button whose floor is its longest word would rather wrap its text than send its neighbour to the next row, and a two-line button in a row of one-line buttons is the wrong kind of surprise. */
+  .actions .btn--primary {
+    flex: 1;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
   /* Two blocks, because they are two files: the standard library's declaration and the program that imports it. Each can grow its own scrollbar on a phone, which is the cost — and worth paying here, where the seam between them is the point being made. Neither carries a head strip; the comment that opens each one says what it is, and a label above it would say it twice. */
   .file {
     padding: 20px 24px;
@@ -116,6 +131,23 @@ import { PAGES, BUILD_URL } from "../data/site";
     text-wrap: pretty;
   }
 
+  /* Two columns, and the heading now belongs to a box rather than to the window: sized in vw it tracks a width it does not live in, and between 960 and 1200 that put "Big opinions about" wider than the column holding it — a fourth line, which is the one thing the hand-placed breaks exist to prevent. 13cqi is 13% of the column itself, and the longest line renders 7.05× the font size, so it lands at 92% of the room it has at every width in this range. The column stops growing at the 1440 cap, so the heading does too, with no ceiling needed to say so.
+
+     The lead loses its 44ch cap here for the same reason: the column is the measure now, and at full width it holds the sentence in two lines instead of three. */
+  @media (min-width: 961px) {
+    .col {
+      container-type: inline-size;
+    }
+
+    h1 {
+      font-size: 13cqi;
+    }
+
+    .lead {
+      max-width: none;
+    }
+  }
+
   @media (max-width: 960px) {
     .hero {
       grid-template-columns: 1fr;
@@ -131,7 +163,14 @@ import { PAGES, BUILD_URL } from "../data/site";
     }
   }
 
+  /* A phone's gutters are a flat 40px whatever the screen, so no fixed size holds three lines across the range: what fits a 430px screen wraps on a 320px one, and a wrapped line is a fourth line the hand-placed breaks were meant to rule out. Sizing by the viewport keeps the ratio instead.
+
+     11.9vw is the arithmetic: "Big opinions about" renders 7.05× the font size — measured, not computed, because letter-spacing and kerning put the pen-and-paper figure 2% under — and it has to clear the viewport less 40px of gutters and 10px for a scrollbar, which is tightest at 320px. The 52px ceiling is where 7.2vw arrives at 720px, so the two curves meet at the breakpoint rather than stepping. */
   @media (max-width: 720px) {
+    h1 {
+      font-size: min(11.9vw, 52px);
+    }
+
     /* The section's own top padding is a document's worth of air, too much for a logo that is meant to sit just under the bar. Pulling it back to the same 32px that sits below gives the wordmark equal room on both sides; the padding itself lives in an inline style this query cannot reach. The wordmark's own optical lift happens inside this box. */
     .lockup {
       display: block;
