@@ -203,12 +203,12 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     output.classList.toggle("error", !empty && tone === "error");
   }
 
-  // Every step the compiler goes through, in the three forms the line needs: the one it wears while it is happening, the one it leaves behind when it finishes, and the plain one it leaves behind when it doesn't. The past tense is reserved for the step that earned it — "compiled" is a claim about the program, and a compile that was refused has no business making it.
+  // Every step the compiler goes through, in the two forms the line needs: the one it wears while it is happening, and the past tense it leaves behind once it has earned it. That past tense is a claim — "compiled" says the program is good — so a step that failed leaves no crumb at all and the verdict speaks for it instead. The first two name the compiler because they are about the compiler, arriving and waking up; by the third the subject has handed off to the program you wrote, which is the truth of what happens here and the thing a bare "fetched" left you to guess.
   const STEPS = {
-    load: { doing: "downloading…", done: (ms) => `downloaded ${ms.toFixed(0)}ms`, stopped: (ms) => `download ${ms.toFixed(0)}ms` },
-    warm: { doing: "initializing…", done: (ms) => `initialized ${ms.toFixed(0)}ms`, stopped: (ms) => `init ${ms.toFixed(0)}ms` },
-    compile: { doing: "compiling…", done: (ms) => `compiled ${ms.toFixed(1)}ms`, stopped: (ms) => `compile ${ms.toFixed(1)}ms` },
-    run: { doing: "running…", done: moduleCrumb, stopped: (ms) => `run ${ms.toFixed(1)}ms` },
+    load: { doing: "fetching compiler…", done: (ms) => `fetched compiler in ${ms.toFixed(0)}ms` },
+    warm: { doing: "warming compiler…", done: (ms) => `warmed compiler in ${ms.toFixed(0)}ms` },
+    compile: { doing: "compiling…", done: (ms) => `compiled in ${ms.toFixed(1)}ms` },
+    run: { doing: "running…", done: moduleCrumb },
   };
 
   // Whether the compiler is already in the worker, which decides what the first step of the next run will be. The worker's own events settle it either way; this only spares the line from starting blank.
@@ -327,14 +327,13 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
         const unavailable = result.phase === "load";
         if (unavailable) loaded = false;
 
-        // The step that failed still leaves its crumb. How long the compiler spent before refusing is worth as much as how long it spends accepting, and without this the commonest failure there is — a typo, on a page that is already warm — would put "error" on an otherwise empty line, which is the whole thing this line was built to stop doing. Only a failure that measured nothing skips it: if the worker never started, there is no duration to report and the verdict stands alone honestly.
-        const failed = STEPS[result.phase];
-        if (failed && result.ms > 0) {
-          done.push(failed.stopped(result.ms));
-          setTrail(done);
-        }
-
-        setStep(unavailable ? "compiler unavailable" : "error", "error");
+        // The step that failed leaves no crumb, because its past tense would claim the one thing that did not happen: "compiled in 42.1ms · refused" is a line arguing with itself. The verdict carries the duration instead, which is what that crumb was really for — how long the compiler spent before refusing is worth as much as how long it spends accepting, and the commonest failure there is, a typo on a page already warm, would otherwise put a bare word on an empty line. A compiler that never arrived is the exception: it measured nothing worth reading, and says so without a number.
+        setStep(
+          unavailable
+            ? "never arrived"
+            : `${result.phase === "compile" ? "refused" : "failed"} in ${result.ms.toFixed(1)}ms`,
+          "error",
+        );
         return;
       }
 
@@ -355,7 +354,7 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
       if (trapped) {
         done.push(ran);
         setTrail(done);
-        setStep("error", "error");
+        setStep("trapped", "error");
       }
     } finally {
       running = false;
