@@ -11,7 +11,8 @@ function loadModule(onPhase) {
     onPhase({ phase: "begin", step: "load" });
     const loadStart = performance.now();
     const mod = await import("/curios/js/curios_js.js");
-    await mod.default();
+    // The wasm is named explicitly rather than left to the bundle's own default: curios builds its browser bundle through wasm-bindgen's library rather than its command line, and the library omits the default module path the command line emits, so an argument-less init reaches WebAssembly.instantiate with nothing to instantiate. Naming it here is what the default would have resolved to anyway, and it stays correct if the bundle regains one.
+    await mod.default({ module_or_path: "/curios/js/curios_js_bg.wasm" });
     onPhase({ phase: "end", step: "load", ms: performance.now() - loadStart });
 
     // The first compile pays whatever the module defers until it is asked for real work. Spending that on a throwaway program keeps it out of the number reported for the program you actually wrote — and it is a wait worth naming, because on a cold page it is long enough to see.
