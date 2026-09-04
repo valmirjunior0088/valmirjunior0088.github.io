@@ -63,7 +63,7 @@ export const FEATURES: Feature[] = [
   },
   {
     kicker: "STANDARD LIBRARY",
-    body: "Collections, formatting, IO, networking, tasks, time, randomness, arbitrary-precision integers, JSON, and TOML. Yes, TOML.",
+    body: "Collections, formatting, IO, the filesystem, processes, networking, tasks, time, randomness, arbitrary-precision integers, property-based testing, JSON, and TOML. Yes, TOML.",
   },
   {
     kicker: "ONE PIPELINE",
@@ -94,13 +94,13 @@ export const RESOURCES: Resource[] = [
   },
   {
     title: "Design decisions",
-    body: "One file per decision — why Curios is the way it is.",
+    body: "One file per decision — language/ for what Curios is, toolchain/ for how it is built and run.",
     href: `${GITHUB_URL}/tree/main/documentation/design`,
   },
   {
     title: "Soundness perimeter",
     body: "Every rule that can admit a term, and how far it has actually been checked.",
-    href: `${GITHUB_URL}/blob/main/documentation/soundness.md`,
+    href: `${GITHUB_URL}/tree/main/documentation/soundness`,
   },
   {
     title: "Roadmap",

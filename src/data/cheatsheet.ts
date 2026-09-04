@@ -82,7 +82,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "OPERATORS",
     code: ["a + b", "a == b", "a &amp;&amp; b"],
     gloss:
-      "Whitespace required on both sides, left-associative — each dispatches through a concept in `/syn` (`Add`, `Eql`, `And`); a path is the opposite and takes none, so `a / b` divides and `a/b` names",
+      "Whitespace required on both sides, left-associative — each dispatches through a concept in `/syn` (`Add`, `Equal`, `And`); a path is the opposite and takes none, so `a / b` divides and `a/b` names",
   },
   {
     title: "Division demands its precondition",
@@ -335,7 +335,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "Mutual recursion",
     tag: "FOLDS",
     code: [
-      '<span class="kw">rec</span> even(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Bool</span> =',
+      '<span class="kw">let</span> even(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Bool</span> =',
       '    <span class="kw">match</span> n',
       "    | 0 =&gt; true",
       "    | p + 1 =&gt; odd(p)",
@@ -347,7 +347,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       '    <span class="kw">end</span>;',
       "even(input)",
     ],
-    gloss: "`rec` members need types; `and` joins a mutual group, one `;` ends it",
+    gloss: "A `let` is recursive by its body; members need types, `and` joins a mutual group, one `;` ends it",
   },
   {
     title: "Declare a concept",
@@ -383,9 +383,9 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "Superclass edges",
     tag: "POLYMORPHISM",
     code: [
-      '<span class="kw">pub concept</span> <span class="kw">Ord</span>(A: <span class="kw">Type</span>): <span class="kw">pub Type</span> {',
-      '    <span class="kw">use</span> <span class="kw">Eql</span>(A),',
-      '    cmp(A, A) -&gt; <span class="kw">Order</span>',
+      '<span class="kw">pub concept</span> <span class="kw">Ordered</span>(A: <span class="kw">Type</span>): <span class="kw">pub Type</span> {',
+      '    <span class="kw">use</span> <span class="kw">Equal</span>(A),',
+      '    cmp(A, A) -&gt; <span class="kw">Ordering</span>',
       "}",
     ],
     gloss: "A `use` field is a superclass edge — satisfiable by projection",
@@ -406,7 +406,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "Override resolution",
     tag: "POLYMORPHISM",
     code: [
-      '<span class="kw">let</span> reverse: <span class="kw">Ord</span>(<span class="kw">Nat</span>) = Ord {',
+      '<span class="kw">let</span> reverse: <span class="kw">Ordered</span>(<span class="kw">Nat</span>) = Ordered {',
       "    cmp(a, b) = compare_reverse(a, b)",
       "};",
       'sort(<span class="kw">use</span> reverse, values)',
@@ -417,7 +417,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "Associated types and laws",
     tag: "POLYMORPHISM",
     code: [
-      '<span class="kw">pub concept</span> <span class="kw">Div</span>(A: <span class="kw">Type</span>): <span class="kw">pub Type</span> {',
+      '<span class="kw">pub concept</span> <span class="kw">Divide</span>(A: <span class="kw">Type</span>): <span class="kw">pub Type</span> {',
       '    <span class="kw">Ok</span>(A) -&gt; <span class="kw">Prop</span>,',
       '    div(a: A, b: A, @ok: <span class="kw">Ok</span>(b)) -&gt; A',
       "}",
@@ -466,7 +466,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       "}",
     ],
     gloss:
-      "A witness may key on a partially applied family — which is why `State(S, A)` and `Throw(E, A)` put the result parameter last",
+      "A witness may key on a partially applied family — which is why `State(S, A)` and `Try(M, E, A)` put the result parameter last",
   },
   {
     title: "Match on a proof",
@@ -478,6 +478,26 @@ export const CHEATSHEET: CheatsheetCard[] = [
       '    <span class="kw">end</span>;',
     ],
     gloss: "Match on the proof — all of it erases before runtime",
+  },
+  {
+    title: "Declare a test",
+    tag: "TESTS",
+    code: [
+      '<span class="kw">test</span> the_answer_holds() =',
+      "    Test/check(21 * 2 == 42);",
+    ],
+    gloss:
+      "A `test` item is a description of type `/syn/Test`, built from the combinators `/std/Test` exports; the parentheses are required and hold the telescope a `let` signature would. `test` is contextual — a keyword only where an item may start — and a test is never `pub`, because its name is its report line rather than an export",
+  },
+  {
+    title: "A parameterized test is a property",
+    tag: "TESTS",
+    code: [
+      '<span class="kw">test</span> add_commutes(n: <span class="kw">Nat</span>, m: <span class="kw">Nat</span>) =',
+      "    Test/check(n + m == m + n);",
+    ],
+    gloss:
+      "Parameters make it a claim about every instantiation, and the runner takes the strongest discharge it can: a body the kernel settles under the whole telescope reports `proved`, and any other is exhausted over the whole domain when the parameters' types are small and finite, or probed over drawn arguments otherwise. What can be drawn is the roster of `/std/Test/Draw` witnesses, and a program writes `Draw` for its own types",
   },
   {
     title: "Foreign declarations",

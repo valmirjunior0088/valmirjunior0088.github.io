@@ -134,7 +134,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "| nil(): (0)\n" +
       "| cons(@m: Nat, x: T, xs: Vec(T, m)): (m + 1)\n" +
       "end\n\n" +
-      "pub rec append(@T: Type, @n: Nat, @m: Nat, v: Vec(T, n), w: Vec(T, m)) -> Vec(T, n + m) =\n" +
+      "pub let append(@T: Type, @n: Nat, @m: Nat, v: Vec(T, n), w: Vec(T, m)) -> Vec(T, n + m) =\n" +
       "    match v\n" +
       "    | nil() => w\n" +
       "    | cons(@j, x, xs) => Vec/cons(x, append(xs, w))\n" +
