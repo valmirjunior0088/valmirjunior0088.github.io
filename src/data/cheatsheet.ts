@@ -7,15 +7,15 @@ export interface CheatsheetCard {
 }
 
 // One flat, searchable list, ordered least to most complex. It used to be two hand-balanced columns of titled sections; the rail lays cards out in a grid now, so balancing is the layout's job and grouping is the search box's, which leaves ordering as the only thing this file still has to get right.
-// Code lines are pre-highlighted markup with exactly one class: .kw, for anything the language reserves. The old four-class scheme collapsed into that on purpose — a block that speaks in one accent reads as one texture rather than a rainbow.
+// Code lines are pre-highlighted markup with two classes: .kw for anything the language reserves, and .cm for a comment, which is prose in a code block and reads a tier down from the code it sits beside. The old four-class scheme collapsed into those on purpose — a block that speaks in one accent reads as one texture rather than a rainbow.
 // Glosses mark inline code with backticks; see data/markup.ts.
 export const CHEATSHEET: CheatsheetCard[] = [
   {
     title: "Line comments",
     tag: "COMMENTS",
     code: [
-      ['<span class="kw">--</span> A complete line comment.'],
-      ['<span class="kw">let</span> n = 1; <span class="kw">--</span> A trailing comment.'],
+      ['<span class="cm">-- A complete line comment.</span>'],
+      ['<span class="kw">let</span> n = 1; <span class="cm">-- A trailing comment.</span>'],
     ],
     gloss:
       "`--` and a space open a comment that runs to the end of the line; `--` glued to what follows it is refused rather than read as one. There are no block comments",
@@ -25,15 +25,15 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "COMMENTS",
     code: [
       [
-        '<span class="kw">-- |</span> Twice the input.',
-        '<span class="kw">-- |</span>',
-        '<span class="kw">-- |</span> Never overflows, since `Nat` is unbounded.',
+        '<span class="cm">-- | Twice the input.</span>',
+        '<span class="cm">-- |</span>',
+        '<span class="cm">-- | Never overflows, since `Nat` is unbounded.</span>',
         '<span class="kw">pub let</span> double(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Nat</span> =',
         "    n + n;",
       ],
     ],
     gloss:
-      "`-- |` is syntax rather than a comment: consecutive lines form one block, attached to the declaration below it — a `let`, `induct`, `struct`, `concept`, `satisfy`, `foreign` or `mod`, or a constructor, field or method inside one. `curios document` renders the blocks as the library's pages",
+      "A documentation comment is not discarded the way a line comment is: consecutive lines form one block, attached to the declaration below it — a `let`, `induct`, `struct`, `concept`, `satisfy`, `foreign` or `mod`, or a constructor, field or method inside one. `curios document` renders the blocks as the library's pages",
   },
   {
     title: "Absolute and relative paths",
@@ -215,7 +215,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "BINDINGS",
     code: [
       ['<span class="kw">let</span> walk(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Nat</span> = walk(n);'],
-      ['<span class="kw">let</span> n = n + 1;  <span class="kw">--</span> refused'],
+      ['<span class="kw">let</span> n = n + 1;  <span class="cm">-- refused</span>'],
     ],
     gloss:
       "So a local function recurses with nothing said, and `let n = n + 1;` names the binding it is declaring rather than an outer `n`. A binding that mentions itself states its type",
@@ -535,7 +535,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     code: [
       [
         '<span class="kw">satisfy</span> <span class="kw">Spell</span>(<span class="kw">Point</span>);',
-        '<span class="kw">--</span> spells as Point { x = 1, y = 2 }',
+        '<span class="cm">-- spells as Point { x = 1, y = 2 }</span>',
       ],
     ],
     gloss:
@@ -598,7 +598,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     code: [
       [
         'Fmt/render(<span class="kw">"# and #"</span>)(Option/some(3))(<span class="kw">"x"</span>)',
-        '<span class="kw">--</span> Option/some(3) and "x"',
+        '<span class="cm">-- Option/some(3) and "x"</span>',
       ],
     ],
     gloss:
