@@ -136,7 +136,7 @@ import { SYNTAX_URL } from "../data/site";
     white-space: nowrap;
   }
 
-  /* 82px of right padding is the corner kept clear for the count, which the text would otherwise scroll under: the longest reading this corpus can produce is "56 of 56", eight characters of Geist Mono at 11px — a 0.6em advance and 0.12em of tracking, so 7.92px each — plus the 10px inset it sits at and 8px of air before the query runs into it. */
+  /* 82px of right padding is the corner kept clear for the count, which the text would otherwise scroll under: the longest reading this corpus can produce is "61 of 61", eight characters of Geist Mono at 11px — a 0.6em advance and 0.12em of tracking, so 7.92px each — plus the 10px inset it sits at and 8px of air before the query runs into it. */
   .search {
     width: 100%;
     height: 100%;
@@ -169,14 +169,13 @@ import { SYNTAX_URL } from "../data/site";
     padding: 16px;
   }
 
-  /* Row-major, so cards read left to right. Ragged bottoms are the cost — a short card leaves a gap under it when its row-mate runs long — and the alternative, column-major, would need a bounded height this scrolling container does not have.
+  /* Row-major, so cards read left to right, and every card in a row takes the height of the tallest one in it, which closes the row as a band rather than leaving a hole under whichever card is shortest. Each card centres its own code well in the height it is handed. Column-major would pack them tighter still, but it needs a bounded height this scrolling container does not have.
 
-     455px is the longest line in the corpus plus the card around it: 420px of Geist Mono at 12.5px, 56 characters, and 30px for the code's padding and the panel's border. Narrower than that and a line breaks, so the count drops as soon as another whole column will not fit rather than squeezing one in — and whatever does fit spreads to fill the rail, which --rail has already sized to hold a round number of them. The min() is what keeps the track from overflowing a screen narrower than a single card, where 455px has stopped being a floor worth holding. */
+     455px is the longest line in the corpus plus the card around it: 420px of Geist Mono at 12.5px, 56 characters, and 30px for the padding around an example and the panel's border. Narrower than that and a line breaks, so the count drops as soon as another whole column will not fit rather than squeezing one in — and whatever does fit spreads to fill the rail, which --rail has already sized to hold a round number of them. The min() is what keeps the track from overflowing a screen narrower than a single card, where 455px has stopped being a floor worth holding. */
   .cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(455px, 100%), 1fr));
     gap: 12px;
-    align-items: start;
   }
 
   .empty {

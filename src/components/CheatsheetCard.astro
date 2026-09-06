@@ -10,7 +10,7 @@ interface Props {
 const { card } = Astro.props;
 
 // Everything a card says is searchable, not just its title — filtering on the code is how you find `..p` when you cannot remember it is called a spread. Stripped of markup, so a search matches what is on screen, and precomputed so a keystroke costs one substring test.
-const haystack = plainText([card.title, card.tag, card.code.join(" "), card.gloss].join(" ")).toLowerCase();
+const haystack = plainText([card.title, card.tag, card.code.flat().join(" "), card.gloss].join(" ")).toLowerCase();
 ---
 
 <Panel class="card" data-card data-search={haystack}>
@@ -19,7 +19,15 @@ const haystack = plainText([card.title, card.tag, card.code.join(" "), card.glos
     <span class="label label--sm label--accent push">{card.tag}</span>
   </Fragment>
 
-  <pre class="code" set:html={card.code.join("\n")} />
+  <div class="well">
+    {
+      card.code.map((example) => (
+        <div class="example">
+          <pre class="code" set:html={example.join("\n")} />
+        </div>
+      ))
+    }
+  </div>
 
   <Fragment slot="foot">
     <span class="gloss" set:html={inlineCode(card.gloss)} />
@@ -27,8 +35,16 @@ const haystack = plainText([card.title, card.tag, card.code.join(" "), card.glos
 </Panel>
 
 <style>
+  /* A column, so the grid can hand the card its row's full height and the card has somewhere to put it: the head and the foot keep their own size, and the well between them carries the difference in its margins. */
   .card {
+    display: flex;
+    flex-direction: column;
     animation: cardIn 260ms ease both;
+  }
+
+  /* A card sets its own display, which outranks the one the `hidden` attribute carries, and the filter hides a card by setting exactly that attribute. The rule has to be said again here for hiding to mean anything. */
+  .card[hidden] {
+    display: none;
   }
 
   /* The cards replay this every time the filter narrows, which is a lot of movement for something a keystroke away. Under a reduced-motion preference they simply appear — no less legible, and no less filtered. */
@@ -54,10 +70,30 @@ const haystack = plainText([card.title, card.tag, card.code.join(" "), card.glos
     color: var(--fg);
   }
 
-  /* The code sits in the deepest well on the site: a card is already a panel on a raised rail, so its code needs one more step down to stay legible as code. */
-  .code {
-    padding: 12px 14px;
+  /* The code sits in the deepest well on the site: a card is already a panel on a raised rail, so its code needs one more step down to stay legible as code. The well holds a column of examples rather than one run of lines, which is what gives a rule somewhere to fall.
+
+     It is sized by its own content, and a grid of 1fr rows in an auto-height container makes every row as tall as the tallest one, so the segments come out equal without the well being stretched to make them so. The row's slack goes to the two auto margins, which centre the well between the head and the foot and, in taking all of the free space, leave the foot on the bottom edge with the panel none the wiser. */
+  .well {
+    margin: auto 0;
+    display: grid;
+    grid-auto-rows: 1fr;
     background: var(--well-deep);
+  }
+
+  /* Equal segments are the grid's doing; this centres the example inside the one it was given. The centring has to sit on a wrapper: laying the code block out as a grid or a flex column would make every highlighted span an item of its own and break each line apart at its keywords. */
+  .example {
+    display: grid;
+    align-content: center;
+    padding: 12px 14px;
+  }
+
+  /* Only ever between two examples: the panel's own edges already close the well above the first and below the last. */
+  .example + .example {
+    border-top: 1px solid var(--line);
+  }
+
+  /* The shared class carries the mono face, the code colour and the zero margin. A card asks only for a smaller step on the scale, and for a long line to wrap where a code block elsewhere on the site would scroll. */
+  .code {
     font-size: var(--ms-code-sm);
     line-height: 1.7;
     white-space: pre-wrap;
