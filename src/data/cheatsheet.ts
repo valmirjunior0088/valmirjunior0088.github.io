@@ -10,6 +10,29 @@ export interface CheatsheetCard {
 // Glosses mark inline code with backticks; see data/markup.ts.
 export const CHEATSHEET: CheatsheetCard[] = [
   {
+    title: "Line comments",
+    tag: "COMMENTS",
+    code: [
+      '<span class="kw">--</span> A complete line comment.',
+      '<span class="kw">let</span> n = 1; <span class="kw">--</span> A trailing comment.',
+    ],
+    gloss:
+      "`--` and a space open a comment that runs to the end of the line; `--` glued to what follows it is refused rather than read as one. There are no block comments",
+  },
+  {
+    title: "Documentation comments",
+    tag: "COMMENTS",
+    code: [
+      '<span class="kw">-- |</span> Twice the input.',
+      '<span class="kw">-- |</span>',
+      '<span class="kw">-- |</span> Never overflows, since `Nat` is unbounded.',
+      '<span class="kw">pub let</span> double(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Nat</span> =',
+      "    n + n;",
+    ],
+    gloss:
+      "`-- |` is syntax rather than a comment: consecutive lines form one block, attached to the declaration below it — a `let`, `induct`, `struct`, `concept`, `satisfy`, `foreign` or `mod`, or a constructor, field or method inside one. `curios document` renders the blocks as the library's pages",
+  },
+  {
     title: "Absolute and relative paths",
     tag: "PATHS",
     code: ["Nat", "Option/some", "/std/List"],
@@ -74,8 +97,15 @@ export const CHEATSHEET: CheatsheetCard[] = [
   {
     title: "Characters, strings, and numbers",
     tag: "LITERALS",
-    code: ['<span class="kw">\'λ\'</span>', '<span class="kw">"hello\\n"</span>', "0xFF", "1.0e9"],
-    gloss: "`Char`, `Str`, numbers typed by context",
+    code: [
+      '<span class="kw">\'λ\'</span>',
+      '<span class="kw">\'\\u{301}\'</span>',
+      '<span class="kw">"hello\\n"</span>',
+      "0xFF",
+      "1.0e9",
+    ],
+    gloss:
+      "`Char`, `Str`, numbers typed by context. The escapes are `\\n`, `\\t`, `\\r`, `\\\\`, the quote, and `\\u{…}` naming a scalar value by up to six hex digits; a `Char` refuses any other, a `Str` keeps the backslash",
   },
   {
     title: "Infix operators dispatch through concepts",
@@ -125,6 +155,16 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "BINDINGS",
     code: ['<span class="kw">let</span> Point { x = px, y = py } = point;'],
     gloss: "Any irrefutable pattern works in a binder",
+  },
+  {
+    title: "Names kept unused on purpose",
+    tag: "BINDINGS",
+    code: [
+      '<span class="kw">let</span> _ = print(<span class="kw">"hi\\n"</span>)!;',
+      '<span class="kw">let</span> _width: <span class="kw">Nat</span> = 80;',
+    ],
+    gloss:
+      "`_` alone names nothing; a `_`-prefixed name is one `curios lint` never reports as unused, nor anything inside a `_`-prefixed module. Every other binder, import and private declaration nothing reaches is a lint, and the exit code says so",
   },
   {
     title: "Lambdas",

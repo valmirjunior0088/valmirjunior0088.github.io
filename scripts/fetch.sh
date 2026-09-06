@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Fetches the pinned curios release's wasm playground bundle and rustdoc API docs into public/curios/js and public/curios/docs, exactly what the deploy workflow does before `astro build`. Run this once (`npm run fetch`) to get a working playground and docs link locally; without it, the "Run" button and the docs link fail (the site handles that gracefully, but the playground won't work).
+# Fetches the pinned curios release's wasm playground bundle, its rustdoc API docs and the standard library's pages into public/curios/js, public/curios/docs/rust and public/curios/docs/std, exactly what the deploy workflow does before `astro build`. Run this once (`npm run fetch`) to get a working playground and docs links locally; without it, the "Run" button and both docs links fail (the site handles that gracefully, but the playground won't work).
 #
 # package.json's "releaseArtifacts" field is the single source of truth for the pinned release — the deploy workflow (.github/workflows/deploy.yml) invokes this same script, so bumping the tag in package.json is the only edit a release needs.
 set -euo pipefail
@@ -14,13 +14,13 @@ trap 'rm -rf "$TMP"' EXIT
 fetch_via_gh() {
   command -v gh >/dev/null 2>&1 || return 1
   gh release download "$CURIOS_TAG" --repo "$CURIOS_REPO" \
-    --pattern 'curios-js.tar.gz' --pattern 'curios-docs.tar.gz' \
+    --pattern 'curios-js.tar.gz' --pattern 'curios-rust-docs.tar.gz' --pattern 'curios-std-docs.tar.gz' \
     --dir "$TMP" --clobber
 }
 
 fetch_via_curl() {
   local asset
-  for asset in curios-js.tar.gz curios-docs.tar.gz; do
+  for asset in curios-js.tar.gz curios-rust-docs.tar.gz curios-std-docs.tar.gz; do
     curl -fsSL -o "$TMP/$asset" \
       "https://github.com/$CURIOS_REPO/releases/download/$CURIOS_TAG/$asset"
   done
@@ -32,8 +32,9 @@ if ! fetch_via_gh; then
   fetch_via_curl
 fi
 
-mkdir -p "$DEST/js" "$DEST/docs"
+mkdir -p "$DEST/js" "$DEST/docs/rust" "$DEST/docs/std"
 tar -xzf "$TMP/curios-js.tar.gz" -C "$DEST/js"
-tar -xzf "$TMP/curios-docs.tar.gz" -C "$DEST/docs"
+tar -xzf "$TMP/curios-rust-docs.tar.gz" -C "$DEST/docs/rust"
+tar -xzf "$TMP/curios-std-docs.tar.gz" -C "$DEST/docs/std"
 
-echo "Done — public/curios now has the wasm playground bundle and docs for $CURIOS_TAG."
+echo "Done — public/curios now has the wasm playground bundle, the Rust docs and the /std docs for $CURIOS_TAG."
