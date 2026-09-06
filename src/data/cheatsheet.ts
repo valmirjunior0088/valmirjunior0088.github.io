@@ -96,9 +96,11 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "Characters, strings, and numbers",
     tag: "LITERALS",
     code: [
-      ['<span class="kw">\'λ\'</span>', '<span class="kw">\'\\u{301}\'</span>'],
+      ['<span class="kw">\'λ\'</span>'],
+      ['<span class="kw">\'\\u{301}\'</span>'],
       ['<span class="kw">"hello\\n"</span>'],
-      ["0xFF", "1.0e9"],
+      ["0xFF"],
+      ["1.0e9"],
     ],
     gloss:
       "`Char`, `Str`, numbers typed by context. The escapes are `\\n`, `\\t`, `\\r`, `\\\\`, the quote, and `\\u{…}` naming a scalar value by up to six hex digits; a `Char` refuses any other, a `Str` keeps the backslash",
@@ -261,7 +263,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
   {
     title: "Tuple values",
     tag: "TUPLES",
-    code: [["(1, true)", "(left = 1, right = true)"], ["(x,)"], ["()"]],
+    code: [["(1, true)"], ["(left = 1, right = true)"], ["(x,)"], ["()"]],
     gloss:
       "Fields may be labeled. A one-field tuple is `(x,)` — the trailing comma is the whole difference between it and the parenthesized term `(x)` — while a labeled single field needs none. `()` is the unit value, and its type is the empty tuple `{}`",
   },
