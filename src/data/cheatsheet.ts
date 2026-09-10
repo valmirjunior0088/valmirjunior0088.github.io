@@ -126,7 +126,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "OPERATORS",
     code: [["a + b"], ["a == b"], ["a &amp;&amp; b"]],
     gloss:
-      "Whitespace required on both sides, left-associative — each dispatches through a concept in `/syn` (`Add`, `Equal`, `And`); a path is the opposite and takes none, so `a / b` divides and `a/b` names",
+      "Whitespace required on both sides, left-associative — each dispatches through a concept the standard library declares (`/std/Add`, `/std/Equal`, `/std/And`); a path is the opposite and takes none, so `a / b` divides and `a/b` names",
   },
   {
     title: "Division demands its precondition",
@@ -675,8 +675,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     code: [
       [
         '<span class="kw">let</span> sym(@x: <span class="kw">Nat</span>, @y: <span class="kw">Nat</span>, p: <span class="kw">Eq</span>(x, y)) -&gt; <span class="kw">Eq</span>(y, x) =',
-        '    <span class="kw">match</span> p: (s, t, q) =&gt; <span class="kw">Eq</span>(t, s)',
-        "    | refl(@z) =&gt; Eq/refl()",
+        '    <span class="kw">match</span> p: (s, t, _q) =&gt; <span class="kw">Eq</span>(t, s)',
+        "    | refl(@_z) =&gt; Eq/refl()",
         '    <span class="kw">end</span>;',
       ],
     ],
@@ -686,21 +686,9 @@ export const CHEATSHEET: CheatsheetCard[] = [
   {
     title: "Declare a test",
     tag: "TESTS",
-    code: [['<span class="kw">test</span> the_answer_holds() =', "    Test/check(21 * 2 == 42);"]],
+    code: [['<span class="kw">test</span> the_answer_holds =', "    Test/assert(21 * 2 == 42);"]],
     gloss:
-      "A `test` item is a description of type `/syn/Test`, built from the combinators `/std/Test` exports; the parentheses are required and hold the telescope a `let` signature would. A test is never `pub`, since its name is its report line rather than an export",
-  },
-  {
-    title: "A parameterized test is a property",
-    tag: "TESTS",
-    code: [
-      [
-        '<span class="kw">test</span> add_commutes(n: <span class="kw">Nat</span>, m: <span class="kw">Nat</span>) =',
-        "    Test/check(n + m == m + n);",
-      ],
-    ],
-    gloss:
-      "Parameters make it a claim about every instantiation, and the runner takes the strongest discharge it can: a body the kernel settles under the whole telescope is proved, a small finite domain is exhausted, and anything else is probed over arguments from the `Draw` roster",
+      "A `test` item is a description of type `/std/Test`, built from the combinators `/std/Test` exports. It takes no parameters — a claim about every instantiation is a proposition rather than a description, so it is a `let`. A test is never `pub`, since its name is its report line rather than an export",
   },
   {
     title: "Foreign declarations",

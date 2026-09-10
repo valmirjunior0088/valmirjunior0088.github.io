@@ -73,7 +73,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
   map: {
     label: "scores.crs",
     code:
-      "use /std/{Fmt, Nat, Map, Option, print};\n\n" +
+      "use /std/{Fmt, Nat, Map, print};\n\n" +
       "let m0: Map(Nat) =\n" +
       "    Map/empty();\n\n" +
       "let m1: Map(Nat) =\n" +
@@ -137,7 +137,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "pub let append(@T: Type, @n: Nat, @m: Nat, v: Vec(T, n), w: Vec(T, m)) -> Vec(T, n + m) =\n" +
       "    match v\n" +
       "    | nil() => w\n" +
-      "    | cons(@j, x, xs) => Vec/cons(x, append(xs, w))\n" +
+      "    | cons(@_j, x, xs) => Vec/cons(x, append(xs, w))\n" +
       "    end;\n\n" +
       'print("typechecks: Vec/append\\n")',
   },
@@ -147,7 +147,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "use /std/{Eq, print};\n\n" +
       "pub let sym(@A: Type, @x: A, @y: A, p: Eq(x, y)) -> Eq(y, x) =\n" +
       "    match p\n" +
-      "    | refl(@z) => Eq/refl()\n" +
+      "    | refl(@_z) => Eq/refl()\n" +
       "    end;\n\n" +
       'print("typechecks: sym\\n")',
   },

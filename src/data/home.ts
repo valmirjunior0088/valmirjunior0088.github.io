@@ -63,7 +63,7 @@ export const FEATURES: Feature[] = [
   },
   {
     kicker: "STANDARD LIBRARY",
-    body: "Collections, formatting, IO, the filesystem, processes, networking, tasks, time, randomness, arbitrary-precision integers, property-based testing, JSON, and TOML. Yes, TOML.",
+    body: "Collections, formatting, IO, the filesystem, processes, networking, tasks, time, randomness, arbitrary-precision integers, JSON, and TOML. Yes, TOML.",
   },
   {
     kicker: "ONE PIPELINE",
