@@ -104,7 +104,8 @@ export const EXAMPLES: Record<string, CuriosExample> = {
   concepts: {
     label: "point.crs",
     code:
-      "use /std/{Nat, Fmt, Add};\n\n" +
+      "use /std/{Nat, Fmt};\n" +
+      "use /std/ops/{Add};\n\n" +
       "pub struct Point: pub Type {\n" +
       "    x: Nat,\n" +
       "    y: Nat,\n" +

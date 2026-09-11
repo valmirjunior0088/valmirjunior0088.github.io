@@ -126,7 +126,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "OPERATORS",
     code: [["a + b"], ["a == b"], ["a &amp;&amp; b"]],
     gloss:
-      "Whitespace required on both sides, left-associative — each dispatches through a concept the standard library declares (`/std/Add`, `/std/Equal`, `/std/And`); a path is the opposite and takes none, so `a / b` divides and `a/b` names",
+      "Whitespace required on both sides, left-associative — each dispatches through a concept the standard library declares (`/std/ops/Add`, `/std/ops/Eql`, `/std/ops/And`); a path is the opposite and takes none, so `a / b` divides and `a/b` names",
   },
   {
     title: "Division demands its precondition",
@@ -505,9 +505,9 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "POLYMORPHISM",
     code: [
       [
-        '<span class="kw">pub concept</span> <span class="kw">Ordered</span>(A: <span class="kw">Type</span>): <span class="kw">pub Type</span> {',
-        '    <span class="kw">use</span> <span class="kw">Equal</span>(A),',
-        '    cmp(A, A) -&gt; <span class="kw">Ordering</span>',
+        '<span class="kw">pub concept</span> <span class="kw">Ord</span>(A: <span class="kw">Type</span>): <span class="kw">pub Type</span> {',
+        '    <span class="kw">use</span> <span class="kw">Eql</span>(A),',
+        '    ord(A, A) -&gt; <span class="kw">Ordering</span>',
         "}",
       ],
     ],
@@ -542,17 +542,17 @@ export const CHEATSHEET: CheatsheetCard[] = [
       "Omitting the body asks the compiler to write one from the declaration of the type in the key, which must be a declared `induct` or `struct`. A derived `Spell` gives the constructor qualified by its type's own name, or a struct as its literal — text that re-parses",
   },
   {
-    title: "A bodyless satisfy derives Equal",
+    title: "A bodyless satisfy derives Eql",
     tag: "POLYMORPHISM",
     code: [
-      ['<span class="kw">satisfy</span> <span class="kw">Equal</span>(<span class="kw">Point</span>);'],
+      ['<span class="kw">satisfy</span> <span class="kw">Eql</span>(<span class="kw">Point</span>);'],
       [
-        '<span class="kw">satisfy</span> (@A: <span class="kw">Type</span>, <span class="kw">use</span> <span class="kw">Equal</span>(A)) =&gt;',
-        '        <span class="kw">Equal</span>(<span class="kw">Tree</span>(A));',
+        '<span class="kw">satisfy</span> (@A: <span class="kw">Type</span>, <span class="kw">use</span> <span class="kw">Eql</span>(A)) =&gt;',
+        '        <span class="kw">Eql</span>(<span class="kw">Tree</span>(A));',
       ],
     ],
     gloss:
-      "The form takes a telescope like any other witness, and either shape may join an `and` group beside written members. A derived `Equal` is structural — the same constructor with pairwise equal payloads, `!=` its negation. `Spell` and `Equal` are the only concepts that derive",
+      "The form takes a telescope like any other witness, and either shape may join an `and` group beside written members. A derived `Eql` is structural — the same constructor with pairwise equal payloads, `!=` its negation, and a derived `Ord` ranks constructors before payloads, over the `Eql` witness its superclass needs first. `Spell`, `Eql` and `Ord` are the only concepts that derive",
   },
   {
     title: "Override resolution",
