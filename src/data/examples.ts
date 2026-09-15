@@ -120,12 +120,10 @@ export const EXAMPLES: Record<string, CuriosExample> = {
   erased: {
     label: "erased.crs",
     code:
-      "use /std/{Nat, Vec, print};\n\n" +
+      "use /std/{Fmt, Nat, Vec};\n\n" +
       "pub let head(@T: Type, @n: Nat, xs: Vec(T, n + 1)) -> T =\n" +
-      "    match xs\n" +
-      "    | cons(@_, x, _) => x\n" +
-      "    end;\n\n" +
-      'print("typechecks: head, n erased\\n")',
+      "    Vec/first(xs);\n\n" +
+      'Fmt/print("head = %\\n")(head(Vec/cons(7, Vec/cons(8, Vec/nil()))))',
   },
   vec: {
     label: "vec.crs",

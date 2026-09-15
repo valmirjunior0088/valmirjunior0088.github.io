@@ -6,13 +6,16 @@ export const HERO = {
   // Three lines, broken where they are meant to break rather than wherever the box runs out: "your arithmetic." opens a line instead of trailing the one above it, at every width.
   heading: ["Small language.", "Big opinions about", "your arithmetic."],
   lead: "Types can depend on values, proofs live beside ordinary code, and the compiler is happy to double-check your math homework.",
-  // Two files, not one read top to bottom: the first quotes the standard library's own Vec so the length in the type is on the page, the second is the program that imports it. Both are true of the shipped compiler — /std/Vec's cons really does take (x, xs) with the length erased, and the declaration below compiles as written.
+  // Two files, not one read top to bottom: the first quotes the standard library's own Vec so the length in the type is on the page, the second is the program that imports it. Both are true of the shipped compiler — /std/Vec really is a list beside a proof that counts it, and the declarations below compile as written.
   declaration: [
     '<span class="cm">-- This is how Vec is represented in the /std...</span>',
-    '<span class="kw">pub induct</span> Vec(T: <span class="kw">Type</span>): (Nat) -> <span class="kw">pub Type</span>',
-    "| nil(): (0)",
-    "| cons(@m: Nat, x: T, xs: Vec(T, m)): (m + 1)",
-    '<span class="kw">end</span>',
+    '<span class="kw">pub let</span> Counted(@T: <span class="kw">Type</span>, l: List(T), n: Nat) -> <span class="kw">Prop</span> =',
+    "    Eq(List/len(l), n);",
+    "",
+    '<span class="kw">pub struct</span> Vec(T: <span class="kw">Type</span>, n: Nat): <span class="kw">pub Type</span> {',
+    "    list: List(T),",
+    "    counted: Counted(list, n),",
+    "}",
   ],
   usage: [
     '<span class="kw">use</span> /std/{Nat, Vec};',
@@ -21,9 +24,9 @@ export const HERO = {
     '<span class="kw">let</span> empty: Vec(Nat, 0) = Vec/nil();',
     '<span class="kw">let</span> single: Vec(Nat, 1) = empty;',
   ],
-  // Transcribed from the real compiler against exactly the five lines above, which is why it reads a bare Vec — an imported name, not the /Vec a local declaration would print — and points at line 5. The --> line is the only part the browser build cannot produce, having no filename to name.
+  // Transcribed from the real compiler against exactly the five lines above, which is why it reads a bare Vec — an imported name, not the /Vec a local declaration would print — names /vector/single, since items with no final term are checked as a module mounted at the file's stem, and points at line 5. The --> line and that stem are the parts the browser build cannot produce, having no filename to name.
   diagnostic: [
-    "while elaborating /single:",
+    "while elaborating /vector/single:",
     '<span class="kw">type mismatch</span>',
     "  inferred: Vec(Nat, 0)",
     "  expected: Vec(Nat, 1)",
@@ -32,7 +35,7 @@ export const HERO = {
     "    5 | let single: Vec(Nat, 1) = empty;",
     '      |                           <span class="kw">^^^^^</span>',
   ],
-  note: "Two different types, so the off-by-one never reaches the generated program. There is nothing to test for, because there is nothing to run — and the `@m` that made it work does its thinking at compile time, then goes home.",
+  note: "Two different types, so the off-by-one never reaches the generated program. There is nothing to test for, because there is nothing to run — and the `counted` field that made it work does its thinking at compile time, then goes home. A proof weighs nothing, so a `Vec` in the WebAssembly is exactly the list.",
 };
 
 export interface Feature {

@@ -18,22 +18,22 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ['<span class="kw">let</span> n = 1; <span class="cm">-- A trailing comment.</span>'],
     ],
     gloss:
-      "`--` and a space open a comment that runs to the end of the line; `--` glued to what follows it is refused rather than read as one. There are no block comments",
+      "`--` and a space open a comment that runs to the end of the line; `--` glued to what follows it is refused rather than read as one, except as the `---` that opens a documentation comment. There are no block comments",
   },
   {
     title: "Documentation comments",
     tag: "COMMENTS",
     code: [
       [
-        '<span class="cm">-- | Twice the input.</span>',
-        '<span class="cm">-- |</span>',
-        '<span class="cm">-- | Never overflows, since `Nat` is unbounded.</span>',
+        '<span class="cm">--- Twice the input.</span>',
+        '<span class="cm">---</span>',
+        '<span class="cm">--- Never overflows, since `Nat` is unbounded.</span>',
         '<span class="kw">pub let</span> double(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Nat</span> =',
         "    n + n;",
       ],
     ],
     gloss:
-      "A documentation comment is not discarded the way a line comment is: consecutive lines form one block, attached to the declaration below it — a `let`, `induct`, `struct`, `concept`, `satisfy`, `foreign` or `mod`, or a constructor, field or method inside one. `curios document` renders the blocks as the library's pages",
+      "`---` and a space open a documentation comment, which is not discarded the way a line comment is: consecutive lines form one block, attached to the declaration below it — a `let`, `induct`, `struct`, `concept`, `satisfy`, `foreign` or `mod`, or a constructor, field or method inside one. `curios document` renders the blocks as the library's pages",
   },
   {
     title: "Absolute and relative paths",
