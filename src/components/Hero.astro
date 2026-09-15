@@ -4,7 +4,6 @@ import Panel from "./Panel.astro";
 import InstallBox from "./InstallBox.astro";
 import Wordmark from "./Wordmark.astro";
 import { HERO } from "../data/home";
-import { inlineCode } from "../data/markup";
 import { PAGES, BUILD_URL } from "../data/site";
 ---
 
@@ -43,14 +42,12 @@ import { PAGES, BUILD_URL } from "../data/site";
       <Panel tone="accent">
         <pre class="code diagnostic" set:html={HERO.diagnostic.join("\n")} />
       </Panel>
-
-      <p class="note" set:html={inlineCode(HERO.note)} />
     </div>
   </div>
 </Section>
 
 <style>
-  /* The two columns are stretched to a common height and each distributes its own slack, which is what lines the install box up with the closing note. It only holds between the 1440 cap and the 960 breakpoint — inside that band the slack stays small enough to read as alignment rather than drift; below it the columns stack and the trick is switched off. No pixel floors on the tracks: mobile Chrome sizes its layout viewport to the page's min-content width before it evaluates a single media query, so a floor wide enough to matter here is a floor that keeps the breakpoint from ever firing. */
+  /* The two columns are stretched to a common height and each distributes its own slack, which is what lines the install box up with the last panel. It only holds between the 1440 cap and the 960 breakpoint — inside that band the slack stays small enough to read as alignment rather than drift; below it the columns stack and the trick is switched off. No pixel floors on the tracks: mobile Chrome sizes its layout viewport to the page's min-content width before it evaluates a single media query, so a floor wide enough to matter here is a floor that keeps the breakpoint from ever firing. */
   .hero {
     display: grid;
     grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
@@ -58,7 +55,7 @@ import { PAGES, BUILD_URL } from "../data/site";
     align-items: stretch;
   }
 
-  /* Both columns distribute their own slack so the install box lands level with the closing note. The left column spaces itself with margins between blocks of prose; only the right one, a stack of peer panels, wants a uniform gap. */
+  /* Both columns distribute their own slack so the install box lands level with the last panel. The left column spaces itself with margins between blocks of prose; only the right one, a stack of peer panels, wants a uniform gap. */
   .col {
     display: flex;
     flex-direction: column;
@@ -120,15 +117,6 @@ import { PAGES, BUILD_URL } from "../data/site";
     padding: 20px 24px;
     font-size: var(--ms-code-sm);
     line-height: 1.8;
-  }
-
-  .note {
-    font-size: 15px;
-    line-height: 1.65;
-    color: var(--fg-mute);
-    max-width: 62ch;
-    margin: 0;
-    text-wrap: pretty;
   }
 
   /* Two columns, and the heading now belongs to a box rather than to the window: sized in vw it tracks a width it does not live in, and between 960 and 1200 that put "Big opinions about" wider than the column holding it — a fourth line, which is the one thing the hand-placed breaks exist to prevent. 13cqi is 13% of the column itself, and the longest line renders 7.05× the font size, so it lands at 92% of the room it has at every width in this range. The column stops growing at the 1440 cap, so the heading does too, with no ceiling needed to say so.

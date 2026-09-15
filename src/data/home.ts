@@ -35,7 +35,6 @@ export const HERO = {
     "    5 | let single: Vec(Nat, 1) = empty;",
     '      |                           <span class="kw">^^^^^</span>',
   ],
-  note: "Two different types, so the off-by-one never reaches the generated program. There is nothing to test for, because there is nothing to run — and the `counted` field that made it work does its thinking at compile time, then goes home. A proof weighs nothing, so a `Vec` in the WebAssembly is exactly the list.",
 };
 
 export interface Feature {
