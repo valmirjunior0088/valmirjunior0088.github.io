@@ -33,7 +33,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "`---` and a space open a documentation comment, which is not discarded the way a line comment is: consecutive lines form one block, attached to the declaration below it — a `let`, `induct`, `struct`, `concept`, `satisfy`, `foreign` or `mod`, or a constructor, field or method inside one. `curios document` renders the blocks as the library's pages",
+      "`---` and a space open a documentation comment, which is not discarded the way a line comment is: consecutive lines form one block, attached to the declaration below it — a `let` or an `and` member, an `induct`, `struct`, `concept`, `satisfy`, `foreign` or `mod`, or a constructor, field or method inside one. `curios document` renders the blocks as the library's pages",
   },
   {
     title: "Absolute and relative paths",
@@ -83,7 +83,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "LITERALS",
     code: [["b[1, 0, 1]"], ["x[0x48, 0x69, ..suffix]"]],
     gloss:
-      "Packed `Bits`, LSB first, and packed `Bytes` — the grain letter glues to the `[`. A constant atom is a numeric literal at the grain's element type, in any radix, and `..` spreads a whole packed value; a literal written entirely from numerals is constant data",
+      "Packed `Bits`, LSB first, and packed `Bytes` — the grain letter glues to the `[`. A constant atom is a numeric literal at the grain's element type, in any radix — or a character literal in a `Bytes` literal, as `x['H', 'i']`, since no character is a bit — and `..` spreads a whole packed value; a literal written entirely from numerals is constant data",
   },
   {
     title: "Terms inside a packed literal",
@@ -475,6 +475,45 @@ export const CHEATSHEET: CheatsheetCard[] = [
     gloss: "A `let` is recursive by its body; members need types, `and` joins a mutual group, one `;` ends it",
   },
   {
+    title: "Shifts and rotations keep the width",
+    tag: "PACKED",
+    code: [
+      ["Bits/shl(b, 3)", "Bits/shr(b, 1)"],
+      ["Bytes/rotl(x, 2)", "Bytes/rotr(x, 1)"],
+      ["Bits/not(b)"],
+    ],
+    gloss:
+      "`not`, `shl`, `shr`, `rotl` and `rotr` are declared at both grains and every one preserves the run’s width. A shift enters zeros and discards what passes the end — under the carrier’s least-significant-first reading a `shl` is multiplication by two to the count, at the run’s own width — while a rotation re-enters it at the other end, its count taken modulo the width so it needs no guard",
+  },
+  {
+    title: "Pointwise operations demand equal length",
+    tag: "PACKED",
+    code: [
+      [
+        '<span class="kw">match</span> Nat/eql(Bits/len(a), Bits/len(b))',
+        "| true =&gt; Bits/and(a, b)",
+        "| false =&gt; b[]",
+        '<span class="kw">end</span>',
+      ],
+    ],
+    gloss:
+      "`and`, `or` and `xor` are pointwise at both grains, and each carries an erased proof that the two runs are the same length. A guard discharges it by its own decision, exactly as division’s precondition is discharged — no proof is written at the call",
+  },
+  {
+    title: "Fill a run in one step",
+    tag: "PACKED",
+    code: [["Bits/replicate(8, false)"], ["Bytes/replicate(4, 0xFF)"]],
+    gloss:
+      "One run of one repeated value at either grain, built by the primitive rather than a spine of conses. `len` reduces a fill to its own count, which is what lets an equal-length bound discharge against one without unfolding it",
+  },
+  {
+    title: "Read a run at the other grain",
+    tag: "PACKED",
+    code: [["Bytes/to_bits(x[0x48])"], ["Bits/to_bytes(b)"]],
+    gloss:
+      "`Bytes/to_bits` asks nothing, since every byte run is already a whole number of bits. `Bits/to_bytes` carries a proof that the length is a multiple of eight, a partial byte having nowhere to go. The payload is the same flat bytes read at either grain",
+  },
+  {
     title: "Declare a concept",
     tag: "POLYMORPHISM",
     code: [
@@ -552,15 +591,15 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "The form takes a telescope like any other witness, and either shape may join an `and` group beside written members. A derived `Eql` is structural — the same constructor with pairwise equal payloads, `!=` its negation, and a derived `Ord` ranks constructors before payloads, over the `Eql` witness its superclass needs first. `Spell`, `Eql` and `Ord` are the only concepts that derive",
+      "The form takes a telescope like any other witness, and either shape may join an `and` group beside written members. A derived `Eql` is structural — the same constructor with pairwise equal payloads, `!=` its negation, and a derived `Ord` ranks constructors before payloads, over the `Eql` witness its superclass needs first. `Spell`, `Eql`, `Ord` and `Hash` are the only concepts that derive",
   },
   {
     title: "Override resolution",
     tag: "POLYMORPHISM",
     code: [
       [
-        '<span class="kw">let</span> reverse: <span class="kw">Ordered</span>(<span class="kw">Nat</span>) = Ordered {',
-        "    cmp(a, b) = compare_reverse(a, b)",
+        '<span class="kw">let</span> reverse: <span class="kw">Ord</span>(<span class="kw">Nat</span>) = Ord {',
+        "    ord(a, b) = compare_reverse(a, b)",
         "};",
         'sort(<span class="kw">use</span> reverse, values)',
       ],
@@ -696,8 +735,12 @@ export const CHEATSHEET: CheatsheetCard[] = [
     code: [
       ['<span class="kw">foreign</span> random: <span class="kw">Nat</span>;'],
       ['<span class="kw">pub foreign</span> log: (<span class="kw">Bytes</span>) -&gt; <span class="kw">Nat</span>;'],
+      [
+        '<span class="kw">foreign</span> read: (<span class="kw">Handle</span>, <span class="kw">Nat</span>)',
+        '    -&gt; {status: <span class="kw">Nat</span>, bytes: <span class="kw">Bytes</span>};',
+      ],
     ],
     gloss:
-      "Implemented by the embedder — wire types only: `Nat`, `Int`, `Bool`, `Bytes`, `Handle`, `List(T)`; a call to one yields an `Io`",
+      "Implemented by the embedder — eight wire types, spelled bare, since the wire grammar resolves no names: `Nat`, `Int`, `Bool`, `Flt`, `Bytes`, `Bits`, `Handle` and `List(T)`. A result may also be a braced list of labelled wire types, and a reference result — `Bytes`, `Bits`, `Handle` or `List(T)` — is written last, the one slot it may take. A call to one yields an `Io`",
   },
 ];

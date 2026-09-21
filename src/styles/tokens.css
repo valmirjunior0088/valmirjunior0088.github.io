@@ -283,8 +283,12 @@ h3 {
   color: var(--fg-mute);
 }
 
+/* The mono face runs larger than Geist at the same size, so an inline code span steps down a notch to sit on the
+   line the prose around it stands on rather than bulging out of it. Components that set their own code size — the
+   install box, the editor, a `.code` block — outrank this and are unaffected. */
 code {
   font-family: var(--mono);
+  font-size: 0.92em;
 }
 
 /* Text for the outline rather than for the page: the playground's own heading, which the design has no room for and the document cannot do without. Clipped rather than hidden, because display: none and visibility: hidden would take it out of the accessibility tree along with everything else. */

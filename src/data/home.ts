@@ -48,24 +48,24 @@ export const FEATURES: Feature[] = [
     body: "Dependent function and tuple types, indexed inductive families, and pattern matching that works out exhaustiveness so you do not have to pretend you did.",
   },
   {
-    kicker: "UNIVERSES",
-    body: "A cumulative hierarchy of `Type`, with levels inferred rather than written by hand — nobody has ever enjoyed writing one down.",
+    kicker: "DECIDED ALGEBRA",
+    body: "A `Vec(T, n + m)` is a `Vec(T, m + n)`, with nothing to prove — conversion decides the carriers' algebra, so your lemma is already a law.",
   },
   {
-    kicker: "PROP",
-    body: "A proof-irrelevant `Prop`, so proofs weigh nothing at runtime. It is the only fair price for a proof.",
+    kicker: "BOUNDS, NOT CHECKS",
+    body: "Division and indexing carry a precondition rather than a runtime trap. A guard discharges it by its own decision, and no proof is ever named.",
   },
   {
     kicker: "ERASURE",
-    body: "Erased arguments — anything marked `@` — guide the checking and then vanish from the output without saying goodbye.",
+    body: "A proof-irrelevant `Prop`, and erased arguments — anything marked `@` — that guide the checking and then vanish without saying goodbye.",
   },
   {
-    kicker: "CONCEPTS",
-    body: "`concept` and `satisfy` for ad-hoc polymorphism: one witness per key, program-wide, so which implementation runs is never a surprise about the call site.",
+    kicker: "WEBASSEMBLY INTEROP",
+    body: "A `foreign` declaration is answered by a WebAssembly module the manifest pins by hash. `curios compile` folds it in, so the executable travels alone.",
   },
   {
     kicker: "STANDARD LIBRARY",
-    body: "Collections, formatting, IO, the filesystem, processes, networking, tasks, time, randomness, arbitrary-precision integers, JSON, and TOML. Yes, TOML.",
+    body: "Collections, formatting, IO, the filesystem, processes, networking, tasks, time, randomness, packed bit and byte strings, JSON, and TOML. Yes, TOML.",
   },
   {
     kicker: "ONE PIPELINE",
