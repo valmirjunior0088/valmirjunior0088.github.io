@@ -57,7 +57,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "MODULES",
     code: [['<span class="kw">pub mod</span> <span class="kw">Nat</span>;']],
     gloss:
-      "Loads from the header's stem directory — `mod Nat;` in `main.crs` reads `main/Nat.crs`; only resolves in the native compiler, where a file system backs it",
+      "Loads from the header's stem directory — `mod Nat;` in `main.crs` reads `main/Nat.crs`",
   },
   {
     title: "Inline module",
