@@ -14,14 +14,7 @@ import { PAGES, BUILD_URL } from "../data/site";
         <Wordmark width={198} />
       </div>
       <p class="label eyebrow">{HERO.eyebrow}</p>
-      <h1>
-        {HERO.heading.map((line, index) => (
-          <>
-            {index > 0 && <br />}
-            {line}
-          </>
-        ))}
-      </h1>
+      <h1 set:html={HERO.heading.join("<br>")} />
       <p class="lead">{HERO.lead}</p>
       <div class="actions">
         <a class="btn btn--primary" href={PAGES.playground.href}>Argue with it in a browser tab</a>
@@ -82,6 +75,15 @@ import { PAGES, BUILD_URL } from "../data/site";
     letter-spacing: -0.02em;
     margin: 0 0 24px;
     text-wrap: balance;
+  }
+
+  /* Emphasis by dimming everything else: the heading steps down to the tier body text is set in and the two words keep the full foreground, so they stand out with no second weight and no second colour — and no line changes width, so the sizes below hold as fitted. Global because the heading's markup arrives as a string, which never carries the scope attribute a scoped selector would look for. */
+  h1 {
+    color: var(--fg-body);
+  }
+
+  h1 :global(em) {
+    color: var(--fg);
   }
 
   .lead {

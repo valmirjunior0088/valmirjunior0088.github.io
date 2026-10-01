@@ -3,8 +3,13 @@ import { GITHUB_URL, SYNTAX_URL } from "./site";
 // Code shown on the landing page is pre-highlighted markup rather than plain text run through a highlighter at build time: there are exactly three snippets, they never change without someone editing this file, and a highlighter for a language this young would be a large amount of machinery to get four keywords amber. Two classes only — .kw for anything the language reserves, .cm for the comments that open each block.
 export const HERO = {
   eyebrow: "DEPENDENTLY TYPED · COMPILES TO WEBASSEMBLY",
-  // Four lines, two to a sentence, broken where they are meant to break rather than wherever the box runs out: "your rhetoric." and "your arithmetic." each open a line instead of trailing the one above it, at every width.
-  heading: ["Mild opinions about", "your rhetoric.", "Strong feelings about", "your arithmetic."],
+  // Four lines, two to a sentence, broken where they are meant to break rather than wherever the box runs out: "your rhetoric." and "your arithmetic." each open a line instead of trailing the one above it, at every width. The two things the opinions are about are set a tier brighter than the rest, marked up here as the code below is, and the full stop stays outside the mark: it belongs to the sentence, not the word.
+  heading: [
+    "Mild opinions about",
+    "your <em>rhetoric</em>.",
+    "Strong feelings about",
+    "your <em>arithmetic</em>.",
+  ],
   lead: "Types can depend on values, proofs live beside ordinary code, and the compiler is happy to double-check your math homework.",
   // Two files, not one read top to bottom: the first quotes the standard library's own Vec so the length in the type is on the page, the second is the program that imports it. Both are true of the shipped compiler — /std/Vec really is a list beside a proof that counts it, and the declarations below compile as written.
   declaration: [
