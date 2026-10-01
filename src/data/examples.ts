@@ -125,26 +125,11 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "    Vec/first(xs);\n\n" +
       'Fmt/print("head = %\\n")(head(Vec/cons(7, Vec/cons(8, Vec/nil()))))',
   },
-  vec: {
-    label: "vec.crs",
-    code:
-      "use /std/{Nat, print};\n\n" +
-      "pub induct Vec(T: Type): (Nat) -> pub Type\n" +
-      "| nil(): (0)\n" +
-      "| cons(@m: Nat, x: T, xs: Vec(T, m)): (m + 1)\n" +
-      "end\n\n" +
-      "pub let append(@T: Type, @n: Nat, @m: Nat, v: Vec(T, n), w: Vec(T, m)) -> Vec(T, n + m) =\n" +
-      "    match v\n" +
-      "    | nil() => w\n" +
-      "    | cons(@_j, x, xs) => Vec/cons(x, append(xs, w))\n" +
-      "    end;\n\n" +
-      'print("typechecks: Vec/append\\n")',
-  },
   sym: {
     label: "sym.crs",
     code:
       "use /std/{Eq, print};\n\n" +
-      "pub let sym(@A: Type, @x: A, @y: A, p: Eq(x, y)) -> Eq(y, x) =\n" +
+      "pub let sym(@A: Type, @x: A, @y: A, p: Eq()(x, y)) -> Eq()(y, x) =\n" +
       "    match p\n" +
       "    | refl(@_z) => Eq/refl()\n" +
       "    end;\n\n" +

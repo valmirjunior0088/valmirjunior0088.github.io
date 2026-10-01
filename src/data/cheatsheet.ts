@@ -140,14 +140,17 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "`/` and `%` also demand the precondition their concept's `Ok` field states — on `Nat`, `Nat/Lt(0, b)`. A literal divisor settles it outright and a guard reduces it away inside the arm, so only a bare `n / d` is refused",
+      "`/` and `%` also demand the precondition their concept's `Ok` field states — on `Nat`, `Nat/Lt(0, b)`. A literal divisor settles it outright, and the elaborator proves the rest from the facts in scope — a guard like this one, or a hypothesis that implies `0 < d` — so only an `n / d` that nothing bounds is refused",
   },
   {
     title: "Whole-term forms need parentheses",
     tag: "OPERATORS",
-    code: [['1 + (<span class="kw">match</span> flag | true =&gt; 1 | false =&gt; 0 <span class="kw">end</span>)']],
+    code: [
+      ['1 + (<span class="kw">let</span> n = 2; n * n)'],
+      ['1 + <span class="kw">match</span> flag | true =&gt; 1 | false =&gt; 0 <span class="kw">end</span>'],
+    ],
     gloss:
-      "`let`, `match`, `choose`, lambdas and function types run to the end of the enclosing term, so an infix operator never takes one bare. Positions that already take a whole term need none: call arguments, list elements, field values, scrutinees and arm bodies",
+      "`let`, lambdas and function types run to the end of the enclosing term, so an infix operator never takes one bare. `match` and `choose` are atoms instead, since `end` closes them, and stand as an operand or take a call with no parentheses. Positions that already take a whole term need none: call arguments, list elements, field values, scrutinees and arm bodies",
   },
   {
     title: "Top-level let needs a type",
@@ -397,12 +400,12 @@ export const CHEATSHEET: CheatsheetCard[] = [
       [
         '<span class="kw">pub induct</span> <span class="kw">Vec</span>(T: <span class="kw">Type</span>): (<span class="kw">Nat</span>) -&gt; <span class="kw">pub Type</span>',
         "| nil(): (0)",
-        '| cons(@m: <span class="kw">Nat</span>, x: T, xs: <span class="kw">Vec</span>(T, m)): (m + 1)',
+        '| cons(@m: <span class="kw">Nat</span>, x: T, xs: <span class="kw">Vec</span>(T)(m)): (m + 1)',
         '<span class="kw">end</span>',
       ],
     ],
     gloss:
-      "An indexed family — the length lives in the type, and each constructor states the indices it produces. The inner `pub` exports construction and elimination",
+      "An indexed family — the length lives in the type, and each constructor states the indices it produces. It is applied as it is declared, its parameters in one call and its indices in the next. The inner `pub` exports construction and elimination",
   },
   {
     title: "Match with a motive",
@@ -713,14 +716,14 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "PROOFS",
     code: [
       [
-        '<span class="kw">let</span> sym(@x: <span class="kw">Nat</span>, @y: <span class="kw">Nat</span>, p: <span class="kw">Eq</span>(x, y)) -&gt; <span class="kw">Eq</span>(y, x) =',
-        '    <span class="kw">match</span> p: (s, t, _q) =&gt; <span class="kw">Eq</span>(t, s)',
+        '<span class="kw">let</span> sym(@x: <span class="kw">Nat</span>, @y: <span class="kw">Nat</span>, p: <span class="kw">Eq</span>()(x, y)) -&gt; <span class="kw">Eq</span>()(y, x) =',
+        '    <span class="kw">match</span> p: (s, t, _q) =&gt; <span class="kw">Eq</span>()(t, s)',
         "    | refl(@_z) =&gt; Eq/refl()",
         '    <span class="kw">end</span>;',
       ],
     ],
     gloss:
-      "All of it erases before runtime. The motive binds one name per index and then the scrutinee, so a match on `Eq` takes three",
+      "All of it erases before runtime. `Eq`'s one parameter is implicit, so its first call is empty and the second carries the two indices. The motive binds one name per index and then the scrutinee, so a match on `Eq` takes three",
   },
   {
     title: "Declare a test",
@@ -741,6 +744,6 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "Implemented by the embedder — eight wire types, spelled bare, since the wire grammar resolves no names: `Nat`, `Int`, `Bool`, `Flt`, `Bytes`, `Bits`, `Handle` and `List(T)`. A result may also be a braced list of labelled wire types, and a reference result — `Bytes`, `Bits`, `Handle` or `List(T)` — is written last, the one slot it may take. A call to one yields an `Io`",
+      "Implemented by the embedder — nine wire types, spelled bare, since the wire grammar resolves no names: `Nat`, `Int`, `Bool`, `Byte`, `Flt`, `Bytes`, `Bits`, `Handle` and `List(T)`. A result may also be a braced list of labelled wire types, which cross in the order written — the labels are part of the tuple's type, so nothing is moved. A call to one yields an `Io`",
   },
 ];

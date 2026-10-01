@@ -9,6 +9,9 @@ node_modules/
 public/curios/js/
 public/curios/docs/
 
+# the pinned release's compiler, downloaded by the same script to render the /std docs
+.artifacts/
+
 # editor/OS cruft
 .DS_Store
 .claude/

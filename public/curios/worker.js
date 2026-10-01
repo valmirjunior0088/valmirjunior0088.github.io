@@ -50,19 +50,21 @@ async function compileAndReport(source, onPhase) {
 
   onPhase({ phase: "begin", step: "compile" });
   const t1 = performance.now();
-  let bytes;
+  // What comes back is `{ program, foreigns }`, the module beside the rows its `foreign` declarations state, and `run` takes the pair whole because it holds each hook to its row. The page is only ever interested in the module, so that is all that leaves this function.
+  let compiled;
   try {
-    bytes = mod.compile(source);
+    compiled = mod.compile(source);
   } catch (error) {
     return { ok: false, phase: "compile", ms: performance.now() - t1, error: String(error) };
   }
+  const bytes = compiled.program;
   onPhase({ phase: "end", step: "compile", ms: performance.now() - t1 });
 
   onPhase({ phase: "begin", step: "run" });
   const t2 = performance.now();
   let outcome;
   try {
-    outcome = await mod.run(bytes, undefined);
+    outcome = await mod.run(compiled, undefined);
   } catch (error) {
     return { ok: false, phase: "run", ms: performance.now() - t2, error: `Couldn't run the program: ${error.message || error}` };
   }

@@ -3,14 +3,14 @@ import { GITHUB_URL, SYNTAX_URL } from "./site";
 // Code shown on the landing page is pre-highlighted markup rather than plain text run through a highlighter at build time: there are exactly three snippets, they never change without someone editing this file, and a highlighter for a language this young would be a large amount of machinery to get four keywords amber. Two classes only — .kw for anything the language reserves, .cm for the comments that open each block.
 export const HERO = {
   eyebrow: "DEPENDENTLY TYPED · COMPILES TO WEBASSEMBLY",
-  // Three lines, broken where they are meant to break rather than wherever the box runs out: "your arithmetic." opens a line instead of trailing the one above it, at every width.
-  heading: ["Small language.", "Big opinions about", "your arithmetic."],
+  // Four lines, two to a sentence, broken where they are meant to break rather than wherever the box runs out: "your rhetoric." and "your arithmetic." each open a line instead of trailing the one above it, at every width.
+  heading: ["Mild opinions about", "your rhetoric.", "Strong feelings about", "your arithmetic."],
   lead: "Types can depend on values, proofs live beside ordinary code, and the compiler is happy to double-check your math homework.",
   // Two files, not one read top to bottom: the first quotes the standard library's own Vec so the length in the type is on the page, the second is the program that imports it. Both are true of the shipped compiler — /std/Vec really is a list beside a proof that counts it, and the declarations below compile as written.
   declaration: [
     '<span class="cm">-- This is how Vec is represented in the /std...</span>',
     '<span class="kw">pub let</span> Counted(@T: <span class="kw">Type</span>, l: List(T), n: Nat) -> <span class="kw">Prop</span> =',
-    "    Eq(List/len(l), n);",
+    "    Eq()(List/len(l), n);",
     "",
     '<span class="kw">pub struct</span> Vec(T: <span class="kw">Type</span>, n: Nat): <span class="kw">pub Type</span> {',
     "    list: List(T),",
@@ -96,13 +96,13 @@ export const RESOURCES: Resource[] = [
   },
   {
     title: "Design decisions",
-    body: "One file per decision — language/ for what Curios is, toolchain/ for how it is built and run.",
+    body: "One file per decision, in a directory per subject — why Curios is the way it is.",
     href: `${GITHUB_URL}/tree/main/documentation/design`,
   },
   {
     title: "Soundness perimeter",
     body: "Every rule that can admit a term, and how far it has actually been checked.",
-    href: `${GITHUB_URL}/tree/main/documentation/soundness`,
+    href: `${GITHUB_URL}/tree/main/documentation/design/soundness`,
   },
   {
     title: "Roadmap",

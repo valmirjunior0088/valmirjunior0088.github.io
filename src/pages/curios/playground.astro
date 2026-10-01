@@ -257,7 +257,7 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     setStep("");
   }
 
-  // Lit and pressed are the same fact: which example is in the buffer. Colour alone would leave a screen reader with thirteen identical buttons.
+  // Lit and pressed are the same fact: which example is in the buffer. Colour alone would leave a screen reader with twelve identical buttons.
   function light(chip, on) {
     chip.classList.toggle("chip--on", on);
     chip.setAttribute("aria-pressed", String(on));
