@@ -105,8 +105,8 @@ export const RESOURCES: Resource[] = [
     href: `${GITHUB_URL}/tree/main/documentation/design`,
   },
   {
-    title: "Soundness perimeter",
-    body: "Every rule that can admit a term, and how far it has actually been checked.",
+    title: "Soundness board",
+    body: "Every rule that can admit a term, argued in an entry, and a ticket for each proof of falsehood found through one.",
     href: `${GITHUB_URL}/tree/main/documentation/design/soundness`,
   },
   {
@@ -116,8 +116,8 @@ export const RESOURCES: Resource[] = [
   },
   {
     title: "Benchmarks",
-    body: "Methodology and results, including what the abstractions cost.",
-    href: `${GITHUB_URL}/blob/main/benchmarks/README.md`,
+    body: "An orientation bench against Rust, native and compiled to WebAssembly — how a figure is read, and what the readings say.",
+    href: `${GITHUB_URL}/blob/main/xbench/README.md`,
   },
 ];
 

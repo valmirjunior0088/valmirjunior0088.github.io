@@ -140,7 +140,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "`/` and `%` also demand the precondition their concept's `Ok` field states — on `Nat`, `Nat/Lt(0, b)`. A literal divisor settles it outright, and the elaborator proves the rest from the facts in scope — a guard like this one, or a hypothesis that implies `0 < d` — so only an `n / d` that nothing bounds is refused",
+      "`/` and `%` also demand the precondition their concept's `Ok` field states — on `Nat`, `Holds(0 < b)`. A literal divisor settles it outright, and the elaborator proves the rest from the facts in scope — a guard like this one, or a hypothesis that implies `0 < d` — so only an `n / d` that nothing bounds is refused",
   },
   {
     title: "Whole-term forms need parentheses",
@@ -233,7 +233,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ['(x: <span class="kw">Nat</span>) =&gt; x + 1'],
     ],
     gloss:
-      "The sugar is a lambda with a telescope in front of it. Every parameter of a `let` telescope is annotated and only a `use` parameter goes without; a bare lambda annotates only where context supplies nothing",
+      "The sugar is a lambda with a telescope in front of it. A `let` telescope is a signature: a plain parameter is always `name: type`, an `@` one may be its type alone, and a `use` one is its concept application; a bare lambda annotates only where context supplies nothing",
   },
   {
     title: "Irrefutable patterns in binders",
@@ -604,11 +604,11 @@ export const CHEATSHEET: CheatsheetCard[] = [
         '<span class="kw">let</span> reverse: <span class="kw">Ord</span>(<span class="kw">Nat</span>) = Ord {',
         "    ord(a, b) = compare_reverse(a, b)",
         "};",
-        'sort(<span class="kw">use</span> reverse, values)',
+        'sort(@_, <span class="kw">use</span> reverse, values)',
       ],
     ],
     gloss:
-      "Pass an ordinary concept value with `use`. Resolution takes local `use` parameters first, then superclass projections, and only then the global table",
+      "Pass an ordinary concept value with `use`, written where its parameter stands: the hidden arguments ahead of a plain one go in order from the first, so `@_` holds the implicit's place. Resolution takes local `use` parameters first, then superclass projections, and only then the global table",
   },
   {
     title: "Associated types and laws",
@@ -680,7 +680,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "A cross-monad action lifts through the declared `Lift` witness — `/std/Async` declares `Lift(Io, Async)`; edges never chain",
+      "A cross-monad action lifts through the declared `Monad/Lift` witness — `/std/Async` declares `Monad/Lift(Io, Async)`; edges never chain",
   },
   {
     title: "Try regions carry the failure",

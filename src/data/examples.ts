@@ -73,14 +73,14 @@ export const EXAMPLES: Record<string, CuriosExample> = {
   map: {
     label: "scores.crs",
     code:
-      "use /std/{Fmt, Nat, Map, print};\n\n" +
-      "let m0: Map(Nat) =\n" +
+      "use /std/{Fmt, Nat, Str, Map, print};\n\n" +
+      "let m0: Map(Str, Nat) =\n" +
       "    Map/empty();\n\n" +
-      "let m1: Map(Nat) =\n" +
+      "let m1: Map(Str, Nat) =\n" +
       '    Map/insert(m0, "ada", 92);\n\n' +
-      "let m2: Map(Nat) =\n" +
+      "let m2: Map(Str, Nat) =\n" +
       '    Map/insert(m1, "grace", 87);\n\n' +
-      "let m3: Map(Nat) =\n" +
+      "let m3: Map(Str, Nat) =\n" +
       '    Map/insert(m2, "alan", 95);\n\n' +
       'match Map/get(m3, "grace")\n' +
       '| some(score) => Fmt/print("grace scored % out of % entries\\n")(score)(Map/len(m3))\n' +

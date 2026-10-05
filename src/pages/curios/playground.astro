@@ -203,11 +203,11 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     output.classList.toggle("error", !empty && tone === "error");
   }
 
-  // Every step the compiler goes through, in the two forms the line needs: the one it wears while it is happening, and the past tense it leaves behind once it has earned it. That past tense is a claim — "compiled" says the program is good — so a step that failed leaves no crumb at all and the verdict speaks for it instead. The first two name the compiler because they are about the compiler, arriving and waking up; by the third the subject has handed off to the program you wrote, which is the truth of what happens here and the thing a bare "fetched" left you to guess.
+  // Every step the compiler goes through, in the two forms the line needs: the one it wears while it is happening, and the past tense it leaves behind once it has earned it. That past tense is a claim — "compiled" says the program is good — so a step that failed leaves no crumb at all and the verdict speaks for it instead. Each names what it acts on: the first two the compiler, arriving and waking up; the third the source, since by then the object is the program you wrote; and the fourth the WebAssembly that came of it — which is the truth of what happens here and the thing a bare "fetched" or "compiled" left you to guess.
   const STEPS = {
     load: { doing: "fetching compiler…", done: (ms) => `fetched compiler in ${ms.toFixed(0)}ms` },
     warm: { doing: "warming compiler…", done: (ms) => `warmed compiler in ${ms.toFixed(0)}ms` },
-    compile: { doing: "compiling…", done: (ms) => `compiled in ${ms.toFixed(1)}ms` },
+    compile: { doing: "compiling source…", done: (ms) => `compiled source in ${ms.toFixed(1)}ms` },
     run: { doing: "running…", done: moduleCrumb },
   };
 
@@ -327,11 +327,11 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
         const unavailable = result.phase === "load";
         if (unavailable) loaded = false;
 
-        // The step that failed leaves no crumb, because its past tense would claim the one thing that did not happen: "compiled in 42.1ms · refused" is a line arguing with itself. The verdict carries the duration instead, which is what that crumb was really for — how long the compiler spent before refusing is worth as much as how long it spends accepting, and the commonest failure there is, a typo on a page already warm, would otherwise put a bare word on an empty line. A compiler that never arrived is the exception: it measured nothing worth reading, and says so without a number.
+        // The step that failed leaves no crumb, because its past tense would claim the one thing that did not happen: "compiled source in 42.1ms · refused source" is a line arguing with itself. The verdict carries the duration instead, which is what that crumb was really for — how long the compiler spent before refusing is worth as much as how long it spends accepting, and the commonest failure there is, a typo on a page already warm, would otherwise put a bare word on an empty line. A compiler that never arrived is the exception: it measured nothing worth reading, and says so without a number.
         setStep(
           unavailable
             ? "never arrived"
-            : `${result.phase === "compile" ? "refused" : "failed"} in ${result.ms.toFixed(1)}ms`,
+            : `${result.phase === "compile" ? "refused source" : "failed"} in ${result.ms.toFixed(1)}ms`,
           "error",
         );
         return;
