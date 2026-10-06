@@ -648,7 +648,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "`#` is the place filled by `Spell` rather than `Show`: the value as source that reads back, a literal or a constructor qualified by its type's own name. The two mix in either order, `\\#` is a literal hash, and a declared type derives its witness with `satisfy Spell(T);`",
+      "`#` is the place filled by `Spell` rather than `Show`: the value as source that reads back, a literal or a constructor qualified by its type's own name. The two mix in either order, `\\#` is a literal hash, and a declared type derives its witness with `satisfy Spell(T) { .. }`",
   },
   {
     title: "Postfix ! is monadic bind",
