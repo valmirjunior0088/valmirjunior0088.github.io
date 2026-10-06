@@ -572,25 +572,29 @@ export const CHEATSHEET: CheatsheetCard[] = [
       "Its premises resolve recursively, and each must be structurally smaller than the head it serves — which is what makes the search terminate",
   },
   {
-    title: "A bodyless satisfy derives Spell",
+    title: "A .. body derives Spell",
     tag: "POLYMORPHISM",
     code: [
       [
-        '<span class="kw">satisfy</span> <span class="kw">Spell</span>(<span class="kw">Point</span>);',
+        '<span class="kw">satisfy</span> <span class="kw">Spell</span>(<span class="kw">Point</span>) {',
+        "    ..",
+        "}",
         '<span class="cm">-- spells as Point { x = 1, y = 2 }</span>',
       ],
     ],
     gloss:
-      "Omitting the body asks the compiler to write one from the declaration of the type in the key, which must be a declared `induct` or `struct`. A derived `Spell` gives the constructor qualified by its type's own name, or a struct as its literal — text that re-parses",
+      "A block holding `..` alone asks the compiler to write the body from the declaration of the type in the key, which must be a declared `induct` or `struct`. A derived `Spell` gives the constructor qualified by its type's own name, or a struct as its literal — text that re-parses",
   },
   {
-    title: "A bodyless satisfy derives Eql",
+    title: "A .. body derives Eql",
     tag: "POLYMORPHISM",
     code: [
-      ['<span class="kw">satisfy</span> <span class="kw">Eql</span>(<span class="kw">Point</span>);'],
+      ['<span class="kw">satisfy</span> <span class="kw">Eql</span>(<span class="kw">Point</span>) {', "    ..", "}"],
       [
         '<span class="kw">satisfy</span> (@A: <span class="kw">Type</span>, <span class="kw">use</span> <span class="kw">Eql</span>(A)) =&gt;',
-        '        <span class="kw">Eql</span>(<span class="kw">Tree</span>(A));',
+        '        <span class="kw">Eql</span>(<span class="kw">Tree</span>(A)) {',
+        "    ..",
+        "}",
       ],
     ],
     gloss:
