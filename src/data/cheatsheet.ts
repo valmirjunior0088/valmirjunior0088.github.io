@@ -33,7 +33,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "`---` and a space open a documentation comment, which is not discarded the way a line comment is: consecutive lines form one block, attached to the declaration below it — a `let` or an `and` member, an `induct`, `struct`, `concept`, `satisfy`, `foreign` or `mod`, or a constructor, field or method inside one. `curios document` renders the blocks as the library's pages",
+      "`---` and a space open a documentation comment, kept where a line comment is discarded: consecutive lines form one block, attached to the declaration below it, or to a constructor, field or method inside one. `curios document` renders the blocks as pages",
   },
   {
     title: "Absolute and relative paths",
@@ -83,7 +83,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "LITERALS",
     code: [["b[1, 0, 1]"], ["x[0x48, 0x69, ..suffix]"]],
     gloss:
-      "Packed `Bits`, LSB first, and packed `Bytes` — the grain letter glues to the `[`. A constant atom is a numeric literal at the grain's element type, in any radix — or a character literal in a `Bytes` literal, as `x['H', 'i']`, since no character is a bit — and `..` spreads a whole packed value; a literal written entirely from numerals is constant data",
+      "Packed `Bits`, LSB first, and packed `Bytes` — the grain letter glues to the `[`. A constant atom is a numeric literal in any radix — or a character in a `Bytes` literal, as `x['H', 'i']`, since no character is a bit — and `..` spreads a whole packed value",
   },
   {
     title: "Terms inside a packed literal",
@@ -119,7 +119,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "Three quotes and a newline open it, a newline and three quotes close it, and the value is the lines between. The leading whitespace they share with the closer comes off each line, so a block reads at the indentation of the code around it. Trailing whitespace goes too",
+      "Three quotes and a newline open it, a newline and three quotes close it, and the value is the lines between, less the indentation they share with the closer and any trailing whitespace — so a block reads at the indentation of the code around it",
   },
   {
     title: "Infix operators dispatch through concepts",
@@ -140,7 +140,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "`/` and `%` also demand the precondition their concept's `Ok` field states — on `Nat`, `Holds(0 < b)`. A literal divisor settles it outright, and the elaborator proves the rest from the facts in scope — a guard like this one, or a hypothesis that implies `0 < d` — so only an `n / d` that nothing bounds is refused",
+      "`/` and `%` demand the precondition their concept's `Ok` field states — on `Nat`, `Holds(0 < b)`. A literal divisor settles it, and the elaborator proves the rest from a guard like this one or a hypothesis, so only an `n / d` that nothing bounds is refused",
   },
   {
     title: "Whole-term forms need parentheses",
@@ -150,7 +150,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ['1 + <span class="kw">match</span> flag | true =&gt; 1 | false =&gt; 0 <span class="kw">end</span>'],
     ],
     gloss:
-      "`let`, lambdas and function types run to the end of the enclosing term, so an infix operator never takes one bare. `match` and `choose` are atoms instead, since `end` closes them, and stand as an operand or take a call with no parentheses. Positions that already take a whole term need none: call arguments, list elements, field values, scrutinees and arm bodies",
+      "`let`, lambdas and function types run to the end of the term, so an operator never takes one bare. `match` and `choose` are atoms, since `end` closes them, and a position that takes a whole term — an argument, an element, an arm body — needs no parentheses",
   },
   {
     title: "Top-level let needs a type",
@@ -177,7 +177,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "Items, then exactly one final term of type `Io({})`. It yields nothing, so a tail that computes a result discards it explicitly, and a module file is items alone. An item's body is its own sequencing region, while a `!` in the final term sequences with the whole program",
+      "Items, then exactly one final term of type `Io({})`. It yields nothing, so a tail that computes a result discards it, and a module file is items alone. An item's body is its own sequencing region; a `!` in the final term sequences with the whole program",
   },
   {
     title: "What pub makes visible",
@@ -187,7 +187,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ['<span class="kw">pub let</span> value: <span class="kw">Nat</span> = 2;'],
     ],
     gloss:
-      "Without `pub` a declaration is visible exactly within its module's subtree \u2014 descendants may name an ancestor's private bindings, ancestors and siblings may not. `pub` adds whatever visibility the module itself has, so inside a private module it means that module's audience",
+      "Without `pub` a declaration is visible within its module's subtree \u2014 to descendants, never to ancestors or siblings. `pub` adds whatever visibility the module itself has, so inside a private module it means that module's audience",
   },
   {
     title: "A second pub exposes the representation",
@@ -233,7 +233,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ['(x: <span class="kw">Nat</span>) =&gt; x + 1'],
     ],
     gloss:
-      "The sugar is a lambda with a telescope in front of it. A `let` telescope is a signature: a plain parameter is always `name: type`, an `@` one may be its type alone, and a `use` one is its concept application; a bare lambda annotates only where context supplies nothing",
+      "The sugar is a lambda with a telescope in front of it. A `let` telescope is a signature: a plain or `@` parameter is always `name: type`, and a `use` one is its concept application; a bare lambda annotates only where context supplies nothing",
   },
   {
     title: "Irrefutable patterns in binders",
@@ -486,7 +486,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ["Bits/not(b)"],
     ],
     gloss:
-      "`not`, `shl`, `shr`, `rotl` and `rotr` are declared at both grains and every one preserves the run’s width. A shift enters zeros and discards what passes the end — under the carrier’s least-significant-first reading a `shl` is multiplication by two to the count, at the run’s own width — while a rotation re-enters it at the other end, its count taken modulo the width so it needs no guard",
+      "`not`, `shl`, `shr`, `rotl` and `rotr` are declared at both grains and each preserves the run’s width. A shift enters zeros and discards what passes the end, while a rotation re-enters it at the other end, its count taken modulo the width so it needs no guard",
   },
   {
     title: "Pointwise operations demand equal length",
@@ -583,7 +583,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "A block holding `..` alone asks the compiler to write the body from the declaration of the type in the key, which must be a declared `induct` or `struct`. A derived `Spell` gives the constructor qualified by its type's own name, or a struct as its literal — text that re-parses",
+      "A block holding `..` alone asks the compiler to write the body from the type in the key, which must be a declared `induct` or `struct`. A derived `Spell` gives the constructor qualified by its type's own name, or a struct as its literal — text that re-parses",
   },
   {
     title: "A .. body derives Eql",
@@ -591,14 +591,13 @@ export const CHEATSHEET: CheatsheetCard[] = [
     code: [
       ['<span class="kw">satisfy</span> <span class="kw">Eql</span>(<span class="kw">Point</span>) {', "    ..", "}"],
       [
-        '<span class="kw">satisfy</span> (@A: <span class="kw">Type</span>, <span class="kw">use</span> <span class="kw">Eql</span>(A)) =&gt;',
-        '        <span class="kw">Eql</span>(<span class="kw">Tree</span>(A)) {',
+        '<span class="kw">satisfy</span> (@A: <span class="kw">Type</span>, <span class="kw">use</span> <span class="kw">Eql</span>(A)) =&gt; <span class="kw">Eql</span>(<span class="kw">Tree</span>(A)) {',
         "    ..",
         "}",
       ],
     ],
     gloss:
-      "The form takes a telescope like any other witness, and either shape may join an `and` group beside written members. A derived `Eql` is structural — the same constructor with pairwise equal payloads, `!=` its negation, and a derived `Ord` ranks constructors before payloads, over the `Eql` witness its superclass needs first. `Spell`, `Eql`, `Ord` and `Hash` are the only concepts that derive",
+      "The form takes a telescope like any other witness. A derived `Eql` is structural — the same constructor with pairwise equal payloads — and a derived `Ord` ranks constructors before payloads. `Spell`, `Eql`, `Ord` and `Hash` are the only concepts that derive",
   },
   {
     title: "Override resolution",
@@ -612,7 +611,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "Pass an ordinary concept value with `use`, written where its parameter stands: the hidden arguments ahead of a plain one go in order from the first, so `@_` holds the implicit's place. Resolution takes local `use` parameters first, then superclass projections, and only then the global table",
+      "Pass a concept value with `use`, where its parameter stands: hidden arguments go in order from the first, so `@_` holds the implicit's place. Resolution takes local `use` parameters first, then superclass projections, and only then the global table",
   },
   {
     title: "Associated types and laws",
@@ -648,7 +647,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "`#` is the place filled by `Spell` rather than `Show`: the value as source that reads back, a literal or a constructor qualified by its type's own name. The two mix in either order, `\\#` is a literal hash, and a declared type derives its witness with `satisfy Spell(T) { .. }`",
+      "`#` is the place filled by `Spell` rather than `Show`: the value as source that reads back. The two mix in either order, `\\#` is a literal hash, and a declared type derives its witness with `satisfy Spell(T) { .. }`",
   },
   {
     title: "Postfix ! is monadic bind",
@@ -705,8 +704,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "EFFECTS",
     code: [
       [
-        '<span class="kw">satisfy</span> (@S: <span class="kw">Type</span>) =&gt;',
-        '        <span class="kw">Monad</span>((A: <span class="kw">Type</span>) =&gt; <span class="kw">State</span>(S, A)) {',
+        '<span class="kw">satisfy</span> (@S: <span class="kw">Type</span>) =&gt; <span class="kw">Monad</span>((A: <span class="kw">Type</span>) =&gt; <span class="kw">State</span>(S, A)) {',
         "    pure(@A, a) = State/pure(a),",
         "    bind(@A, @B, m, f) = State/bind(m, f)",
         "}",
@@ -734,20 +732,21 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "TESTS",
     code: [['<span class="kw">test</span> the_answer_holds =', "    Test/assert(21 * 2 == 42);"]],
     gloss:
-      "A `test` item is a description of type `/std/Test`, built from the combinators `/std/Test` exports. It takes no parameters — a claim about every instantiation is a proposition rather than a description, so it is a `let`. A test is never `pub`, since its name is its report line rather than an export",
+      "A `test` item is a description of type `/std/Test`, built from its combinators. It takes no parameters — a claim about every instantiation is a proposition, so it is a `let` — and is never `pub`, since its name is its report line rather than an export",
   },
   {
     title: "Foreign declarations",
     tag: "FOREIGN",
     code: [
-      ['<span class="kw">foreign</span> random: <span class="kw">Nat</span>;'],
-      ['<span class="kw">pub foreign</span> log: (<span class="kw">Bytes</span>) -&gt; <span class="kw">Nat</span>;'],
+      ['<span class="kw">foreign</span> random() -&gt; <span class="kw">Nat</span>;'],
+      ['<span class="kw">pub foreign</span> log(<span class="kw">Bytes</span>) -&gt; <span class="kw">Nat</span>;'],
       [
-        '<span class="kw">foreign</span> read: (<span class="kw">Handle</span>, <span class="kw">Nat</span>)',
-        '    -&gt; {status: <span class="kw">Nat</span>, bytes: <span class="kw">Bytes</span>};',
+        '<span class="kw">foreign</span> read(<span class="kw">Handle</span>, <span class="kw">Nat</span>) -&gt; {',
+        '    status: <span class="kw">Nat</span>,',
+        '    bytes: <span class="kw">Bytes</span>};',
       ],
     ],
     gloss:
-      "Implemented by the embedder — nine wire types, spelled bare, since the wire grammar resolves no names: `Nat`, `Int`, `Bool`, `Byte`, `Flt`, `Bytes`, `Bits`, `Handle` and `List(T)`. A result may also be a braced list of labelled wire types, which cross in the order written — the labels are part of the tuple's type, so nothing is moved. A call to one yields an `Io`",
+      "A function with no body, implemented outside the program. Its operands are wire types, spelled bare: `Nat`, `Int`, `Bool`, `Byte`, `Flt`, `Bytes`, `Bits`, `Handle` and `List(T)`. A result may also be a braced list of labelled ones. A call to one yields an `Io`",
   },
 ];
