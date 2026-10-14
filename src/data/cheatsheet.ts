@@ -140,7 +140,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "`/` and `%` demand the precondition their concept's `Ok` field states — on `Nat`, `Holds(0 < b)`. A literal divisor settles it, and the elaborator proves the rest from a guard like this one or a hypothesis, so only an `n / d` that nothing bounds is refused",
+      "`/` and `%` demand the precondition their concept's `Ok` field states — on `Nat`, `Nat/NonZero(b)`, which is `Holds(b != 0)`. A literal divisor settles it, and the elaborator proves the rest from a guard like this one or a hypothesis, so only an `n / d` that nothing bounds is refused",
   },
   {
     title: "Whole-term forms need parentheses",
@@ -177,7 +177,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "Items, then exactly one final term of type `Io({})`. It yields nothing, so a tail that computes a result discards it, and a module file is items alone. An item's body is its own sequencing region; a `!` in the final term sequences with the whole program",
+      "Items, then exactly one final term, the description the program performs: an `Io({})`, or a `Try(Io, E, {})` whose failure is written to standard error and ends the program with status `1`. A tail that computes another result discards it, and a module file is items alone. An item's body is its own sequencing region; a `!` in the final term sequences with the whole program",
   },
   {
     title: "What pub makes visible",
@@ -332,7 +332,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "Only a bare `_` in final position is a default. A named binder is not a catch-all, and nested wildcard defaults are not accepted",
+      "A final `_` states no case, so its body is typed where the match stands, however deep the arms before it nest. A final arm binding a name is refused, since the scrutinee is in scope under the name it already has",
   },
   {
     title: "Literal dispatch",
