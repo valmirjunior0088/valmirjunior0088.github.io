@@ -177,7 +177,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "Items, then exactly one final term, the description the program performs: an `Io({})`, or a `Try(Io, E, {})` whose failure is written to standard error and ends the program with status `1`. A tail that computes another result discards it, and a module file is items alone. An item's body is its own sequencing region; a `!` in the final term sequences with the whole program",
+      "Items, then exactly one final term, the description the program performs: an `Io({})`, a `Try(Io, E, {})` whose failure is written to standard error and ends the program with status `1`, or `()` where the program has done what it does by its last `!`. A tail that computes another result discards it, and a module file is items alone. An item's body is its own sequencing region; a `!` in the final term sequences with the whole program",
   },
   {
     title: "What pub makes visible",
@@ -677,13 +677,13 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "EFFECTS",
     code: [
       [
-        '<span class="kw">let</span> fiber: <span class="kw">Async</span>({}) =',
+        '<span class="kw">let</span> greeted: <span class="kw">Try</span>(<span class="kw">Io</span>, Io/Error, {}) =',
         '    <span class="kw">let</span> _ = print(<span class="kw">"hi\\n"</span>)!;',
-        "    Async/pure(());",
+        "    Try/pure(());",
       ],
     ],
     gloss:
-      "A cross-monad action lifts through the declared `Monad/Lift` witness — `/std/Async` declares `Monad/Lift(Io, Async)`; edges never chain",
+      "A cross-monad action lifts through the declared `Monad/Lift` witness — `/std/Try` declares `Monad/Lift(Io, Try(M, E))` wherever `Io` lifts into `M`; edges never chain",
   },
   {
     title: "Try regions carry the failure",
@@ -747,6 +747,6 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "A function with no body, implemented outside the program. Its operands are wire types, spelled bare: `Nat`, `Int`, `Bool`, `Byte`, `Flt`, `Bytes`, `Bits`, `Handle` and `List(T)`. A result may also be a braced list of labelled ones. A call to one yields an `Io`",
+      "A function with no body, implemented outside the program. Its operands are wire types, spelled bare: `Nat`, `Int`, `Bool`, `Byte`, `Flt`, `Bytes`, `Bits`, `Handle`, `List(T)` and `Option(T)`. A result may also be a braced list of labelled ones. A call to one yields an `Io`, which suspends while its answer comes later, the rest of the program running on",
   },
 ];
