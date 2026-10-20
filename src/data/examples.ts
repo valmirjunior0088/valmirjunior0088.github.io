@@ -82,7 +82,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       '    Map/insert(m1, "grace", 87);\n\n' +
       "let m3: Map(Str, Nat) =\n" +
       '    Map/insert(m2, "alan", 95);\n\n' +
-      'match Map/get(m3, "grace")\n' +
+      'match Map/try_get(m3, "grace")\n' +
       '| some(score) => Fmt/print("grace scored % out of % entries\\n")(score)(Map/len(m3))\n' +
       '| none() => print("no such entry\\n")\n' +
       "end",

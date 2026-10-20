@@ -81,16 +81,16 @@ export const CHEATSHEET: CheatsheetCard[] = [
   {
     title: "Packed literals",
     tag: "LITERALS",
-    code: [["b[1, 0, 1]"], ["x[0x48, 0x69, ..suffix]"]],
+    code: [["x['H', 'i']"], ["x[0x48, 0x69, ..suffix]"]],
     gloss:
-      "Packed `Bits`, LSB first, and packed `Bytes` — the grain letter glues to the `[`. A constant atom is a numeric literal in any radix — or a character in a `Bytes` literal, as `x['H', 'i']`, since no character is a bit — and `..` spreads a whole packed value",
+      "A packed literal builds `Bytes`, the first byte written first, with the `x` glued to the `[` — a bare `[…]` is still a `List`. A constant atom is a numeric literal from `0` to `255` in any radix, or a character whose code point fits a byte, and `..` spreads a whole `Bytes` value",
   },
   {
     title: "Terms inside a packed literal",
     tag: "LITERALS",
-    code: [["b[flag, ..rest]"], ["x[..acc, byte]"]],
+    code: [["x[head, ..tail]"], ["x[..acc, byte]"]],
     gloss:
-      "An entry is an ordinary term contributing one atom — a `Bool` in a `Bits` literal, a `Byte` in a `Bytes` literal. `b[h, ..t]` conses and `x[..acc, b]` appends, with no named form",
+      "An entry is an ordinary term contributing one `Byte`. `x[h, ..t]` conses and `x[..acc, b]` appends, with no named form",
   },
   {
     title: "Characters, strings, and numbers",
@@ -440,14 +440,14 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "FOLDS",
     code: [
       [
-        '<span class="kw">match</span> bits',
-        "| b[] =&gt; base",
-        "| b[head, ..tail]; hyp =&gt; step(head, hyp)",
+        '<span class="kw">match</span> bytes',
+        "| x[] =&gt; base",
+        "| x[head, ..tail]; hyp =&gt; step(head, hyp)",
         '<span class="kw">end</span>',
       ],
     ],
     gloss:
-      "A `Bits` head is a `Bool` and a `Bytes` head a `Byte`, and the `;` binder holds the fold's result for the tail",
+      "A `Bytes` head is a `Byte`, and the `;` binder holds the fold's result for the tail",
   },
   {
     title: "The fold binder takes patterns",
@@ -481,40 +481,33 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "Shifts and rotations keep the width",
     tag: "PACKED",
     code: [
-      ["Bits/shl(b, 3)", "Bits/shr(b, 1)"],
-      ["Bytes/rotl(x, 2)", "Bytes/rotr(x, 1)"],
-      ["Bits/not(b)"],
+      ["Bytes/shl(b, 3)", "Bytes/shr(b, 1)"],
+      ["Bytes/rotl(b, 2)", "Bytes/rotr(b, 1)"],
+      ["Bytes/not(b)"],
     ],
     gloss:
-      "`not`, `shl`, `shr`, `rotl` and `rotr` are declared at both grains and each preserves the run’s width. A shift enters zeros and discards what passes the end, while a rotation re-enters it at the other end, its count taken modulo the width so it needs no guard",
+      "`not`, `shl`, `shr`, `rotl` and `rotr` each preserve the run’s width and move whole bytes, a shift by bits being `Nat`’s. A shift enters zero bytes and discards what passes the end, while a rotation re-enters it at the other end, its count taken modulo the width so it needs no guard",
   },
   {
     title: "Pointwise operations demand equal length",
     tag: "PACKED",
     code: [
       [
-        '<span class="kw">match</span> Nat/eql(Bits/len(a), Bits/len(b))',
-        "| true =&gt; Bits/and(a, b)",
-        "| false =&gt; b[]",
+        '<span class="kw">match</span> Nat/eql(Bytes/len(a), Bytes/len(b))',
+        "| true =&gt; Bytes/and(a, b)",
+        "| false =&gt; x[]",
         '<span class="kw">end</span>',
       ],
     ],
     gloss:
-      "`and`, `or` and `xor` are pointwise at both grains, and each carries an erased proof that the two runs are the same length. A guard discharges it by its own decision, exactly as division’s precondition is discharged — no proof is written at the call",
+      "`and`, `or` and `xor` are pointwise, and each carries an erased proof that the two runs are the same length. A guard discharges it by its own decision, exactly as division’s precondition is discharged — no proof is written at the call",
   },
   {
     title: "Fill a run in one step",
     tag: "PACKED",
-    code: [["Bits/replicate(8, false)"], ["Bytes/replicate(4, 0xFF)"]],
+    code: [["Bytes/replicate(4, 0xFF)"]],
     gloss:
-      "One run of one repeated value at either grain, built by the primitive rather than a spine of conses. `len` reduces a fill to its own count, which is what lets an equal-length bound discharge against one without unfolding it",
-  },
-  {
-    title: "Read a run at the other grain",
-    tag: "PACKED",
-    code: [["Bytes/to_bits(x[0x48])"], ["Bits/to_bytes(b)"]],
-    gloss:
-      "`Bytes/to_bits` asks nothing, since every byte run is already a whole number of bits. `Bits/to_bytes` carries a proof that the length is a multiple of eight, a partial byte having nowhere to go. The payload is the same flat bytes read at either grain",
+      "One run of one repeated byte, built by the primitive rather than a spine of conses. `len` reduces a fill to its own count, which is what lets an equal-length bound discharge against one without unfolding it",
   },
   {
     title: "Declare a concept",
@@ -690,9 +683,9 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "EFFECTS",
     code: [
       [
-        '<span class="kw">let</span> contents: <span class="kw">Try</span>(<span class="kw">Io</span>, Io/Error, <span class="kw">Bytes</span>) =',
-        '    <span class="kw">let</span> f = File/open(path, mode)!;',
+        '<span class="kw">let</span> copied: <span class="kw">Try</span>(<span class="kw">Io</span>, Io/Error, <span class="kw">Bytes</span>) =',
         '    <span class="kw">let</span> text = File/read_all(path)!;',
+        '    <span class="kw">let</span> _ = File/write_all(copy, text)!;',
         "    Try/pure(text);",
       ],
     ],
@@ -747,6 +740,6 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "A function with no body, implemented outside the program. Its operands are wire types, spelled bare: `Nat`, `Int`, `Bool`, `Byte`, `Flt`, `Bytes`, `Bits`, `Handle`, `List(T)` and `Option(T)`. A result may also be a braced list of labelled ones. A call to one yields an `Io`, which suspends while its answer comes later, the rest of the program running on",
+      "A function with no body, implemented outside the program. Its operands are wire types, spelled bare: `Nat`, `Int`, `Bool`, `Byte`, `Flt`, `Bytes`, `Handle`, `List(T)` and `Option(T)`. A result may also be a braced list of labelled ones. A call to one yields an `Io`, which suspends while its answer comes later, the rest of the program running on",
   },
 ];
