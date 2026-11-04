@@ -78,7 +78,7 @@ export const FEATURES: Feature[] = [
   },
   {
     kicker: "EDITOR SUPPORT",
-    body: "Zed and VS Code extensions highlight `.crs` and launch `curios wonder server`, so the compiler you already have can interrupt you sooner.",
+    body: "Zed and VS Code extensions highlight `.crs` and launch `curios wonder --server`, so the compiler you already have can interrupt you sooner.",
   },
 ];
 
