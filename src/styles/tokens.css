@@ -291,6 +291,11 @@ code {
   font-size: 0.92em;
 }
 
+/* Each word of an inline code span, as inlineCode wraps it: a line may break between words but never inside one. */
+code .word {
+  white-space: nowrap;
+}
+
 /* Text for the outline rather than for the page: the playground's own heading, which the design has no room for and the document cannot do without. Clipped rather than hidden, because display: none and visibility: hidden would take it out of the accessibility tree along with everything else. */
 .sr-only {
   position: absolute;
