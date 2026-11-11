@@ -293,7 +293,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       [
         '<span class="kw">pub struct</span> <span class="kw">Point</span>: <span class="kw">pub Type</span> {',
         '    x: <span class="kw">Nat</span>,',
-        '    y: <span class="kw">Nat</span>',
+        '    y: <span class="kw">Nat</span>,',
         "}",
       ],
     ],
@@ -525,7 +525,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     code: [
       [
         '<span class="kw">pub concept</span> <span class="kw">Show</span>(A: <span class="kw">Type</span>): <span class="kw">pub Type</span> {',
-        '    show(A) -&gt; <span class="kw">Str</span>',
+        '    show(A) -&gt; <span class="kw">Str</span>,',
         "}",
       ],
     ],
@@ -538,7 +538,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     code: [
       [
         '<span class="kw">satisfy</span> <span class="kw">Show</span>(<span class="kw">Nat</span>) {',
-        "    show(n) = Nat/to_str(n)",
+        "    show(n) = Nat/to_str(n),",
         "}",
       ],
     ],
@@ -552,7 +552,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       [
         '<span class="kw">pub concept</span> <span class="kw">Ord</span>(A: <span class="kw">Type</span>): <span class="kw">pub Type</span> {',
         '    <span class="kw">use</span> <span class="kw">Eql</span>(A),',
-        '    ord(A, A) -&gt; <span class="kw">Ordering</span>',
+        '    ord(A, A) -&gt; <span class="kw">Ordering</span>,',
         "}",
       ],
     ],
@@ -567,7 +567,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
         '<span class="kw">satisfy</span> (@A: <span class="kw">Type</span>, <span class="kw">use</span> <span class="kw">Show</span>(A)) =&gt; <span class="kw">Show</span>(<span class="kw">List</span>(A)) {',
         "    show(values) =",
         '        List/fold(values, <span class="kw">""</span>, (v, r) =&gt;',
-        "            Str/concat(r, Show/show(v)))",
+        "            Str/concat(r, Show/show(v))),",
         "}",
       ],
     ],
@@ -623,7 +623,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       [
         '<span class="kw">pub concept</span> <span class="kw">Divide</span>(A: <span class="kw">Type</span>): <span class="kw">pub Type</span> {',
         '    <span class="kw">Ok</span>(A) -&gt; <span class="kw">Prop</span>,',
-        '    div(a: A, b: A, @ok: <span class="kw">Ok</span>(b)) -&gt; A',
+        '    div(a: A, b: A, @ok: <span class="kw">Ok</span>(b)) -&gt; A,',
         "}",
       ],
     ],
@@ -712,7 +712,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       [
         '<span class="kw">satisfy</span> (@S: <span class="kw">Type</span>) =&gt; <span class="kw">Monad</span>((A: <span class="kw">Type</span>) =&gt; <span class="kw">State</span>(S, A)) {',
         "    pure(@A, a) = State/pure(a),",
-        "    bind(@A, @B, m, f) = State/bind(m, f)",
+        "    bind(@A, @B, m, f) = State/bind(m, f),",
         "}",
       ],
     ],
@@ -725,7 +725,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     code: [
       [
         '<span class="kw">let</span> sym(@x: <span class="kw">Nat</span>, @y: <span class="kw">Nat</span>, p: <span class="kw">Eq</span>()(x, y)) -&gt; <span class="kw">Eq</span>()(y, x) =',
-        '    <span class="kw">match</span> p: (s, t, _q) =&gt; <span class="kw">Eq</span>()(t, s)',
+        '    <span class="kw">match</span> p: (s, t, _) =&gt; <span class="kw">Eq</span>()(t, s)',
         "    | refl(@_) =&gt; Eq/refl()",
         '    <span class="kw">end</span>;',
       ],
