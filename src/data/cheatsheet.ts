@@ -65,7 +65,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     code: [
       [
         '<span class="kw">pub mod</span> <span class="kw">Internal</span>',
-        '    <span class="kw">pub let</span> value: <span class="kw">Nat</span> = 1;',
+        '    <span class="kw">pub let</span> value: <span class="kw">Nat</span> =',
+        "        1;",
         '<span class="kw">end</span>',
       ],
     ],
@@ -157,7 +158,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "DECLARATIONS",
     code: [
       [
-        '<span class="kw">pub let</span> zero: <span class="kw">Nat</span> = 0;',
+        '<span class="kw">pub let</span> zero: <span class="kw">Nat</span> =',
+        "    0;",
         "",
         '<span class="kw">pub let</span> bump(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Nat</span> =',
         "    n + 1;",
@@ -171,7 +173,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "DECLARATIONS",
     code: [
       [
-        '<span class="kw">pub let</span> greeting: <span class="kw">Str</span> = <span class="kw">"hi\\n"</span>;',
+        '<span class="kw">pub let</span> greeting: <span class="kw">Str</span> =',
+        '    <span class="kw">"hi\\n"</span>;',
         "",
         "print(greeting)",
       ],
@@ -183,8 +186,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "What pub makes visible",
     tag: "DECLARATIONS",
     code: [
-      ['<span class="kw">let</span> helper: <span class="kw">Nat</span> = 1;'],
-      ['<span class="kw">pub let</span> value: <span class="kw">Nat</span> = 2;'],
+      ['<span class="kw">let</span> helper: <span class="kw">Nat</span> =', "    1;"],
+      ['<span class="kw">pub let</span> value: <span class="kw">Nat</span> =', "    2;"],
     ],
     gloss:
       "Without `pub` a declaration is visible within its module's subtree \u2014 to descendants, never to ancestors or siblings. `pub` adds whatever visibility the module itself has, so inside a private module it means that module's audience",
@@ -194,7 +197,9 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "DECLARATIONS",
     code: [
       [
-        '<span class="kw">pub struct</span> <span class="kw">Meters</span>: <span class="kw">pub Type</span> { <span class="kw">Nat</span> }',
+        '<span class="kw">pub struct</span> <span class="kw">Meters</span>: <span class="kw">pub Type</span> {',
+        '    <span class="kw">Nat</span>,',
+        "}",
       ],
     ],
     gloss:
@@ -217,7 +222,10 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "A binding is in scope of its own value",
     tag: "BINDINGS",
     code: [
-      ['<span class="kw">let</span> walk(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Nat</span> = walk(n);'],
+      [
+        '<span class="kw">let</span> walk(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Nat</span> =',
+        "    walk(n);",
+      ],
       ['<span class="kw">let</span> n = n + 1;  <span class="cm">-- refused</span>'],
     ],
     gloss:
@@ -228,7 +236,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "BINDINGS",
     code: [
       [
-        '<span class="kw">let</span> increment(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Nat</span> = n + 1;',
+        '<span class="kw">let</span> increment(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Nat</span> =',
+        "    n + 1;",
       ],
       ['(x: <span class="kw">Nat</span>) =&gt; x + 1'],
     ],
@@ -251,7 +260,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "BINDINGS",
     code: [
       ['<span class="kw">let</span> _ = print(<span class="kw">"hi\\n"</span>)!;'],
-      ['<span class="kw">let</span> _width: <span class="kw">Nat</span> = 80;'],
+      ['<span class="kw">let</span> _width: <span class="kw">Nat</span> =', "    80;"],
     ],
     gloss:
       "`_` alone names nothing; a `_`-prefixed name is one `curios lint` never reports as unused, nor anything inside a `_`-prefixed module. Every other binder, import and private declaration nothing reaches is a lint, and the exit code says so",
@@ -259,7 +268,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
   {
     title: "Written goals",
     tag: "GOALS",
-    code: [['<span class="kw">let</span> todo: <span class="kw">Nat</span> = ?;']],
+    code: [['<span class="kw">let</span> todo: <span class="kw">Nat</span> =', "    ?;"]],
     gloss:
       "A written goal — the report gives scope, expected type, and verified candidate fits, then the build exits 2. A goal is never accepted in a successfully compiled program",
   },
@@ -294,14 +303,14 @@ export const CHEATSHEET: CheatsheetCard[] = [
   {
     title: "Construct with labels",
     tag: "STRUCTS",
-    code: [['<span class="kw">let</span> p: <span class="kw">Point</span> = Point {', "    x = 1,", "    y = 2", "};"]],
+    code: [['<span class="kw">let</span> p: <span class="kw">Point</span> =', "    Point { x = 1, y = 2 };"]],
     gloss:
       "Every field named, and checked in declaration order. A parameterized head may supply its type arguments before the block, as `Pair(Nat, Bool) { … }`, and `label(params) = value` sugar assigns a lambda",
   },
   {
     title: "Copy the rest, then override",
     tag: "STRUCTS",
-    code: [['<span class="kw">let</span> q: <span class="kw">Point</span> = Point {', "    ..p,", "    y = 9", "};"]],
+    code: [['<span class="kw">let</span> q: <span class="kw">Point</span> =', "    Point { ..p, y = 9 };"]],
     gloss:
       "`..p` copies a value of the same structure. It must come first and may occur once, and the labeled overrides after it follow declaration order. Tuples and strings have no update form",
   },
@@ -472,6 +481,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
         '    <span class="kw">match</span> n | 0 =&gt; true | p + 1 =&gt; odd(p) <span class="kw">end</span>',
         '<span class="kw">and</span> odd(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Bool</span> =',
         '    <span class="kw">match</span> n | 0 =&gt; false | p + 1 =&gt; even(p) <span class="kw">end</span>;',
+        "",
         "even(input)",
       ],
     ],
@@ -597,9 +607,9 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "POLYMORPHISM",
     code: [
       [
-        '<span class="kw">let</span> reverse: <span class="kw">Ord</span>(<span class="kw">Nat</span>) = Ord {',
-        "    ord(a, b) = compare_reverse(a, b)",
-        "};",
+        '<span class="kw">let</span> reverse: <span class="kw">Ord</span>(<span class="kw">Nat</span>) =',
+        "    Ord { ord(a, b) = compare_reverse(a, b) };",
+        "",
         'sort(@_, <span class="kw">use</span> reverse, values)',
       ],
     ],
@@ -660,7 +670,10 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "Io describes, it does not perform",
     tag: "EFFECTS",
     code: [
-      ['<span class="kw">let</span> greeting: <span class="kw">Io</span>({}) = print(<span class="kw">"hi"</span>);'],
+      [
+        '<span class="kw">let</span> greeting: <span class="kw">Io</span>({}) =',
+        '    print(<span class="kw">"hi"</span>);',
+      ],
     ],
     gloss:
       "A host call builds an `Io` description and performs nothing — a program's tail is one `Io({})`, forced once. Nothing takes an `Io(T)` to a `T`",
@@ -713,7 +726,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       [
         '<span class="kw">let</span> sym(@x: <span class="kw">Nat</span>, @y: <span class="kw">Nat</span>, p: <span class="kw">Eq</span>()(x, y)) -&gt; <span class="kw">Eq</span>()(y, x) =',
         '    <span class="kw">match</span> p: (s, t, _q) =&gt; <span class="kw">Eq</span>()(t, s)',
-        "    | refl(@_z) =&gt; Eq/refl()",
+        "    | refl(@_) =&gt; Eq/refl()",
         '    <span class="kw">end</span>;',
       ],
     ],
