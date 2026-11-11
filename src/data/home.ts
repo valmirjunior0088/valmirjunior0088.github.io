@@ -1,4 +1,4 @@
-import { GITHUB_URL, SYNTAX_URL } from "./site";
+import { GITHUB_URL, LANGUAGE_URL } from "./site";
 
 // Code shown on the landing page is pre-highlighted markup rather than plain text run through a highlighter at build time: there are exactly three snippets, they never change without someone editing this file, and a highlighter for a language this young would be a large amount of machinery to get four keywords amber. Two classes only — .kw for anything the language reserves, .cm for the comments that open each block.
 export const HERO = {
@@ -92,7 +92,7 @@ export const RESOURCES: Resource[] = [
   {
     title: "Language reference",
     body: "The complete surface language — what something means and how to spell it.",
-    href: SYNTAX_URL,
+    href: LANGUAGE_URL,
   },
   {
     title: "Usage",

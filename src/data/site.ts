@@ -1,7 +1,7 @@
 export const GITHUB_URL = "https://github.com/valmirjunior0088/curios";
 export const ISSUES_URL = `${GITHUB_URL}/issues`;
 export const BUILD_URL = `${GITHUB_URL}#build-from-source`;
-export const SYNTAX_URL = `${GITHUB_URL}/blob/main/documentation/syntax.md`;
+export const LANGUAGE_URL = `${GITHUB_URL}/blob/main/documentation/language.md`;
 
 // Both served from this same site by scripts/fetch.sh, so they stay root-relative links rather than absolute ones back to ourselves. The Rust docs are rustdoc's tree, a release asset, entered at the compiler crate's own page rather than through the root's redirect to it; the /std docs are no asset at all — the script runs the release's own compiler, and `curios document --std` renders them off the prelude it embeds, with the root module's page as the landing page.
 export const RUST_DOCS_URL = "/curios/docs/rust/curios/index.html";
