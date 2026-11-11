@@ -61,16 +61,16 @@ export const FEATURES: Feature[] = [
     body: "Division and indexing carry a precondition rather than a runtime trap. A guard discharges it by its own decision, and no proof is ever named.",
   },
   {
+    kicker: "NON-BLOCKING IO",
+    body: "IO where non-blocking is not a suggestion: a wait suspends only the branch that waits, while the other branches carry on without noticing.",
+  },
+  {
     kicker: "ERASURE",
     body: "A proof-irrelevant `Prop`, and erased arguments — anything marked `@` — that guide the checking and then vanish without saying goodbye.",
   },
   {
-    kicker: "WEBASSEMBLY INTEROP",
-    body: "A `foreign` declaration is answered by a WebAssembly module the manifest pins by hash. `curios compile` folds it in, so the executable travels alone.",
-  },
-  {
     kicker: "STANDARD LIBRARY",
-    body: "Collections, formatting, IO, the filesystem, processes, networking, tasks, time, randomness, packed bit and byte strings, JSON, and TOML. Yes, TOML.",
+    body: "Collections, formatting, IO, the filesystem, processes, networking, time, randomness, packed byte strings, JSON, and TOML. Yes, TOML.",
   },
   {
     kicker: "ONE PIPELINE",
