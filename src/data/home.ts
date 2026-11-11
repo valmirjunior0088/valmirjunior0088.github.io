@@ -112,7 +112,7 @@ export const RESOURCES: Resource[] = [
   {
     title: "Roadmap",
     body: "What exists, what is pending, and the specifications for the pending half.",
-    href: `${GITHUB_URL}/blob/main/documentation/roadmap.md`,
+    href: `${GITHUB_URL}/tree/main/documentation/roadmap`,
   },
   {
     title: "Benchmarks",
