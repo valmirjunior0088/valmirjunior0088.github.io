@@ -359,6 +359,20 @@ export const CHEATSHEET: CheatsheetCard[] = [
       "Literal arms with a mandatory `_` default. A dispatch literal is a numeric or a character literal, the latter matching its scalar value, and induction arms cannot be mixed into the same `match`",
   },
   {
+    title: "Several patterns, one arm",
+    tag: "MATCH",
+    code: [
+      [
+        '<span class="kw">match</span> Char/to_nat(c)',
+        "| <span class=\"kw\">' '</span> | <span class=\"kw\">'\\t'</span> | <span class=\"kw\">'\\n'</span> | <span class=\"kw\">'\\r'</span> =&gt; true",
+        "| _ =&gt; false",
+        '<span class="kw">end</span>',
+      ],
+    ],
+    gloss:
+      "Each alternative stands after a bar of its own. All bind the same names, the body is typed once under each alternative's cases, and no two alternatives share a value",
+  },
+  {
     title: "Guarded ladder",
     tag: "CHOOSE",
     code: [
@@ -565,9 +579,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     code: [
       [
         '<span class="kw">satisfy</span> (@A: <span class="kw">Type</span>, <span class="kw">use</span> <span class="kw">Show</span>(A)) =&gt; <span class="kw">Show</span>(<span class="kw">List</span>(A)) {',
-        "    show(values) =",
-        '        List/fold(values, <span class="kw">""</span>, (v, r) =&gt;',
-        "            Str/concat(r, Show/show(v))),",
+        '    show(values) = List/fold(values, <span class="kw">""</span>, (v, r) =&gt; r + Show/show(v)),',
         "}",
       ],
     ],
