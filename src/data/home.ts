@@ -95,7 +95,7 @@ export const RESOURCES: Resource[] = [
     href: LANGUAGE_URL,
   },
   {
-    title: "Usage",
+    title: "Usage reference",
     body: "Every subcommand, flag, and package concept the command line offers.",
     href: `${GITHUB_URL}/blob/main/documentation/usage.md`,
   },
