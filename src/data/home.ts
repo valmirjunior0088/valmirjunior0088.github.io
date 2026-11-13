@@ -29,16 +29,16 @@ export const HERO = {
     '<span class="kw">let</span> empty: Vec(Nat, 0) = Vec/nil();',
     '<span class="kw">let</span> single: Vec(Nat, 1) = empty;',
   ],
-  // Transcribed from the real compiler against exactly the five lines above, which is why it reads a bare Vec and a bare single — a report spells a name as it is written where the report stands — and points at line 5. The --> line is the part the browser build cannot produce, having no filename to name.
+  // Transcribed from the real compiler against exactly the five lines above, which is why it reads a bare Vec — a report spells a name as it is written where the report stands — and points at line 5. The file's name on the closing line is the part the browser build cannot produce, having no file to name.
   diagnostic: [
-    "while elaborating single:",
     '<span class="kw">type mismatch</span>',
-    "  inferred: Vec(Nat, 0)",
-    "  expected: Vec(Nat, 1)",
-    "",
-    "   --> vector.crs:5:27",
-    "    5 | let single: Vec(Nat, 1) = empty;",
-    '      |                           <span class="kw">^^^^^</span>',
+    "│  inferred: Vec(Nat, 0)",
+    "│  expected: Vec(Nat, 1)",
+    "│",
+    "│  5 │ let single: Vec(Nat, 1) = empty;",
+    '│    │                           <span class="kw">^^^^^</span>',
+    "│",
+    "╰─ [error] vector.crs:5:27",
   ],
 };
 

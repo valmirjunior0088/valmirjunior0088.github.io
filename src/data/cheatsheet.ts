@@ -579,7 +579,9 @@ export const CHEATSHEET: CheatsheetCard[] = [
     code: [
       [
         '<span class="kw">satisfy</span> (@A: <span class="kw">Type</span>, <span class="kw">use</span> <span class="kw">Show</span>(A)) =&gt; <span class="kw">Show</span>(<span class="kw">List</span>(A)) {',
-        '    show(values) = List/fold(values, <span class="kw">""</span>, (v, r) =&gt; r + Show/show(v)),',
+        "    show(values) =",
+        '        List/fold(values, <span class="kw">""</span>, (v, r) =&gt;',
+        "            Str/concat(r, Show/show(v))),",
         "}",
       ],
     ],
