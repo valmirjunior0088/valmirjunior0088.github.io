@@ -38,7 +38,7 @@ export const HERO = {
     "│  5 │ let single: Vec(Nat, 1) = empty;",
     '│    │                           <span class="kw">^^^^^</span>',
     "│",
-    "╰─ [error] vector.crs:5:27",
+    "└─ [error] vector.crs:5:27",
   ],
 };
 

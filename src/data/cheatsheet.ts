@@ -151,7 +151,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ['1 + <span class="kw">match</span> flag | true =&gt; 1 | false =&gt; 0 <span class="kw">end</span>'],
     ],
     gloss:
-      "`let`, lambdas and function types run to the end of the term, so an operator never takes one bare. `match` and `choose` are atoms, since `end` closes them, and a position that takes a whole term — an argument, an element, an arm body — needs no parentheses",
+      "`let`, lambdas and function types run to the end of the term, so an operator never takes one bare. `match` is an atom, since `end` closes it, and a position that takes a whole term — an argument, an element, an arm body — needs no parentheses",
   },
   {
     title: "Top-level let needs a type",
@@ -327,7 +327,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "Checked for overlap and completeness. A matrix like this takes no motive, since no core eliminator answers to it",
+      "Checked for overlap and completeness. Each scrutinee of the tuple is matched in a column of its own",
   },
   {
     title: "Dispatch default arm",
@@ -356,7 +356,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
       ],
     ],
     gloss:
-      "Literal arms with a mandatory `_` default. A dispatch literal is a numeric or a character literal, the latter matching its scalar value, and induction arms cannot be mixed into the same `match`",
+      "Literal arms with a mandatory `_` default. A dispatch literal is a numeric or a character literal, the latter matching its scalar value, and a successor arm `p + 1` is not mixed into the same `match`",
   },
   {
     title: "Several patterns, one arm",
@@ -373,19 +373,33 @@ export const CHEATSHEET: CheatsheetCard[] = [
       "Each alternative stands after a bar of its own. All bind the same names, the body is typed once under each alternative's cases, and no two alternatives share a value",
   },
   {
-    title: "Guarded ladder",
-    tag: "CHOOSE",
+    title: "A match with no head",
+    tag: "GUARDS",
     code: [
       [
-        '<span class="kw">choose</span>',
-        "| prefer_fresh &amp;&amp; fresh &gt; 0 =&gt; fresh",
+        '<span class="kw">match</span>',
+        "| prefer_fresh, fresh &gt; 0 =&gt; fresh",
         "| some(n) = cached =&gt; n",
         "| _ =&gt; 0",
         '<span class="kw">end</span>',
       ],
     ],
     gloss:
-      "`choose` consumes no scrutinee — arms are tried top to bottom, `some(n) = cached` is a bind-arm, and the final `_` arm is mandatory",
+      "A `match` with no head is guards alone, tried top to bottom: a `Bool` term passes where it is `true`, `pattern = term` where the value matches, and a comma runs the next guard only where the one before passed. The final `_` arm is required",
+  },
+  {
+    title: "Guards after a pattern",
+    tag: "GUARDS",
+    code: [
+      [
+        '<span class="kw">match</span> cached',
+        "| some(n), n &gt; 0 =&gt; n",
+        "| _ =&gt; 1",
+        '<span class="kw">end</span>',
+      ],
+    ],
+    gloss:
+      "An arm writes guards after its patterns, each after a comma, reading the names the patterns bind. Where a guard fails the value goes on to the arms after it, and where an arm's one guard is a condition that fails, the arms after it know it is false",
   },
   {
     title: "Dependent function and tuple types",
@@ -431,64 +445,55 @@ export const CHEATSHEET: CheatsheetCard[] = [
       "An indexed family — the length lives in the type, and each constructor states the indices it produces. It is applied as it is declared, its parameters in one call and its indices in the next. The inner `pub` exports construction and elimination",
   },
   {
-    title: "Match with a motive",
-    tag: "FOLDS",
+    title: "A recursion that descends",
+    tag: "RECURSION",
     code: [
       [
-        '<span class="kw">match</span> n: (m) =&gt; P(m)',
-        "| 0 =&gt; base",
-        "| pred + 1; hyp =&gt; step(pred, hyp)",
-        '<span class="kw">end</span>',
+        '<span class="kw">let</span> factorial(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Nat</span> =',
+        '    <span class="kw">match</span> n',
+        "    | 0 =&gt; 1",
+        "    | pred + 1 =&gt; n * factorial(pred)",
+        '    <span class="kw">end</span>;',
       ],
     ],
     gloss:
-      "The motive binds the indices then the scrutinee, and can be left off wherever the elaborator infers it; `; hyp` binds the result for the smaller structure, and `+ 1` needs whitespace on both sides",
+      "A definition calls itself by its name. A call on what a case took apart descends, so the checker finds the recursion total and a type or a proof may use it; one that does not descend is a program still, kept out of both. `+ 1` needs whitespace on both sides",
   },
   {
-    title: "Folding a list",
-    tag: "FOLDS",
+    title: "A list pattern is a run",
+    tag: "RECURSION",
     code: [
       [
-        '<span class="kw">match</span> values',
-        "| [] =&gt; 0",
-        "| [head, ..tail]; sum =&gt; head + sum",
-        '<span class="kw">end</span>',
+        '<span class="kw">let</span> last(values: <span class="kw">List</span>(<span class="kw">Nat</span>)) -&gt; <span class="kw">Option</span>(<span class="kw">Nat</span>) =',
+        '    <span class="kw">match</span> values',
+        "    | [] =&gt; Option/none()",
+        "    | [only] =&gt; Option/some(only)",
+        "    | [_, ..rest] =&gt; last(rest)",
+        '    <span class="kw">end</span>;',
       ],
     ],
     gloss:
-      "The `; sum` binder holds the fold's result for the tail, so the sum is written without recursion and terminates by the structure. Leave the binder off for a plain case split",
+      "A list pattern is the literal that builds the value: `[]`, `[only]` for exactly one element, and `[_, ..rest]` for a list that element begins, each element a pattern of its own. The call on `rest` descends",
   },
   {
-    title: "Packed folds",
-    tag: "FOLDS",
+    title: "Packed runs",
+    tag: "RECURSION",
     code: [
       [
-        '<span class="kw">match</span> bytes',
-        "| x[] =&gt; base",
-        "| x[head, ..tail]; hyp =&gt; step(head, hyp)",
-        '<span class="kw">end</span>',
+        '<span class="kw">let</span> lines(bytes: <span class="kw">Bytes</span>) -&gt; <span class="kw">Nat</span> =',
+        '    <span class="kw">match</span> bytes',
+        "    | x[] =&gt; 0",
+        "    | x['\\n', ..tail] =&gt; 1 + lines(tail)",
+        "    | x[_, ..tail] =&gt; lines(tail)",
+        '    <span class="kw">end</span>;',
       ],
     ],
     gloss:
-      "A `Bytes` head is a `Byte`, and the `;` binder holds the fold's result for the tail",
-  },
-  {
-    title: "The fold binder takes patterns",
-    tag: "FOLDS",
-    code: [
-      [
-        '<span class="kw">match</span> n',
-        "| 0 =&gt; (0, true)",
-        "| pred + 1; (count, live) =&gt; step(count, live)",
-        '<span class="kw">end</span>',
-      ],
-    ],
-    gloss:
-      "The `;` binder names the fold result, not scrutinee shape — so it takes any irrefutable tuple or struct pattern, exactly like a `let`",
+      "`x[` takes a `Bytes` value apart as `[` takes a list. Its elements are bytes, matched by their literals: a numeral up to `255`, or a character whose code point fits a byte",
   },
   {
     title: "Mutual recursion",
-    tag: "FOLDS",
+    tag: "RECURSION",
     code: [
       [
         '<span class="kw">let</span> even(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Bool</span> =',
@@ -739,13 +744,13 @@ export const CHEATSHEET: CheatsheetCard[] = [
     code: [
       [
         '<span class="kw">let</span> sym(@x: <span class="kw">Nat</span>, @y: <span class="kw">Nat</span>, p: <span class="kw">Eq</span>()(x, y)) -&gt; <span class="kw">Eq</span>()(y, x) =',
-        '    <span class="kw">match</span> p: (s, t, _) =&gt; <span class="kw">Eq</span>()(t, s)',
+        '    <span class="kw">match</span> p',
         "    | refl(@_) =&gt; Eq/refl()",
         '    <span class="kw">end</span>;',
       ],
     ],
     gloss:
-      "All of it erases before runtime. `Eq`'s one parameter is implicit, so its first call is empty and the second carries the two indices. The motive binds one name per index and then the scrutinee, so a match on `Eq` takes three",
+      "All of it erases before runtime. `Eq`'s one parameter is implicit, so its first call is empty and the second carries the two indices. The arm is typed at its case, where `y` is `x`, so `Eq/refl()` proves the flipped equation",
   },
   {
     title: "Declare a test",

@@ -10,7 +10,7 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "use /std/{print};\n\n" +
       'print("Hello, world!\\n")',
   },
-  destructure: {
+  midpoint: {
     label: "midpoint.crs",
     code:
       "use /std/{Fmt, Nat};\n\n" +
@@ -27,8 +27,8 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "let (mx, my) = bounds(m);\n\n" +
       'Fmt/print("midpoint = (%, %)\\n")(mx)(my)',
   },
-  spread: {
-    label: "spread.crs",
+  patch: {
+    label: "patch.crs",
     code:
       "use /std/{Fmt, Nat, List};\n\n" +
       "pub struct Point: pub Type {\n" +
@@ -45,32 +45,38 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "    [1, ..base, 5];\n\n" +
       'Fmt/print("q = (%, %), padded has % elems\\n")(q.x)(q.y)(List/len(padded))',
   },
-  patterns: {
-    label: "combine.crs",
+  shapes: {
+    label: "shapes.crs",
     code:
-      "use /std/{Option, Nat, Fmt};\n\n" +
+      "use /std/{Fmt, List, Nat, Option, Str};\n\n" +
       "let combine(a: Option(Nat), b: Option(Nat)) -> Nat =\n" +
       "    match (a, b)\n" +
       "    | (some(x), some(y)) => x + y\n" +
-      "    | (some(x), none()) => x\n" +
-      "    | (none(), some(y)) => y\n" +
+      "    | (some(x), none()) | (none(), some(x)) => x\n" +
       "    | (none(), none()) => 0\n" +
       "    end;\n\n" +
-      'Fmt/print("combine = %\\n")(combine(Option/some(3), Option/some(4)))',
+      "let shape(values: List(Nat)) -> Str =\n" +
+      "    match values\n" +
+      '    | [] => "empty"\n' +
+      '    | [_] => "one"\n' +
+      '    | [x, y, .._], x == y => "opens with a pair"\n' +
+      '    | _ => "many"\n' +
+      "    end;\n\n" +
+      'Fmt/print("combine = %, shape = %\\n")(combine(Option/some(3), Option/none()))(shape([4, 4, 2]))',
   },
-  "cond match": {
-    label: "select.crs",
+  cache: {
+    label: "cache.crs",
     code:
       "use /std/{Bool, Fmt, Nat, Option};\n\n" +
       "let select(prefer_fresh: Bool, cached: Option(Nat), fresh: Nat) -> Nat =\n" +
-      "    choose\n" +
-      "    | prefer_fresh && fresh > 0 => fresh\n" +
-      "    | some(n) = cached => n\n" +
+      "    match\n" +
+      "    | prefer_fresh, fresh > 0 => fresh\n" +
+      "    | some(n) = cached, n > 0 => n\n" +
       "    | _ => 0\n" +
       "    end;\n\n" +
-      'Fmt/print("choice = %\\n")(select(true, Option/some(21), 5))',
+      'Fmt/print("choice = %\\n")(select(false, Option/some(21), 5))',
   },
-  map: {
+  scores: {
     label: "scores.crs",
     code:
       "use /std/{Fmt, Nat, Str, Map, print};\n\n" +
@@ -87,8 +93,8 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       '| none() => print("no such entry\\n")\n' +
       "end",
   },
-  donotation: {
-    label: "sum_all.crs",
+  readings: {
+    label: "readings.crs",
     code:
       "use /std/{Nat, Option, Fmt, print};\n\n" +
       "let sum_all(a: Option(Nat), b: Option(Nat), c: Option(Nat)) -> Option(Nat) =\n" +
@@ -101,10 +107,10 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       '| none() => print("missing a reading\\n")\n' +
       "end",
   },
-  concepts: {
-    label: "point.crs",
+  points: {
+    label: "points.crs",
     code:
-      "use /std/{Nat, Fmt};\n" +
+      "use /std/{Fmt, Nat, Spell};\n" +
       "use /std/ops/{Add};\n\n" +
       "pub struct Point: pub Type {\n" +
       "    x: Nat,\n" +
@@ -113,42 +119,69 @@ export const EXAMPLES: Record<string, CuriosExample> = {
       "satisfy Add(Point) {\n" +
       "    add(a, b) = Point { x = a.x + b.x, y = a.y + b.y },\n" +
       "}\n\n" +
+      "satisfy Spell(Point) {\n" +
+      "    ..\n" +
+      "}\n\n" +
       "let p: Point =\n" +
       "    Point { x = 1, y = 2 } + Point { x = 3, y = 4 };\n\n" +
-      'Fmt/print("p.x + p.y = %\\n")(p.x + p.y)',
+      'Fmt/print("p = #\\n")(p)',
   },
-  erased: {
-    label: "erased.crs",
+  nonempty: {
+    label: "nonempty.crs",
     code:
       "use /std/{Fmt, Nat, Vec};\n\n" +
       "pub let head(@T: Type, @n: Nat, xs: Vec(T, n + 1)) -> T =\n" +
       "    Vec/first(xs);\n\n" +
       'Fmt/print("head = %\\n")(head(Vec/cons(7, Vec/cons(8, Vec/nil()))))',
   },
-  sym: {
-    label: "sym.crs",
+  laws: {
+    label: "laws.crs",
     code:
-      "use /std/{Eq, print};\n\n" +
-      "pub let sym(@A: Type, @x: A, @y: A, p: Eq()(x, y)) -> Eq()(y, x) =\n" +
-      "    match p\n" +
-      "    | refl(@_z) => Eq/refl()\n" +
+      "use /std/{Eq, List, Nat, print};\n\n" +
+      "pub let sum(values: List(Nat)) -> Nat =\n" +
+      "    match values | [] => 0 | [head, ..tail] => head + sum(tail) end;\n\n" +
+      "pub let commutes(a: Nat, b: Nat) -> Eq()(a + b, b + a) =\n" +
+      "    Eq/refl();\n\n" +
+      "pub let lengths(\n" +
+      "    @T: Type,\n" +
+      "    xs: List(T),\n" +
+      "    ys: List(T),\n" +
+      ") -> Eq()(List/len([..xs, ..ys]), List/len(xs) + List/len(ys)) =\n" +
+      "    Eq/refl();\n\n" +
+      "pub let sums(xs: List(Nat), ys: List(Nat)) -> Eq()(sum([..xs, ..ys]), sum(xs) + sum(ys)) =\n" +
+      "    match xs\n" +
+      "    | [] => Eq/refl()\n" +
+      "    | [head, ..tail] => Eq/cong((s: Nat) => head + s, sums(tail, ys))\n" +
       "    end;\n\n" +
-      'print("typechecks: sym\\n")',
+      'print("every proof checked\\n")',
   },
-  goal: {
-    label: "goal.crs",
+  holes: {
+    label: "holes.crs",
     code:
-      "use /std/{print};\n\n" +
-      "pub let compose(@A: Type, @B: Type, @C: Type, f: (B) -> C, g: (A) -> B) -> (A) -> C =\n" +
-      "    ?;\n\n" +
+      "use /std/{Nat, print};\n\n" +
+      "pub induct Vec(T: Type): (Nat) -> pub Type\n" +
+      "| nil(): (0)\n" +
+      "| cons(@m: Nat, x: T, xs: Vec(T)(m)): (m + 1)\n" +
+      "end\n\n" +
+      "pub let append(@T: Type, @n: Nat, @k: Nat, v: Vec(T)(n), w: Vec(T)(k)) -> Vec(T)(n + k) =\n" +
+      "    match v | nil() => ? | cons(@m, x, xs) => Vec/cons(x, ?) end;\n\n" +
       'print("unreachable\\n")',
   },
-  error: {
-    label: "broken.crs",
+  mistakes: {
+    label: "mistakes.crs",
     code:
-      "use /std/{Nat, Vec, print};\n\n" +
+      "use /std/{Bool, Nat, Vec, print};\n" +
+      "use /std/Bool/{False};\n\n" +
       "pub let broken(@n: Nat) -> Vec(Nat, n) =\n" +
       "    Vec/cons(0, Vec/nil());\n\n" +
+      "pub let ratio(n: Nat, d: Nat) -> Nat =\n" +
+      "    n / d;\n\n" +
+      "pub let pick(b: Bool) -> Nat =\n" +
+      "    match b | true => 1 end;\n\n" +
+      "pub let absurd(n: Nat) -> False =\n" +
+      "    absurd(n + 1);\n\n" +
+      "pub let total: Natt =\n" +
+      "    3;\n\n" +
       'print("unreachable\\n")',
   },
 };
