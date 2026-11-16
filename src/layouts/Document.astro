@@ -25,10 +25,21 @@ const FONTS = [
   { family: "Faustina", style: "italic", weight: "300 800", file: "/curios/fonts/faustina-italic.woff2" },
 ];
 
-const faces = FONTS.map(
-  ({ family, style, weight, file }) =>
-    `@font-face { font-family: "${family}"; font-style: ${style}; font-weight: ${weight}; font-display: block; src: url("${file}") format("woff2"); }`,
-).join("\n");
+// `block` holds each face's text back until that face's own file arrives, and the three files land at slightly different times — so left to itself the page reveals in instalments: the heading, then the prose a beat later, then the code. A page that holds everything until all three are in hand appears once, complete. The script below marks the document pending and lifts the mark when every face has loaded, or after three seconds — the browser's own limit for `block`, past which it would be showing fallbacks anyway. The mark is the script's to set, so a browser running no script never hides anything.
+//
+// The mark goes on at once, but the asking waits for the first frame. `document.fonts.load` has the browser work out the page's styles, and asked from the head it can do that before the stylesheets have arrived — whenever a face settles first, as a blocked or missing one does at once. The stylesheets then land on elements already styled with the browser's defaults, and every transition on the page runs from those: the hero's buttons faded in from link blue. A frame is only drawn once the stylesheets are in, so asking from inside one cannot get ahead of them, and the three seconds count from the first frame, much as `block`'s own do.
+const PENDING = "fonts-pending";
+
+const faces = [
+  ...FONTS.map(
+    ({ family, style, weight, file }) =>
+      `@font-face { font-family: "${family}"; font-style: ${style}; font-weight: ${weight}; font-display: block; src: url("${file}") format("woff2"); }`,
+  ),
+  `html.${PENDING} body { visibility: hidden; }`,
+].join("\n");
+
+// The shorthand `document.fonts.load` asks for, one per face. Any weight inside a variable face's range resolves to the same file, so the bottom of each range will do.
+const specs = FONTS.map(({ family, style, weight }) => `${style} ${weight.split(" ")[0]} 1em "${family}"`);
 ---
 
 <!doctype html>
@@ -42,6 +53,15 @@ const faces = FONTS.map(
     {/* A font is always fetched in CORS mode, and a preload only counts if it asks the same way — without `crossorigin` the browser would fetch every file twice. */}
     {FONTS.map(({ file }) => <link rel="preload" href={file} as="font" type="font/woff2" crossorigin />)}
     <style is:inline set:html={faces} />
+    <script is:inline define:vars={{ PENDING, specs }}>
+      const root = document.documentElement;
+      root.classList.add(PENDING);
+      requestAnimationFrame(() => {
+        const loaded = Promise.allSettled(specs.map((spec) => document.fonts.load(spec)));
+        const capped = new Promise((resolve) => setTimeout(resolve, 3000));
+        Promise.race([loaded, capped]).then(() => root.classList.remove(PENDING));
+      });
+    </script>
   </head>
   <body class={bodyClass}>
     <slot />
