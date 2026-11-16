@@ -1,14 +1,15 @@
 ---
-// A block of Curios. The data files hold code as pre-highlighted markup in two classes — `kw` for anything the language reserves, `cm` for a comment — which this sets as given. `size="sm"` is the cheatsheet's step down the scale, which also wraps a long line where a block elsewhere would scroll.
+// A block of Curios, highlighted by the compiler's own grammar at build time (src/lib/highlight.ts). `size="sm"` is the cheatsheet's step down the scale, which also wraps a long line where a block elsewhere would scroll.
+import { highlight } from "../lib/highlight";
 import styles from "./Code.module.css";
 
 interface Props {
-  html: string;
+  code: string;
   size?: "sm";
   class?: string;
 }
 
-const { html, size, class: className } = Astro.props;
+const { code, size, class: className } = Astro.props;
 ---
 
-<pre class:list={[styles.code, size === "sm" && styles.sm, className]} set:html={html} />
+<pre class:list={[styles.code, size === "sm" && styles.sm, className]} set:html={highlight(code)} />

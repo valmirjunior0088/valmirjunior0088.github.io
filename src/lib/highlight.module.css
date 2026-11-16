@@ -1,0 +1,36 @@
+/* One class per kind of token the grammar tells apart, as src/lib/highlight.ts names them — that module imports this one, so the names it writes into the markup are these and no others. The colours are the code palette's tokens in index.css. */
+.keyword {
+  color: var(--code-keyword);
+}
+
+.sort {
+  color: var(--code-sort);
+}
+
+.type {
+  color: var(--code-type);
+}
+
+.function {
+  color: var(--code-function);
+}
+
+.string {
+  color: var(--code-string);
+}
+
+.escape {
+  color: var(--code-escape);
+}
+
+.number {
+  color: var(--code-number);
+}
+
+.comment {
+  color: var(--code-comment);
+}
+
+.punct {
+  color: var(--code-punct);
+}

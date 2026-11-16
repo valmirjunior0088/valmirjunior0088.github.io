@@ -132,6 +132,29 @@ h3 {
   margin: 0;
 }
 
+/* The code palette: Curios highlighted by the compiler's own grammar (src/lib/highlight.ts, with highlight.module.css beside it), one colour per kind of token. Brightness and one hue: keywords keep the site's amber; types stand out by being brighter rather than by being another colour; strings take a sand that sits beside the amber; numbers, escapes and the sorts take the amber's paler step; punctuation steps back and comments read a tier down, as prose sitting in code. `currentColor` is a kind left the colour of the code around it. */
+:root {
+  --code-keyword: var(--accent);
+  --code-sort: var(--accent-hi);
+  --code-type: #f2f7f7;
+  --code-function: currentColor;
+  --code-string: #e2c9a0;
+  --code-escape: var(--accent-hi);
+  --code-number: var(--accent-hi);
+  --code-comment: var(--fg-mute);
+  --code-punct: var(--fg-faint);
+}
+
+/* The terminal. What the compiler and the programs it runs print is drawn as a terminal draws it, on a darker ground of its own — near-black, with a trace of the site's teal — and in the four roles the compiler paints a report in (src/lib/terminal.ts, with terminal.module.css beside it): the one surface on the site that is a terminal rather than a panel, and the one that does not share the site's palette. */
+:root {
+  --term-ground: #0b1316;
+  --term-text: #cfd6d6;
+  --term-bold: #ffffff;
+  --term-dim: rgba(207, 214, 214, 0.5);
+  --term-red: #ef6b6b;
+  --term-yellow: #e5c07b;
+}
+
 /* The mono face runs larger than Geist at the same size, so an inline code span steps down a notch to sit on the
    line the prose around it stands on rather than bulging out of it. Components that set their own code size — the
    install box, the editor, a `.code` block — outrank this and are unaffected. */

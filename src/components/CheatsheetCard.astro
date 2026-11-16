@@ -2,7 +2,6 @@
 import Panel from "./Panel.astro";
 import Label from "./Label.astro";
 import Code from "./Code.astro";
-import { plainText } from "../data/markup";
 import { inlineCode } from "../lib/inline";
 import type { CheatsheetCard } from "../data/cheatsheet";
 import styles from "./CheatsheetCard.module.css";
@@ -13,8 +12,8 @@ interface Props {
 
 const { card } = Astro.props;
 
-// Everything a card says is searchable, not just its title — filtering on the code is how you find `..p` when you cannot remember it is called a spread. Stripped of markup, so a search matches what is on screen, and precomputed so a keystroke costs one substring test.
-const haystack = plainText([card.title, card.tag, card.code.flat().join(" "), card.gloss].join(" ")).toLowerCase();
+// Everything a card says is searchable, not just its title — filtering on the code is how you find `..p` when you cannot remember it is called a spread. Precomputed, so a keystroke costs one substring test.
+const haystack = [card.title, card.tag, card.code.flat().join(" "), card.gloss].join(" ").toLowerCase();
 ---
 
 <Panel class={styles.card} data-card data-search={haystack}>
@@ -27,7 +26,7 @@ const haystack = plainText([card.title, card.tag, card.code.flat().join(" "), ca
     {
       card.code.map((example) => (
         <div class={styles.example}>
-          <Code html={example.join("\n")} size="sm" />
+          <Code code={example.join("\n")} size="sm" />
         </div>
       ))
     }

@@ -7,15 +7,15 @@ export interface CheatsheetCard {
 }
 
 // One flat, searchable list, ordered least to most complex. It used to be two hand-balanced columns of titled sections; the rail lays cards out in a grid now, so balancing is the layout's job and grouping is the search box's, which leaves ordering as the only thing this file still has to get right.
-// Code lines are pre-highlighted markup with two classes: .kw for anything the language reserves, and .cm for a comment, which is prose in a code block and reads a tier down from the code it sits beside. The old four-class scheme collapsed into those on purpose — a block that speaks in one accent reads as one texture rather than a rainbow.
+// Code lines are plain Curios, written the way `curios format` writes it at the card's width; the build highlights them with the compiler's own grammar (src/lib/highlight.ts).
 // Glosses mark inline code with backticks; see src/lib/inline.ts.
 export const CHEATSHEET: CheatsheetCard[] = [
   {
     title: "Line comments",
     tag: "COMMENTS",
     code: [
-      ['<span class="cm">-- A complete line comment.</span>'],
-      ['<span class="kw">let</span> n = 1; <span class="cm">-- A trailing comment.</span>'],
+      ["-- A complete line comment."],
+      ["let n = 1; -- A trailing comment."],
     ],
     gloss:
       "`--` and a space open a comment that runs to the end of the line; `--` glued to what follows it is refused rather than read as one, except as the `---` that opens a documentation comment. There are no block comments",
@@ -25,10 +25,10 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "COMMENTS",
     code: [
       [
-        '<span class="cm">--- Twice the input.</span>',
-        '<span class="cm">---</span>',
-        '<span class="cm">--- Never overflows, since `Nat` is unbounded.</span>',
-        '<span class="kw">pub let</span> double(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Nat</span> =',
+        "--- Twice the input.",
+        "---",
+        "--- Never overflows, since `Nat` is unbounded.",
+        "pub let double(n: Nat) -> Nat =",
         "    n + n;",
       ],
     ],
@@ -46,8 +46,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "Bring modules into scope",
     tag: "MODULES",
     code: [
-      ['<span class="kw">use</span> /std/{<span class="kw">Nat</span>, <span class="kw">Bool</span>};'],
-      ['<span class="kw">pub use</span> Option/*;'],
+      ["use /std/{Nat, Bool};"],
+      ["pub use Option/*;"],
     ],
     gloss:
       "There is no bare `use path;` form, so an import always comes through a group. Prefixing it with `pub` re-exports what it imports, and a glob takes the exported surface only, never a subtree-private name",
@@ -55,7 +55,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
   {
     title: "Load a submodule from disk",
     tag: "MODULES",
-    code: [['<span class="kw">pub mod</span> <span class="kw">Nat</span>;']],
+    code: [["pub mod Nat;"]],
     gloss:
       "Loads from the header's stem directory — `mod Nat;` in `main.crs` reads `main/Nat.crs`",
   },
@@ -64,10 +64,10 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "MODULES",
     code: [
       [
-        '<span class="kw">pub mod</span> <span class="kw">Internal</span>',
-        '    <span class="kw">pub let</span> value: <span class="kw">Nat</span> =',
+        "pub mod Internal",
+        "    pub let value: Nat =",
         "        1;",
-        '<span class="kw">end</span>',
+        "end",
       ],
     ],
     gloss:
@@ -97,9 +97,9 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "Characters, strings, and numbers",
     tag: "LITERALS",
     code: [
-      ['<span class="kw">\'λ\'</span>'],
-      ['<span class="kw">\'\\u{301}\'</span>'],
-      ['<span class="kw">"hello\\n"</span>'],
+      ["'λ'"],
+      ["'\\u{301}'"],
+      ['"hello\\n"'],
       ["0xFF"],
       ["1.0e9"],
     ],
@@ -111,12 +111,12 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "LITERALS",
     code: [
       [
-        '<span class="kw">let</span> page: <span class="kw">Str</span> =',
-        '    <span class="kw">"""</span>',
-        '    <span class="kw">&lt;ul&gt;</span>',
-        '        <span class="kw">&lt;li&gt;one&lt;/li&gt;</span>',
-        '    <span class="kw">&lt;/ul&gt;</span>',
-        '    <span class="kw">"""</span>;',
+        "let page: Str =",
+        '    """',
+        "    <ul>",
+        "        <li>one</li>",
+        "    </ul>",
+        '    """;',
       ],
     ],
     gloss:
@@ -125,7 +125,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
   {
     title: "Infix operators dispatch through concepts",
     tag: "OPERATORS",
-    code: [["a + b"], ["a == b"], ["a &amp;&amp; b"]],
+    code: [["a + b"], ["a == b"], ["a && b"]],
     gloss:
       "Whitespace required on both sides, left-associative — each dispatches through a concept the standard library declares (`/std/ops/Add`, `/std/ops/Eql`, `/std/ops/And`); a path is the opposite and takes none, so `a / b` divides and `a/b` names",
   },
@@ -134,10 +134,10 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "OPERATORS",
     code: [
       [
-        '<span class="kw">match</span> 0 &lt; d',
-        "| true =&gt; n / d",
-        "| false =&gt; 0",
-        '<span class="kw">end</span>',
+        "match 0 < d",
+        "| true => n / d",
+        "| false => 0",
+        "end",
       ],
     ],
     gloss:
@@ -147,8 +147,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "Whole-term forms need parentheses",
     tag: "OPERATORS",
     code: [
-      ['1 + (<span class="kw">let</span> n = 2; n * n)'],
-      ['1 + <span class="kw">match</span> flag | true =&gt; 1 | false =&gt; 0 <span class="kw">end</span>'],
+      ["1 + (let n = 2; n * n)"],
+      ["1 + match flag | true => 1 | false => 0 end"],
     ],
     gloss:
       "`let`, lambdas and function types run to the end of the term, so an operator never takes one bare. `match` is an atom, since `end` closes it, and a position that takes a whole term — an argument, an element, an arm body — needs no parentheses",
@@ -158,10 +158,10 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "DECLARATIONS",
     code: [
       [
-        '<span class="kw">pub let</span> zero: <span class="kw">Nat</span> =',
+        "pub let zero: Nat =",
         "    0;",
         "",
-        '<span class="kw">pub let</span> bump(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Nat</span> =',
+        "pub let bump(n: Nat) -> Nat =",
         "    n + 1;",
       ],
     ],
@@ -173,8 +173,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "DECLARATIONS",
     code: [
       [
-        '<span class="kw">pub let</span> greeting: <span class="kw">Str</span> =',
-        '    <span class="kw">"hi\\n"</span>;',
+        "pub let greeting: Str =",
+        '    "hi\\n";',
         "",
         "print(greeting)",
       ],
@@ -186,8 +186,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "What pub makes visible",
     tag: "DECLARATIONS",
     code: [
-      ['<span class="kw">let</span> helper: <span class="kw">Nat</span> =', "    1;"],
-      ['<span class="kw">pub let</span> value: <span class="kw">Nat</span> =', "    2;"],
+      ["let helper: Nat =", "    1;"],
+      ["pub let value: Nat =", "    2;"],
     ],
     gloss:
       "Without `pub` a declaration is visible within its module's subtree \u2014 to descendants, never to ancestors or siblings. `pub` adds whatever visibility the module itself has, so inside a private module it means that module's audience",
@@ -197,8 +197,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "DECLARATIONS",
     code: [
       [
-        '<span class="kw">pub struct</span> <span class="kw">Meters</span>: <span class="kw">pub Type</span> {',
-        '    <span class="kw">Nat</span>,',
+        "pub struct Meters: pub Type {",
+        "    Nat,",
         "}",
       ],
     ],
@@ -210,8 +210,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "BINDINGS",
     code: [
       [
-        '<span class="kw">let</span> x = compute();',
-        '<span class="kw">let</span> y: <span class="kw">Nat</span> = 0;',
+        "let x = compute();",
+        "let y: Nat = 0;",
         "x + y",
       ],
     ],
@@ -223,10 +223,10 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "BINDINGS",
     code: [
       [
-        '<span class="kw">let</span> walk(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Nat</span> =',
+        "let walk(n: Nat) -> Nat =",
         "    walk(n);",
       ],
-      ['<span class="kw">let</span> n = n + 1;  <span class="cm">-- refused</span>'],
+      ["let n = n + 1;  -- refused"],
     ],
     gloss:
       "So a local function recurses with nothing said, and `let n = n + 1;` names the binding it is declaring rather than an outer `n`. A binding that mentions itself states its type",
@@ -236,10 +236,10 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "BINDINGS",
     code: [
       [
-        '<span class="kw">let</span> increment(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Nat</span> =',
+        "let increment(n: Nat) -> Nat =",
         "    n + 1;",
       ],
-      ['(x: <span class="kw">Nat</span>) =&gt; x + 1'],
+      ["(x: Nat) => x + 1"],
     ],
     gloss:
       "The sugar is a lambda with a telescope in front of it. A `let` telescope is a signature: a plain or `@` parameter is always `name: type`, and a `use` one is its concept application; a bare lambda annotates only where context supplies nothing",
@@ -248,9 +248,9 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "Irrefutable patterns in binders",
     tag: "BINDINGS",
     code: [
-      ['<span class="kw">let</span> (a, b) = pair;'],
-      ['<span class="kw">let</span> Point { x = px, y = py } = point;'],
-      ["(Point { x, y }) =&gt; x + y"],
+      ["let (a, b) = pair;"],
+      ["let Point { x = px, y = py } = point;"],
+      ["(Point { x, y }) => x + y"],
     ],
     gloss:
       "Destructuring, not a match: a tuple or struct pattern stands wherever a binder does — a local `let`, and a lambda parameter just the same. Anything refutable needs a `match`",
@@ -259,8 +259,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "Names kept unused on purpose",
     tag: "BINDINGS",
     code: [
-      ['<span class="kw">let</span> _ = print(<span class="kw">"hi\\n"</span>)!;'],
-      ['<span class="kw">let</span> _width: <span class="kw">Nat</span> =', "    80;"],
+      ['let _ = print("hi\\n")!;'],
+      ["let _width: Nat =", "    80;"],
     ],
     gloss:
       "`_` alone names nothing; a `_`-prefixed name is one `curios lint` never reports as unused, nor anything inside a `_`-prefixed module. Every other binder, import and private declaration nothing reaches is a lint, and the exit code says so",
@@ -268,7 +268,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
   {
     title: "Written goals",
     tag: "GOALS",
-    code: [['<span class="kw">let</span> todo: <span class="kw">Nat</span> =', "    ?;"]],
+    code: [["let todo: Nat =", "    ?;"]],
     gloss:
       "A written goal — the report gives scope, expected type, and verified candidate fits, then the build exits 2. A goal is never accepted in a successfully compiled program",
   },
@@ -291,9 +291,9 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "STRUCTS",
     code: [
       [
-        '<span class="kw">pub struct</span> <span class="kw">Point</span>: <span class="kw">pub Type</span> {',
-        '    x: <span class="kw">Nat</span>,',
-        '    y: <span class="kw">Nat</span>,',
+        "pub struct Point: pub Type {",
+        "    x: Nat,",
+        "    y: Nat,",
         "}",
       ],
     ],
@@ -303,14 +303,14 @@ export const CHEATSHEET: CheatsheetCard[] = [
   {
     title: "Construct with labels",
     tag: "STRUCTS",
-    code: [['<span class="kw">let</span> p: <span class="kw">Point</span> =', "    Point { x = 1, y = 2 };"]],
+    code: [["let p: Point =", "    Point { x = 1, y = 2 };"]],
     gloss:
       "Every field named, and checked in declaration order. A parameterized head may supply its type arguments before the block, as `Pair(Nat, Bool) { … }`, and `label(params) = value` sugar assigns a lambda",
   },
   {
     title: "Copy the rest, then override",
     tag: "STRUCTS",
-    code: [['<span class="kw">let</span> q: <span class="kw">Point</span> =', "    Point { ..p, y = 9 };"]],
+    code: [["let q: Point =", "    Point { ..p, y = 9 };"]],
     gloss:
       "`..p` copies a value of the same structure. It must come first and may occur once, and the labeled overrides after it follow declaration order. Tuples and strings have no update form",
   },
@@ -319,11 +319,11 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "MATCH",
     code: [
       [
-        '<span class="kw">match</span> (left, right)',
-        "| (some(x), some(y)) =&gt; x + y",
-        "| (some(x), none()) =&gt; x",
-        "| (none(), _) =&gt; 0",
-        '<span class="kw">end</span>',
+        "match (left, right)",
+        "| (some(x), some(y)) => x + y",
+        "| (some(x), none()) => x",
+        "| (none(), _) => 0",
+        "end",
       ],
     ],
     gloss:
@@ -334,10 +334,10 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "MATCH",
     code: [
       [
-        '<span class="kw">match</span> option',
-        "| some(v) =&gt; consume(v)",
-        "| _ =&gt; fallback",
-        '<span class="kw">end</span>',
+        "match option",
+        "| some(v) => consume(v)",
+        "| _ => fallback",
+        "end",
       ],
     ],
     gloss:
@@ -348,11 +348,11 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "MATCH",
     code: [
       [
-        '<span class="kw">match</span> tag',
-        "| 0 =&gt; first",
-        "| 1 =&gt; second",
-        "| _ =&gt; otherwise",
-        '<span class="kw">end</span>',
+        "match tag",
+        "| 0 => first",
+        "| 1 => second",
+        "| _ => otherwise",
+        "end",
       ],
     ],
     gloss:
@@ -363,10 +363,10 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "MATCH",
     code: [
       [
-        '<span class="kw">match</span> Char/to_nat(c)',
-        "| <span class=\"kw\">' '</span> | <span class=\"kw\">'\\t'</span> | <span class=\"kw\">'\\n'</span> | <span class=\"kw\">'\\r'</span> =&gt; true",
-        "| _ =&gt; false",
-        '<span class="kw">end</span>',
+        "match Char/to_nat(c)",
+        "| ' ' | '\\t' | '\\n' | '\\r' => true",
+        "| _ => false",
+        "end",
       ],
     ],
     gloss:
@@ -377,11 +377,11 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "GUARDS",
     code: [
       [
-        '<span class="kw">match</span>',
-        "| prefer_fresh, fresh &gt; 0 =&gt; fresh",
-        "| some(n) = cached =&gt; n",
-        "| _ =&gt; 0",
-        '<span class="kw">end</span>',
+        "match",
+        "| prefer_fresh, fresh > 0 => fresh",
+        "| some(n) = cached => n",
+        "| _ => 0",
+        "end",
       ],
     ],
     gloss:
@@ -392,10 +392,10 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "GUARDS",
     code: [
       [
-        '<span class="kw">match</span> cached',
-        "| some(n), n &gt; 0 =&gt; n",
-        "| _ =&gt; 1",
-        '<span class="kw">end</span>',
+        "match cached",
+        "| some(n), n > 0 => n",
+        "| _ => 1",
+        "end",
       ],
     ],
     gloss:
@@ -405,8 +405,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "Dependent function and tuple types",
     tag: "TYPES",
     code: [
-      ['(x: <span class="kw">Nat</span>, y: <span class="kw">Nat</span>) -&gt; <span class="kw">Nat</span>'],
-      ['{value: A, proof: <span class="kw">Valid</span>(value)}'],
+      ["(x: Nat, y: Nat) -> Nat"],
+      ["{value: A, proof: Valid(value)}"],
     ],
     gloss:
       "\u03a0 and \u03a3. Later parts see the names bound before them, so a result type may mention its arguments and a tuple's second component is the receipt for its first",
@@ -414,7 +414,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
   {
     title: "Implicit parameters",
     tag: "TELESCOPES",
-    code: [['(@A: <span class="kw">Type</span>, x: A) -&gt; A'], ['f(@<span class="kw">Nat</span>, x)']],
+    code: [["(@A: Type, x: A) -> A"], ["f(@Nat, x)"]],
     gloss:
       "`@` marks a slot the elaborator infers and erases before runtime. The same `@` supplies one at a call, which is how you pin down what inference cannot reach",
   },
@@ -423,7 +423,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "TELESCOPES",
     code: [
       [
-        '<span class="kw">let</span> join(@A: <span class="kw">Type</span>, <span class="kw">use</span> <span class="kw">Show</span>(A), v: A) -&gt; <span class="kw">Str</span> =',
+        "let join(@A: Type, use Show(A), v: A) -> Str =",
         "    Show/show(v);",
       ],
     ],
@@ -435,10 +435,10 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "INDUCT",
     code: [
       [
-        '<span class="kw">pub induct</span> <span class="kw">Vec</span>(T: <span class="kw">Type</span>): (<span class="kw">Nat</span>) -&gt; <span class="kw">pub Type</span>',
+        "pub induct Vec(T: Type): (Nat) -> pub Type",
         "| nil(): (0)",
-        '| cons(@m: <span class="kw">Nat</span>, x: T, xs: <span class="kw">Vec</span>(T)(m)): (m + 1)',
-        '<span class="kw">end</span>',
+        "| cons(@m: Nat, x: T, xs: Vec(T)(m)): (m + 1)",
+        "end",
       ],
     ],
     gloss:
@@ -449,11 +449,11 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "RECURSION",
     code: [
       [
-        '<span class="kw">let</span> factorial(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Nat</span> =',
-        '    <span class="kw">match</span> n',
-        "    | 0 =&gt; 1",
-        "    | pred + 1 =&gt; n * factorial(pred)",
-        '    <span class="kw">end</span>;',
+        "let factorial(n: Nat) -> Nat =",
+        "    match n",
+        "    | 0 => 1",
+        "    | pred + 1 => n * factorial(pred)",
+        "    end;",
       ],
     ],
     gloss:
@@ -464,12 +464,12 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "RECURSION",
     code: [
       [
-        '<span class="kw">let</span> last(values: <span class="kw">List</span>(<span class="kw">Nat</span>)) -&gt; <span class="kw">Option</span>(<span class="kw">Nat</span>) =',
-        '    <span class="kw">match</span> values',
-        "    | [] =&gt; Option/none()",
-        "    | [only] =&gt; Option/some(only)",
-        "    | [_, ..rest] =&gt; last(rest)",
-        '    <span class="kw">end</span>;',
+        "let last(values: List(Nat)) -> Option(Nat) =",
+        "    match values",
+        "    | [] => Option/none()",
+        "    | [only] => Option/some(only)",
+        "    | [_, ..rest] => last(rest)",
+        "    end;",
       ],
     ],
     gloss:
@@ -480,12 +480,12 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "RECURSION",
     code: [
       [
-        '<span class="kw">let</span> lines(bytes: <span class="kw">Bytes</span>) -&gt; <span class="kw">Nat</span> =',
-        '    <span class="kw">match</span> bytes',
-        "    | x[] =&gt; 0",
-        "    | x['\\n', ..tail] =&gt; 1 + lines(tail)",
-        "    | x[_, ..tail] =&gt; lines(tail)",
-        '    <span class="kw">end</span>;',
+        "let lines(bytes: Bytes) -> Nat =",
+        "    match bytes",
+        "    | x[] => 0",
+        "    | x['\\n', ..tail] => 1 + lines(tail)",
+        "    | x[_, ..tail] => lines(tail)",
+        "    end;",
       ],
     ],
     gloss:
@@ -496,10 +496,10 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "RECURSION",
     code: [
       [
-        '<span class="kw">let</span> even(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Bool</span> =',
-        '    <span class="kw">match</span> n | 0 =&gt; true | p + 1 =&gt; odd(p) <span class="kw">end</span>',
-        '<span class="kw">and</span> odd(n: <span class="kw">Nat</span>) -&gt; <span class="kw">Bool</span> =',
-        '    <span class="kw">match</span> n | 0 =&gt; false | p + 1 =&gt; even(p) <span class="kw">end</span>;',
+        "let even(n: Nat) -> Bool =",
+        "    match n | 0 => true | p + 1 => odd(p) end",
+        "and odd(n: Nat) -> Bool =",
+        "    match n | 0 => false | p + 1 => even(p) end;",
         "",
         "even(input)",
       ],
@@ -522,10 +522,10 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "PACKED",
     code: [
       [
-        '<span class="kw">match</span> Nat/eql(Bytes/len(a), Bytes/len(b))',
-        "| true =&gt; Bytes/and(a, b)",
-        "| false =&gt; x[]",
-        '<span class="kw">end</span>',
+        "match Nat/eql(Bytes/len(a), Bytes/len(b))",
+        "| true => Bytes/and(a, b)",
+        "| false => x[]",
+        "end",
       ],
     ],
     gloss:
@@ -543,8 +543,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "POLYMORPHISM",
     code: [
       [
-        '<span class="kw">pub concept</span> <span class="kw">Show</span>(A: <span class="kw">Type</span>): <span class="kw">pub Type</span> {',
-        '    show(A) -&gt; <span class="kw">Str</span>,',
+        "pub concept Show(A: Type): pub Type {",
+        "    show(A) -> Str,",
         "}",
       ],
     ],
@@ -556,7 +556,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "POLYMORPHISM",
     code: [
       [
-        '<span class="kw">satisfy</span> <span class="kw">Show</span>(<span class="kw">Nat</span>) {',
+        "satisfy Show(Nat) {",
         "    show(n) = Nat/to_str(n),",
         "}",
       ],
@@ -569,9 +569,9 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "POLYMORPHISM",
     code: [
       [
-        '<span class="kw">pub concept</span> <span class="kw">Ord</span>(A: <span class="kw">Type</span>): <span class="kw">pub Type</span> {',
-        '    <span class="kw">use</span> <span class="kw">Eql</span>(A),',
-        '    ord(A, A) -&gt; <span class="kw">Ordering</span>,',
+        "pub concept Ord(A: Type): pub Type {",
+        "    use Eql(A),",
+        "    ord(A, A) -> Ordering,",
         "}",
       ],
     ],
@@ -583,9 +583,9 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "POLYMORPHISM",
     code: [
       [
-        '<span class="kw">satisfy</span> (@A: <span class="kw">Type</span>, <span class="kw">use</span> <span class="kw">Show</span>(A)) =&gt; <span class="kw">Show</span>(<span class="kw">List</span>(A)) {',
+        "satisfy (@A: Type, use Show(A)) => Show(List(A)) {",
         "    show(values) =",
-        '        List/fold(values, <span class="kw">""</span>, (v, r) =&gt;',
+        '        List/fold(values, "", (v, r) =>',
         "            Str/concat(r, Show/show(v))),",
         "}",
       ],
@@ -598,10 +598,10 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "POLYMORPHISM",
     code: [
       [
-        '<span class="kw">satisfy</span> <span class="kw">Spell</span>(<span class="kw">Point</span>) {',
+        "satisfy Spell(Point) {",
         "    ..",
         "}",
-        '<span class="cm">-- spells as Point { x = 1, y = 2 }</span>',
+        "-- spells as Point { x = 1, y = 2 }",
       ],
     ],
     gloss:
@@ -611,9 +611,9 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "A .. body derives Eql",
     tag: "POLYMORPHISM",
     code: [
-      ['<span class="kw">satisfy</span> <span class="kw">Eql</span>(<span class="kw">Point</span>) {', "    ..", "}"],
+      ["satisfy Eql(Point) {", "    ..", "}"],
       [
-        '<span class="kw">satisfy</span> (@A: <span class="kw">Type</span>, <span class="kw">use</span> <span class="kw">Eql</span>(A)) =&gt; <span class="kw">Eql</span>(<span class="kw">Tree</span>(A)) {',
+        "satisfy (@A: Type, use Eql(A)) => Eql(Tree(A)) {",
         "    ..",
         "}",
       ],
@@ -626,10 +626,10 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "POLYMORPHISM",
     code: [
       [
-        '<span class="kw">let</span> reverse: <span class="kw">Ord</span>(<span class="kw">Nat</span>) =',
+        "let reverse: Ord(Nat) =",
         "    Ord { ord(a, b) = compare_reverse(a, b) };",
         "",
-        'sort(@_, <span class="kw">use</span> reverse, values)',
+        "sort(@_, use reverse, values)",
       ],
     ],
     gloss:
@@ -640,9 +640,9 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "POLYMORPHISM",
     code: [
       [
-        '<span class="kw">pub concept</span> <span class="kw">Divide</span>(A: <span class="kw">Type</span>): <span class="kw">pub Type</span> {',
-        '    <span class="kw">Ok</span>(A) -&gt; <span class="kw">Prop</span>,',
-        '    div(a: A, b: A, @ok: <span class="kw">Ok</span>(b)) -&gt; A,',
+        "pub concept Divide(A: Type): pub Type {",
+        "    Ok(A) -> Prop,",
+        "    div(a: A, b: A, @ok: Ok(b)) -> A,",
         "}",
       ],
     ],
@@ -653,8 +653,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "A % place shows its argument",
     tag: "FORMAT",
     code: [
-      ['Fmt/print(<span class="kw">"midpoint = (%, %)\\n"</span>)(mx)(my)'],
-      ['Fmt/render(<span class="kw">"x = %"</span>)(point.x)'],
+      ['Fmt/print("midpoint = (%, %)\\n")(mx)(my)'],
+      ['Fmt/render("x = %")(point.x)'],
     ],
     gloss:
       "The literal's places fix the call's type: one argument per `%`, each resolving the `Show` witness for its own type, and a missing or surplus one is refused where the call is written. `\\%` is a literal percent. `Fmt/render` answers a `Str`, `Fmt/print` an `Io({})`",
@@ -664,8 +664,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "FORMAT",
     code: [
       [
-        'Fmt/render(<span class="kw">"# and #"</span>)(Option/some(3))(<span class="kw">"x"</span>)',
-        '<span class="cm">-- Option/some(3) and "x"</span>',
+        'Fmt/render("# and #")(Option/some(3))("x")',
+        '-- Option/some(3) and "x"',
       ],
     ],
     gloss:
@@ -676,9 +676,9 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "EFFECTS",
     code: [
       [
-        '<span class="kw">let</span> sum(a: <span class="kw">Option</span>(<span class="kw">Nat</span>), b: <span class="kw">Option</span>(<span class="kw">Nat</span>)) -&gt; <span class="kw">Option</span>(<span class="kw">Nat</span>) =',
-        '    <span class="kw">let</span> x = a!;',
-        '    <span class="kw">let</span> y = b!;',
+        "let sum(a: Option(Nat), b: Option(Nat)) -> Option(Nat) =",
+        "    let x = a!;",
+        "    let y = b!;",
         "    Option/some(x + y);",
       ],
     ],
@@ -690,8 +690,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "EFFECTS",
     code: [
       [
-        '<span class="kw">let</span> greeting: <span class="kw">Io</span>({}) =',
-        '    print(<span class="kw">"hi"</span>);',
+        "let greeting: Io({}) =",
+        '    print("hi");',
       ],
     ],
     gloss:
@@ -702,8 +702,8 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "EFFECTS",
     code: [
       [
-        '<span class="kw">let</span> greeted: <span class="kw">Try</span>(<span class="kw">Io</span>, Io/Error, {}) =',
-        '    <span class="kw">let</span> _ = print(<span class="kw">"hi\\n"</span>)!;',
+        "let greeted: Try(Io, Io/Error, {}) =",
+        '    let _ = print("hi\\n")!;',
         "    Try/pure(());",
       ],
     ],
@@ -715,9 +715,9 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "EFFECTS",
     code: [
       [
-        '<span class="kw">let</span> copied: <span class="kw">Try</span>(<span class="kw">Io</span>, Io/Error, <span class="kw">Bytes</span>) =',
-        '    <span class="kw">let</span> text = File/read_all(path)!;',
-        '    <span class="kw">let</span> _ = File/write_all(copy, text)!;',
+        "let copied: Try(Io, Io/Error, Bytes) =",
+        "    let text = File/read_all(path)!;",
+        "    let _ = File/write_all(copy, text)!;",
         "    Try/pure(text);",
       ],
     ],
@@ -729,7 +729,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "EFFECTS",
     code: [
       [
-        '<span class="kw">satisfy</span> (@S: <span class="kw">Type</span>) =&gt; <span class="kw">Monad</span>((A: <span class="kw">Type</span>) =&gt; <span class="kw">State</span>(S, A)) {',
+        "satisfy (@S: Type) => Monad((A: Type) => State(S, A)) {",
         "    pure(@A, a) = State/pure(a),",
         "    bind(@A, @B, m, f) = State/bind(m, f),",
         "}",
@@ -743,10 +743,10 @@ export const CHEATSHEET: CheatsheetCard[] = [
     tag: "PROOFS",
     code: [
       [
-        '<span class="kw">let</span> sym(@x: <span class="kw">Nat</span>, @y: <span class="kw">Nat</span>, p: <span class="kw">Eq</span>()(x, y)) -&gt; <span class="kw">Eq</span>()(y, x) =',
-        '    <span class="kw">match</span> p',
-        "    | refl(@_) =&gt; Eq/refl()",
-        '    <span class="kw">end</span>;',
+        "let sym(@x: Nat, @y: Nat, p: Eq()(x, y)) -> Eq()(y, x) =",
+        "    match p",
+        "    | refl(@_) => Eq/refl()",
+        "    end;",
       ],
     ],
     gloss:
@@ -755,7 +755,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
   {
     title: "Declare a test",
     tag: "TESTS",
-    code: [['<span class="kw">test</span> the_answer_holds =', "    Test/assert(21 * 2 == 42);"]],
+    code: [["test the_answer_holds =", "    Test/assert(21 * 2 == 42);"]],
     gloss:
       "A `test` item is a description of type `/std/Test`, built from its combinators. It takes no parameters — a claim about every instantiation is a proposition, so it is a `let` — and is never `pub`, since its name is its report line rather than an export",
   },
@@ -763,12 +763,12 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "Foreign declarations",
     tag: "FOREIGN",
     code: [
-      ['<span class="kw">foreign</span> random() -&gt; <span class="kw">Nat</span>;'],
-      ['<span class="kw">pub foreign</span> log(<span class="kw">Bytes</span>) -&gt; <span class="kw">Nat</span>;'],
+      ["foreign random() -> Nat;"],
+      ["pub foreign log(Bytes) -> Nat;"],
       [
-        '<span class="kw">foreign</span> read(<span class="kw">Handle</span>, <span class="kw">Nat</span>) -&gt; {',
-        '    status: <span class="kw">Nat</span>,',
-        '    bytes: <span class="kw">Bytes</span>};',
+        "foreign read(Handle, Nat) -> {",
+        "    status: Nat,",
+        "    bytes: Bytes};",
       ],
     ],
     gloss:

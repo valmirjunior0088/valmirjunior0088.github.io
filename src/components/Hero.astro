@@ -6,8 +6,12 @@ import Button from "./Button.astro";
 import Code from "./Code.astro";
 import InstallBox from "./InstallBox.astro";
 import Wordmark from "./Wordmark.astro";
+import Terminal from "./Terminal.astro";
 import { HERO } from "../data/home";
 import { PAGES, BUILD_URL } from "../data/site";
+import { ansiToHtml } from "../lib/terminal";
+// What `curios run --color always vector.crs` printed for the snippet above it, captured from the pinned compiler — `npm run check` holds it to what the compiler prints now, and `node scripts/check.mjs --update` captures it again.
+import diagnostic from "../data/hero-diagnostic.ansi?raw";
 import styles from "./Hero.module.css";
 ---
 
@@ -29,16 +33,14 @@ import styles from "./Hero.module.css";
 
     <div class:list={[styles.col, styles.panels]}>
       <Panel>
-        <Code html={HERO.declaration.join("\n")} class={styles.file} />
+        <Code code={HERO.declaration.join("\n")} class={styles.file} />
       </Panel>
 
       <Panel>
-        <Code html={HERO.usage.join("\n")} class={styles.file} />
+        <Code code={HERO.usage.join("\n")} class={styles.file} />
       </Panel>
 
-      <Panel tone="accent">
-        <Code html={HERO.diagnostic.join("\n")} class={styles.diagnostic} />
-      </Panel>
+      <Terminal command="curios run vector.crs" output={ansiToHtml(diagnostic)} />
     </div>
   </div>
 </Section>

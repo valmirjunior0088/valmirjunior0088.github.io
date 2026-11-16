@@ -1,0 +1,16 @@
+---
+// A terminal window, for something the compiler printed — the command that was run, after a dim prompt, and what came back, already in the terminal's roles (src/lib/terminal.ts).
+import { terminal, escape } from "../lib/terminal";
+import styles from "./Terminal.module.css";
+
+interface Props {
+  command: string;
+  output: string;
+}
+
+const { command, output } = Astro.props;
+
+const html = `<span class="${terminal.dim}">$</span> ${escape(command)}\n${output}`;
+---
+
+<pre class:list={[terminal.terminal, styles.window]} set:html={html} />

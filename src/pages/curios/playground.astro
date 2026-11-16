@@ -94,6 +94,7 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
   const trail = element<HTMLElement>("[data-trail]");
   const stepLine = element<HTMLElement>("[data-step]");
   const output = element<HTMLElement>("[data-output]");
+  const paint = element<HTMLElement>("[data-paint]");
   const chips = [...document.querySelectorAll<HTMLButtonElement>("[data-example]")];
 
   let running = false;
@@ -105,6 +106,21 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     const lines = source.value.split("\n").length;
     gutter.textContent = Array.from({ length: lines }, (_, index) => index + 1).join("\n");
   }
+
+  // The editor's paint. Until the highlighter has loaded — it comes after the page, so it never holds it up — the paint shows the code plain, which keeps the transparent textarea readable from the first frame. The trailing newline gives a last empty line of the textarea a line in the paint to match.
+  let paintCode: ((code: string) => string) | null = null;
+
+  function renderPaint() {
+    if (paintCode) paint.innerHTML = `${paintCode(source.value)}\n`;
+    else paint.textContent = `${source.value}\n`;
+  }
+
+  import("../../lib/highlight")
+    .then(({ highlight }) => {
+      paintCode = highlight;
+      renderPaint();
+    })
+    .catch(() => {});
 
   // Which the pane is showing — the placeholder, or something the run produced that went wrong — is said by attributes, which the pane's style reads.
   function setOutput(text: string, tone?: "error") {
@@ -177,6 +193,7 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
   function pick(name: string) {
     source.value = sourceOf(name);
     renderGutter();
+    renderPaint();
     chips.forEach((chip) => light(chip, chip.dataset.example === name));
     clearOutput();
   }
@@ -184,11 +201,14 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
   // Editing detaches the buffer from whichever example it started as, so no chip stays lit: what is in the editor is no longer that file.
   source.addEventListener("input", () => {
     renderGutter();
+    renderPaint();
     chips.forEach((chip) => light(chip, false));
   });
 
   source.addEventListener("scroll", () => {
     gutter.scrollTop = source.scrollTop;
+    paint.scrollTop = source.scrollTop;
+    paint.scrollLeft = source.scrollLeft;
   });
 
   chips.forEach((chip) => chip.addEventListener("click", () => pick(chip.dataset.example ?? "")));

@@ -1,0 +1,23 @@
+/* The terminal surface and the four roles the compiler paints a report in, as src/lib/terminal.ts names them — that module imports this one, and everything that draws a terminal takes its classes from there. The colours are the terminal's tokens in index.css. */
+.terminal {
+  background: var(--term-ground);
+  color: var(--term-text);
+  font-family: var(--mono);
+}
+
+.bold {
+  color: var(--term-bold);
+  font-weight: 700;
+}
+
+.dim {
+  color: var(--term-dim);
+}
+
+.red {
+  color: var(--term-red);
+}
+
+.yellow {
+  color: var(--term-yellow);
+}

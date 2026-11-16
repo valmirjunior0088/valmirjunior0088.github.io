@@ -5,12 +5,6 @@
   overflow: hidden;
 }
 
-/* The one variant: a panel that is itself the bad news, used for the compiler diagnostic in the hero. */
-.accent {
-  border-color: var(--accent-line);
-  background: var(--accent-wash);
-}
-
 .head {
   display: flex;
   align-items: center;

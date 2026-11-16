@@ -69,13 +69,6 @@
 }
 
 /* Two blocks, because they are two files: the standard library's declaration and the program that imports it. Each can grow its own scrollbar on a phone, which is the cost — and worth paying here, where the seam between them is the point being made. Neither carries a head strip; the comment that opens each one says what it is, and a label above it would say it twice. */
-/* Qualified by the column because it restyles Code's size, and the two weigh the same otherwise. */
-.panels .diagnostic {
-  padding: 20px 24px;
-  font-size: var(--ms-code-sm);
-  line-height: 1.8;
-}
-
 .file {
   padding: 20px 24px;
 }

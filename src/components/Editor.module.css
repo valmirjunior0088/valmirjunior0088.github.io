@@ -21,31 +21,60 @@
   white-space: pre;
 }
 
-.input {
+.field {
+  position: relative;
   flex: 1;
   min-width: 0;
+}
+
+/* The textarea and its paint share every metric that decides where a character lands, or the colour drifts off the text it belongs to. */
+.input,
+.paint {
+  position: absolute;
+  inset: 0;
+  margin: 0;
   padding: 16px 20px;
+  font-family: var(--mono);
+  font-size: var(--ms-code);
+  line-height: 1.75;
+  white-space: pre;
+}
+
+.input {
+  width: 100%;
+  height: 100%;
   border: none;
   resize: none;
   outline: none;
   background: transparent;
-  color: var(--fg);
-  font-family: var(--mono);
-  font-size: var(--ms-code);
-  line-height: 1.75;
+  color: transparent;
   caret-color: var(--accent);
-  white-space: pre;
   overflow: auto;
+}
+
+/* The paint only ever follows the textarea's scroll, so it gets the same spare room at its far edges that the gutter gets at the bottom: a scrollbar gives the textarea that much more travel. */
+.paint {
+  padding-right: 44px;
+  padding-bottom: 40px;
+  color: var(--fg);
+  overflow: hidden;
+  pointer-events: none;
 }
 
 /* Same rule for both, and it has to be: under 16px iOS zooms the page in on focus, and the gutter must match the textarea exactly or the numbers drift off their lines. */
 @media (max-width: 720px) {
   .gutter,
-  .input {
+  .input,
+  .paint {
     font-size: 16px;
   }
 
+  .input,
+  .paint {
+    padding-left: 12px;
+  }
+
   .input {
-    padding: 16px 12px;
+    padding-right: 12px;
   }
 }

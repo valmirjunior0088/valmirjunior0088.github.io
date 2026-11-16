@@ -1,0 +1,11 @@
+/* A window rather than a pane: on the home page the terminal stands among panels, so it keeps their corners and their edge while its ground and its text are the terminal's own. It scrolls sideways rather than wrapping, as a terminal would. */
+.window {
+  margin: 0;
+  padding: 20px 24px;
+  border: 1px solid var(--edge);
+  border-radius: var(--r-panel);
+  font-size: var(--ms-code-sm);
+  line-height: 1.8;
+  white-space: pre;
+  overflow-x: auto;
+}

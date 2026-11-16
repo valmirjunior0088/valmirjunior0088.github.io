@@ -62,6 +62,13 @@ mkdir -p "$DEST/js" "$DEST/docs/rust" "$DEST/docs/std"
 tar -xzf "$TMP/curios-js.tar.gz" -C "$DEST/js"
 tar -xzf "$TMP/curios-docs.tar.gz" -C "$DEST/docs/rust"
 
+# The TextMate grammar the compiler's own VS Code extension highlights with, read from the release tag's source: no release ships it as an asset yet, and reading it at the tag keeps the site's highlighting pinned to the same release as everything else here. The site highlights its code with it at build time and in the playground's editor, and shows plain code without it.
+GRAMMAR="editors/vscode/syntaxes/curios.tmLanguage.json"
+mkdir -p "$ARTIFACTS"
+if ! { command -v gh >/dev/null 2>&1 && gh api -H "Accept: application/vnd.github.raw" "repos/$CURIOS_REPO/contents/$GRAMMAR?ref=$CURIOS_TAG" > "$ARTIFACTS/curios.tmLanguage.json"; }; then
+  curl -fsSL -o "$ARTIFACTS/curios.tmLanguage.json" "https://raw.githubusercontent.com/$CURIOS_REPO/refs/tags/$CURIOS_TAG/$GRAMMAR"
+fi
+
 if [ -z "$COMPILER" ]; then
   echo "curios $CURIOS_TAG ships no compiler for $(uname -s) $(uname -m), so the /std docs were not rendered" >&2
   echo "Done — public/curios now has the wasm playground bundle and the Rust docs for $CURIOS_TAG."

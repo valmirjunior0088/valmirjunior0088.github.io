@@ -3,7 +3,8 @@
 // What it holds them to:
 //   - the fetched compiler is the pinned one — a checkout that moved the pin without fetching again would otherwise check, and serve, the old release;
 //   - the examples in src/data/examples are exactly the ones src/data/examples.ts lists, every one is formatted the way `curios format` would write it and lints clean, and each runs or is refused exactly as listed;
-//   - the diagnostic on the home page is what the compiler reports for the snippet printed above it, character for character.
+//   - the home page's two snippets are formatted as `curios format` would write them;
+//   - the terminal on the home page shows what `curios run` prints for the snippet above it, character for character and colour for colour.
 import { registerHooks } from "node:module";
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
@@ -94,23 +95,42 @@ for (const example of EXAMPLES.filter((example) => onDisk.includes(example.name)
   else pass(`${file} reports ${describe(want)}`);
 }
 
-// The snippet is written to a file under the name its closing line gives, because that name is part of what the page quotes.
+// The home page's terminal shows what `curios run --color always` printed for the snippet above it, captured whole, colours included — src/data/hero-diagnostic.ansi. The file it ran is named on the capture's first line, which is part of what the page quotes, so the snippet is run under that name. Step times are the one thing a second run need not repeat, so a time compares equal to any other. `--update` captures it again, which is what a pin bump that changes a report asks for.
+const HERO_CAPTURE = join(ROOT, "src/data/hero-diagnostic.ansi");
 const { HERO } = await import("../src/data/home.ts");
-const { plainText } = await import("../src/data/markup.ts");
-const quoted = plainText(HERO.diagnostic.join("\n"));
-const name = /\[error\] ([^\s:]+):/.exec(quoted)?.[1];
-if (!name) {
-  fail("the home page's diagnostic names no file on its closing line");
-} else {
-  const dir = mkdtempSync(join(tmpdir(), "curios-check-"));
-  try {
-    writeFileSync(join(dir, name), `${plainText(HERO.usage.join("\n"))}\n`);
-    const lint = curios(["lint", name], { cwd: dir });
-    if (lint.output.includes(quoted)) pass("the home page's diagnostic is what the compiler reports");
-    else fail("the home page's diagnostic is not what the compiler reports for the snippet above it", lint.output);
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
+const captured = readFileSync(HERO_CAPTURE, "utf8");
+
+// Both snippets on the home page are written as the formatter writes them, like every example: the declaration and the program beside it.
+const snippets = mkdtempSync(join(tmpdir(), "curios-check-"));
+try {
+  const files = ["declaration", "usage"].map((part) => {
+    const file = join(snippets, `${part}.crs`);
+    writeFileSync(file, `${HERO[part].join("\n")}\n`);
+    return file;
+  });
+  const formatted = curios(["format", "--check", ...files]);
+  if (formatted.status === 0) pass("the home page's code is formatted as `curios format` would write it");
+  else fail("the home page's code is not formatted as `curios format` would write it", formatted.output);
+} finally {
+  rmSync(snippets, { recursive: true, force: true });
+}
+
+const name = captured.replace(/\x1b\[[0-9;]*m/g, "").split("\n")[0].trim();
+const dir = mkdtempSync(join(tmpdir(), "curios-check-"));
+try {
+  writeFileSync(join(dir, name), `${HERO.usage.join("\n")}\n`);
+  const run = curios(["run", "--color", "always", name], { cwd: dir });
+  const steady = (text) => text.replace(/\d+\.\d+s\b/g, "0.0s");
+  if (process.argv.includes("--update")) {
+    writeFileSync(HERO_CAPTURE, run.output);
+    pass("captured the home page's terminal again");
+  } else if (steady(run.output) === steady(captured.trimEnd())) {
+    pass("the home page's terminal is what the compiler prints");
+  } else {
+    fail("the home page's terminal is not what the compiler prints for the snippet above it — `node scripts/check.mjs --update` captures it again", run.output);
   }
+} finally {
+  rmSync(dir, { recursive: true, force: true });
 }
 
 if (failures.length) {

@@ -9,16 +9,6 @@
   contain: inline-size;
 }
 
-/* The data's two highlighting classes arrive inside a string of markup, so they are named as they are written there. Two and no more: the canvas collapsed keywords, types and strings into a single amber, and holding to that keeps a block reading as one texture instead of a rainbow. */
-.code :global(.kw) {
-  color: var(--accent);
-}
-
-/* A comment is prose sitting in a code block, and reads a tier down from the code it is explaining. */
-.code :global(.cm) {
-  color: var(--fg-mute);
-}
-
 .sm {
   font-size: var(--ms-code-sm);
   line-height: 1.7;

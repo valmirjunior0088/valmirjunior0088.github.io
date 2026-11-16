@@ -1,21 +1,20 @@
 ---
-// The most reused box on the site. The hero's code panel, the hero's error panel, and every cheatsheet card are the same three-register box — an optional head strip, a body, an optional foot strip — differing only in what gets slotted in and which of the two tones it wears.
+// The most reused box on the site. The hero's code panels and every cheatsheet card are the same three-register box — an optional head strip, a body, an optional foot strip — differing only in what gets slotted in.
 import styles from "./Panel.module.css";
 
 interface Props {
-  tone?: "neutral" | "accent";
   class?: string;
   // Anything else passed in lands on the box itself, which is how a consumer hangs its own data attributes on a panel without this component knowing about them.
   [key: string]: unknown;
 }
 
-const { tone = "neutral", class: className, ...attrs } = Astro.props;
+const { class: className, ...attrs } = Astro.props;
 
 const hasHead = Astro.slots.has("head");
 const hasFoot = Astro.slots.has("foot");
 ---
 
-<div class:list={[styles.panel, tone === "accent" && styles.accent, className]} {...attrs}>
+<div class:list={[styles.panel, className]} {...attrs}>
   {
     hasHead && (
       <div class={styles.head}>

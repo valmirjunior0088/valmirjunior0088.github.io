@@ -1,5 +1,7 @@
 ---
 // Markup and metrics only. How tall it is belongs to the playground page, which shares the frame out between it and the output pane; the behaviour lives there too, because the gutter, the example chips, the run button, and the output pane all read and write the same piece of state, and splitting that across component scripts buys nothing but a harder trail to follow.
+//
+// The code is highlighted as it is typed. A textarea cannot colour its own text, so it is laid over a copy of itself that can: the textarea's text is transparent and only its caret and selection show, while the copy underneath — the paint — draws the same text in the same place, highlighted. The page repaints it on every edit and scrolls it with the textarea.
 import styles from "./Editor.module.css";
 
 interface Props {
@@ -11,5 +13,8 @@ const { class: className } = Astro.props;
 
 <div class:list={[styles.editor, className]} data-editor>
   <div class={styles.gutter} data-gutter aria-hidden="true"></div>
-  <textarea class={styles.input} data-source spellcheck="false" wrap="off" aria-label="Curios source"></textarea>
+  <div class={styles.field}>
+    <pre class={styles.paint} data-paint aria-hidden="true"></pre>
+    <textarea class={styles.input} data-source spellcheck="false" wrap="off" aria-label="Curios source"></textarea>
+  </div>
 </div>
