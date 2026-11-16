@@ -1,0 +1,11 @@
+use /std/{Nat, print};
+
+pub induct Vec(T: Type): (Nat) -> pub Type
+| nil(): (0)
+| cons(@m: Nat, x: T, xs: Vec(T)(m)): (m + 1)
+end
+
+pub let append(@T: Type, @n: Nat, @k: Nat, v: Vec(T)(n), w: Vec(T)(k)) -> Vec(T)(n + k) =
+    match v | nil() => ? | cons(@m, x, xs) => Vec/cons(x, ?) end;
+
+print("unreachable\n")

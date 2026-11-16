@@ -1,30 +1,6 @@
 /* The design system, quantized from the design canvas. The canvas explored roughly forty distinct alpha values; what survives here is the intent behind them — five text tiers, three line weights, three surface depths — because a token that cannot be named is a token nobody can apply consistently. */
 
-/* Latin subsets of the three variable faces, self-hosted from public/curios/fonts so the page owes nothing to a third-party host. Google serves one file per family across the whole weight axis, so the four Geist weights the design asks for cost one request, not four. */
-@font-face {
-  font-family: "Geist";
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-  src: url("/curios/fonts/geist.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Geist Mono";
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-  src: url("/curios/fonts/geist-mono.woff2") format("woff2");
-}
-
-/* Faustina is loaded italic-only, on purpose: every display setting on this site is italic, and the upright face would only ever be a mistake waiting to be made. */
-@font-face {
-  font-family: "Faustina";
-  font-style: italic;
-  font-weight: 300 800;
-  font-display: swap;
-  src: url("/curios/fonts/faustina-italic.woff2") format("woff2");
-}
+/* The faces themselves are declared in Document.astro rather than here, from the same list that preloads their files, so that their fetch starts with the page instead of waiting for this stylesheet. The stacks that name them are below, with the other tokens. */
 
 :root {
   /* Surfaces, shallowest to deepest. Everything below --ink is a black wash rather than a colour, so a panel nested in a panel keeps reading as "further in". */
@@ -54,8 +30,13 @@
   --accent-wash: rgba(247, 197, 119, 0.06);
   --accent-fill: rgba(247, 197, 119, 0.14);
   --accent-mute: rgba(247, 197, 119, 0.85);
+  --accent-select: rgba(247, 197, 119, 0.28);
   --ok: #9fd8b4;
   --err: #f0a38a;
+
+  /* Two that are neither a wash nor a line. The veil is the ground itself held at 88%, for the sticky header to blur what passes under it through; the shadow is what the cheatsheet rail casts over the page it slides across. */
+  --veil: rgba(20, 51, 64, 0.88);
+  --shadow: rgba(0, 0, 0, 0.35);
 
   --r-chip: 2px;
   --r-btn: 3px;
@@ -74,11 +55,22 @@
 
   --bar: 56px;
 
-  /* Spacing that has to flex with the viewport lives here rather than in media queries, because Section takes its padding as a prop that lands in an inline style — a place no query can reach. The clamps hold the drawn values from 1000px up and shrink smoothly below. */
+  /* A toolbar's padding above and below its controls — and the splitter's height, since above the action bar the splitter stands in for it. */
+  --toolbar-y: 12px;
+
+  /* The widest the page's content gets, sections and footer alike. */
+  --max: 1440px;
+
+  /* Spacing that flexes with the viewport, as clamps rather than as steps in media queries, so it scales smoothly and every component reads the one value. The clamps hold the drawn values from 1000px up and shrink smoothly below. */
   --editor-gutter: clamp(40px, 8vw, 52px);
   --pad: clamp(20px, 4vw, 40px);
   --sec-y: clamp(56px, 7vw, 96px);
-  /* The cheatsheet rail is as wide as the cards it holds and no wider. A column is 455px — the longest line in the corpus plus the card around it — gaps are 12px, and the frame is 32px of padding, a 1px border, and 17px kept back for the widest scrollbar it might wear. That puts two columns at 972px and three at 1439px, and the rail steps between those rather than sliding: a rail wider than its cards would only pad them, and one narrower would break their lines. Below two columns' worth it takes the whole screen, which is what a phone gets. */
+
+  /* A cheatsheet card is as wide as the longest line in the corpus plus the card around it: 420px of Geist Mono at 12.5px, 56 characters, and 30px for the padding around an example and the panel's border — and the rail lays them out with this gap between. Narrower than that and a line breaks. */
+  --card: 455px;
+  --card-gap: 12px;
+
+  /* The cheatsheet rail is as wide as the cards it holds and no wider: a whole number of --card columns and the gaps between them, plus 50px of frame — the rail body's 16px of padding either side, its 1px border, and 17px kept back for the widest scrollbar it might wear. It steps between two columns and three rather than sliding, since a rail wider than its cards would only pad them and one narrower would break their lines; below two columns' worth it takes the whole screen, which is what a phone gets. The steps are at the bottom of this file. */
   --rail: 100vw;
 }
 
@@ -111,7 +103,7 @@ a:hover {
 }
 
 ::selection {
-  background: rgba(247, 197, 119, 0.28);
+  background: var(--accent-select);
 }
 
 ::-webkit-scrollbar {
@@ -119,8 +111,9 @@ a:hover {
   height: 10px;
 }
 
+/* A thumb is something you can grab, so it wears the edge of one. */
 ::-webkit-scrollbar-thumb {
-  background: rgba(222, 233, 233, 0.18);
+  background: var(--edge-strong);
   border-radius: 5px;
 }
 
@@ -135,6 +128,11 @@ h3 {
   font-style: italic;
   font-weight: 500;
   margin: 0;
+}
+
+/* The heading that opens a section of the landing page. Display sizes are otherwise one to a place and stay inline; this one is shared, so it lives here once. */
+.section-title {
+  font-size: clamp(28px, 3.4vw, 38px);
 }
 
 /* The mono caption that labels nearly everything on the site — hero eyebrow, panel titles, section kickers, the footer. No uppercase transform: the same treatment carries filenames like vector.crs, which must keep their case. */
@@ -199,12 +197,13 @@ h3 {
   color: var(--accent);
 }
 
+/* The sides are wider than the top and bottom on purpose. Padding is measured to the line box, not to the letters, and the line box Geist builds at 13px carries 4px of empty ascender room above the capitals and 4px of descender room below the baseline, while the letters run almost to the edges of their own advances. So 9px reads as 14px above and below, and 13px is what it takes to put the letters the same 14px from the sides. */
 .btn--sm {
   font-size: 13px;
-  padding: 9px 20px;
+  padding: 9px 13px;
 }
 
-/* The small mono control: COPY, the cheatsheet toggle, the rail's close button. Same hover contract as everything else — go amber. */
+/* The small mono control: COPY and the rail's close button. Same hover contract as everything else — go amber. */
 .btn--chip {
   font-family: var(--mono);
   font-size: var(--ms-micro);
@@ -313,6 +312,13 @@ code .word {
   margin-left: auto;
 }
 
+/* The breakpoints. A media query cannot read a custom property, so each component writes its own as a figure; these are the only figures there are, and what each one means.
+
+     720px — the phone. Below it the playground stops being a fixed frame and becomes a scrolling document (AppShell), and everything that lays out for a pointer — the header, the hero, the footer, the frame — lays out for a thumb instead.
+     960px — the hero's two columns stack (961px is the same line, seen from above).
+     480px and 400px — the narrowest phones, where a row has to give something up.
+     972px and 1439px — the cheatsheet rail's steps, below. */
+
 /* Fingers, not pointers: the mono chips compute to a 24px target, which is fine under a mouse and hopeless under a thumb. */
 @media (max-width: 720px) {
   .btn--chip {
@@ -320,15 +326,15 @@ code .word {
   }
 }
 
-/* The rail's two steps up, each the exact width of the columns it is about to show. The queries sit at those same widths, so the step happens the moment the screen can hold it and never before — one pixel under, the rail is still the whole screen and already that wide. */
+/* The rail's two steps up, each the exact width of the columns it is about to show. The queries sit at those same widths, so the step happens the moment the screen can hold it and never before — one pixel under, the rail is still the whole screen and already that wide. The widths are computed from --card; the queries cannot be, so they are the two figures that have to be redone by hand if a card's width ever changes: 2 × 455 + 12 + 50 = 972, and 3 × 455 + 2 × 12 + 50 = 1439. */
 @media (min-width: 972px) {
   :root {
-    --rail: 972px;
+    --rail: calc(2 * var(--card) + var(--card-gap) + 50px);
   }
 }
 
 @media (min-width: 1439px) {
   :root {
-    --rail: 1439px;
+    --rail: calc(3 * var(--card) + 2 * var(--card-gap) + 50px);
   }
 }

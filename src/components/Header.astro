@@ -5,10 +5,9 @@ import { inlineCode } from "../data/markup";
 
 interface Props {
   current: PageId;
-  sticky?: boolean;
 }
 
-const { current, sticky = false } = Astro.props;
+const { current } = Astro.props;
 
 const page = PAGES[current];
 
@@ -20,7 +19,7 @@ const internal = (Object.keys(PAGES) as PageId[])
 const links = [...internal, ...EXTERNAL_NAV];
 ---
 
-<header class:list={["bar", sticky && "bar--sticky"]}>
+<header class="bar">
   <a href={PAGES.home.href} class="brand">
     <Wordmark />
     <img class="mark" src="/curios/brand/curios-mark.svg" alt="Curios" width="30" height="32" />
@@ -32,21 +31,18 @@ const links = [...internal, ...EXTERNAL_NAV];
 </header>
 
 <style>
+  /* Every page holds the bar in place and blurs what passes under it. On a wide screen the playground's frame never scrolls, so the stickiness is inert there; on a phone the frame becomes a scrolling document and the bar behaves exactly as it does on the landing page. */
   .bar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
     display: flex;
     align-items: center;
     gap: 24px;
     height: var(--bar);
     padding: 0 28px;
     border-bottom: 1px solid var(--edge);
-  }
-
-  /* Both pages hold the bar in place and blur what passes under it. On a wide screen the playground's frame never scrolls, so this is inert there; on a phone the frame becomes a scrolling document and the bar behaves exactly as it does on the landing page. */
-  .bar--sticky {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    background: rgba(20, 51, 64, 0.88);
+    background: var(--veil);
     backdrop-filter: blur(14px);
   }
 

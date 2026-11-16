@@ -29,7 +29,7 @@ export const HERO = {
     '<span class="kw">let</span> empty: Vec(Nat, 0) = Vec/nil();',
     '<span class="kw">let</span> single: Vec(Nat, 1) = empty;',
   ],
-  // Transcribed from the real compiler against exactly the five lines above, which is why it reads a bare Vec — a report spells a name as it is written where the report stands — and points at line 5. The file's name on the closing line is the part the browser build cannot produce, having no file to name.
+  // Transcribed from the real compiler against exactly the five lines above, which is why it reads a bare Vec — a report spells a name as it is written where the report stands — and points at line 5. The file's name on the closing line is the part the browser build cannot produce, having no file to name. `npm run check` writes those five lines to a file of that name and holds this to what the pinned compiler reports for it, character for character.
   diagnostic: [
     '<span class="kw">type mismatch</span>',
     "│  inferred: Vec(Nat, 0)",
@@ -124,5 +124,4 @@ export const RESOURCES: Resource[] = [
 export const CLOSING = {
   heading: "If you are still here",
   body: "Curios is early, experimental, and under active development — syntax, standard library, and compiler may all change without notice.",
-  licence: "APACHE-2.0",
 };

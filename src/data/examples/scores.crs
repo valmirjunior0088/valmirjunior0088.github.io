@@ -1,0 +1,18 @@
+use /std/{Fmt, Nat, Str, Map, print};
+
+let m0: Map(Str, Nat) =
+    Map/empty();
+
+let m1: Map(Str, Nat) =
+    Map/insert(m0, "ada", 92);
+
+let m2: Map(Str, Nat) =
+    Map/insert(m1, "grace", 87);
+
+let m3: Map(Str, Nat) =
+    Map/insert(m2, "alan", 95);
+
+match Map/try_get(m3, "grace")
+| some(score) => Fmt/print("grace scored % out of % entries\n")(score)(Map/len(m3))
+| none() => print("no such entry\n")
+end

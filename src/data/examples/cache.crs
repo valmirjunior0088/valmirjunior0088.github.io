@@ -1,0 +1,10 @@
+use /std/{Bool, Fmt, Nat, Option};
+
+let select(prefer_fresh: Bool, cached: Option(Nat), fresh: Nat) -> Nat =
+    match
+    | prefer_fresh, fresh > 0 => fresh
+    | some(n) = cached, n > 0 => n
+    | _ => 0
+    end;
+
+Fmt/print("choice = %\n")(select(false, Option/some(21), 5))

@@ -1,0 +1,18 @@
+use /std/{Fmt, Nat};
+
+pub struct Point: pub Type {
+    x: Nat,
+    y: Nat,
+}
+
+let midpoint(Point { x = ax, y = ay }: Point, Point { x = bx, y = by }: Point) -> Point =
+    Point { x = (ax + bx) / 2, y = (ay + by) / 2 };
+
+let bounds(p: Point) -> {Nat, Nat} =
+    (p.x, p.y);
+
+let m: Point =
+    midpoint(Point { x = 0, y = 0 }, Point { x = 4, y = 10 });
+
+let (mx, my) = bounds(m);
+Fmt/print("midpoint = (%, %)\n")(mx)(my)

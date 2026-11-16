@@ -69,6 +69,8 @@ import { INSTALL_COMMAND } from "../data/site";
     command.addEventListener("scroll", syncFade, { passive: true });
     window.addEventListener("resize", syncFade);
     syncFade();
+    // Measured once more when the web fonts land: the command is drawn in a fallback face until then, and the swap changes how wide it runs without changing the box it scrolls in, so nothing else would notice.
+    document.fonts.ready.then(syncFade);
 
     let revert: ReturnType<typeof setTimeout>;
 

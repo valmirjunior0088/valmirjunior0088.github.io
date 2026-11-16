@@ -1,0 +1,12 @@
+use /std/{Nat, Option, Fmt, print};
+
+let sum_all(a: Option(Nat), b: Option(Nat), c: Option(Nat)) -> Option(Nat) =
+    let x = a!;
+    let y = b!;
+    let z = c!;
+    Option/some(x + y + z);
+
+match sum_all(Option/some(3), Option/some(4), Option/some(5))
+| some(n) => Fmt/print("sum = %\n")(n)
+| none() => print("missing a reading\n")
+end

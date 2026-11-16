@@ -1,4 +1,4 @@
-// The compiler's thread. `compile` is a synchronous WebAssembly call that holds whichever thread runs it for as long as the type checker takes, and `run` is much the same behind a promise — so both happen here, off the page, and the page only ever hears about them through messages. Each request is `{ id, source }`; the answers are `{ id, kind: "phase", event }` around every step and one `{ id, kind: "done", result }` at the end, in the same shape loader.js hands the page.
+// The compiler's thread. `compile` is a synchronous WebAssembly call that holds whichever thread runs it for as long as the type checker takes, and `run` is much the same behind a promise — so both happen here, off the page, and the page only ever hears about them through messages. Each request is `{ id, source }`; the answers are `{ id, kind: "phase", event }` around every step and one `{ id, kind: "done", result }` at the end, in the shape loader.js hands the page — less the wording of a failure, which loader.js supplies.
 
 let modulePromise = null;
 
@@ -34,18 +34,16 @@ function loadModule(onPhase) {
 
 const utf8 = new TextDecoder();
 
+// Failures leave here as the bare cause and the step it struck; loader.js words them for the pane, so each sentence is written in one place.
+const describe = (error) => error?.message || String(error);
+
 async function compileAndReport(source, onPhase) {
   const loadStart = performance.now();
   let mod;
   try {
     mod = await loadModule(onPhase);
   } catch (error) {
-    return {
-      ok: false,
-      phase: "load",
-      ms: performance.now() - loadStart,
-      error: `Couldn't load the curios compiler: ${error.message || error}`,
-    };
+    return { ok: false, phase: "load", ms: performance.now() - loadStart, error: describe(error) };
   }
 
   onPhase({ phase: "begin", step: "compile" });
@@ -66,7 +64,7 @@ async function compileAndReport(source, onPhase) {
   try {
     outcome = await mod.run(compiled, undefined);
   } catch (error) {
-    return { ok: false, phase: "run", ms: performance.now() - t2, error: `Couldn't run the program: ${error.message || error}` };
+    return { ok: false, phase: "run", ms: performance.now() - t2, error: describe(error) };
   }
   // The size rides along with the run's timing because that is where the page reads it out: one crumb for how much WebAssembly ran and how long it took.
   onPhase({ phase: "end", step: "run", ms: performance.now() - t2, bytes: bytes.length });
@@ -82,8 +80,12 @@ async function compileAndReport(source, onPhase) {
   return { ok: true, bytes, run };
 }
 
+// Every request is answered, whatever happens. Each step guards its own call into the module, but anything that throws past those guards — a release whose module answers in a shape this file no longer expects, say — would reject this handler, and a rejection inside a worker reaches nobody: the page would wait on the request for ever, with Run stuck on "Running…".
 self.addEventListener("message", async ({ data: { id, source } }) => {
-  const result = await compileAndReport(source, (event) => self.postMessage({ id, kind: "phase", event }));
-  const transfer = result.ok ? [result.bytes.buffer] : [];
-  self.postMessage({ id, kind: "done", result }, transfer);
+  try {
+    const result = await compileAndReport(source, (event) => self.postMessage({ id, kind: "phase", event }));
+    self.postMessage({ id, kind: "done", result }, result.ok ? [result.bytes.buffer] : []);
+  } catch (error) {
+    self.postMessage({ id, kind: "done", result: { ok: false, phase: "internal", error: describe(error) } });
+  }
 });

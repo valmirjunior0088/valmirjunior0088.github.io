@@ -7,15 +7,17 @@ export const LANGUAGE_URL = `${GITHUB_URL}/blob/main/documentation/language.md`;
 export const RUST_DOCS_URL = "/curios/docs/rust/curios/index.html";
 export const STD_DOCS_URL = "/curios/docs/std/index.html";
 
+export const LICENCE = "APACHE-2.0";
+
 export const INSTALL_COMMAND =
   "curl -fsSL https://github.com/valmirjunior0088/curios/releases/latest/download/install.sh | sh";
 
 export type PageId = "home" | "playground";
 
-// The header shows one chip and a set of links. The page you are on supplies the chip and drops out of the links, so both pages share a single component and differ by one prop.
-export const PAGES: Record<PageId, { chip: string; label: string; href: string }> = {
-  home: { chip: "HOME", label: "Home", href: "/curios/" },
-  playground: { chip: "PLAYGROUND", label: "Playground", href: "/curios/playground" },
+// Everything the site says about one of its own pages, in one row. The header shows one chip and a set of links: the page you are on supplies the chip and drops out of the links, so every page shares a single header and differs by one prop. The title is the document's. Each href ends in a slash because each page is a directory's index, and a link without one costs a redirect to the address with it.
+export const PAGES: Record<PageId, { chip: string; label: string; title: string; href: string }> = {
+  home: { chip: "HOME", label: "Home", title: "Curios", href: "/curios/" },
+  playground: { chip: "PLAYGROUND", label: "Playground", title: "Playground · Curios", href: "/curios/playground/" },
 };
 
 // Labels mark inline code with backticks, as every other string in data/ does; see data/markup.ts.

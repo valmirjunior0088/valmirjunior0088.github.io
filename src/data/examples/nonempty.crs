@@ -1,0 +1,6 @@
+use /std/{Fmt, Nat, Vec};
+
+pub let head(@T: Type, @n: Nat, xs: Vec(T, n + 1)) -> T =
+    Vec/first(xs);
+
+Fmt/print("head = %\n")(head(Vec/cons(7, Vec/cons(8, Vec/nil()))))

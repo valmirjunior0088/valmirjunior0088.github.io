@@ -1,14 +1,15 @@
 ---
 import Section from "./Section.astro";
 import { RESOURCES, CLOSING } from "../data/home";
+import { LICENCE } from "../data/site";
 ---
 
 <Section>
   <div class="closing">
     <div>
-      <h2>{CLOSING.heading}</h2>
+      <h2 class="section-title">{CLOSING.heading}</h2>
       <p>{CLOSING.body}</p>
-      <span class="chip chip--static">{CLOSING.licence}</span>
+      <span class="chip chip--static">{LICENCE}</span>
     </div>
 
     <div class="cards">
@@ -33,7 +34,6 @@ import { RESOURCES, CLOSING } from "../data/home";
   }
 
   h2 {
-    font-size: clamp(28px, 3.4vw, 38px);
     margin-bottom: 16px;
   }
 

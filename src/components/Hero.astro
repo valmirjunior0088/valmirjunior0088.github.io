@@ -161,7 +161,7 @@ import { PAGES, BUILD_URL } from "../data/site";
       font-size: min(10.7vw, 52px);
     }
 
-    /* The section's own top padding is a document's worth of air, too much for a logo that is meant to sit just under the bar. Pulling it back to the same 32px that sits below gives the wordmark equal room on both sides; the padding itself lives in an inline style this query cannot reach. The wordmark's own optical lift happens inside this box. */
+    /* The section's own top padding is a document's worth of air, too much for a logo that is meant to sit just under the bar. Pulling it back to the same 32px that sits below gives the wordmark equal room on both sides. The padding is Section's, scoped to Section, and every other section keeps it, so the lockup takes the air back from inside rather than Section growing an option for the one box that wants less. The wordmark's own optical lift happens inside this box. */
     .lockup {
       display: block;
       width: 198px;

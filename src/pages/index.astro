@@ -1,8 +1,16 @@
+---
+// The site's root has nothing of its own: it forwards to Curios. The address is built from astro.config's `site` and the home page's own entry, so neither is written out a second time here.
+import { PAGES } from "../data/site";
+
+const home = PAGES.home.href;
+const canonical = new URL(home, Astro.site);
+---
+
 <!doctype html>
-<title>Curios</title>
-<meta http-equiv="refresh" content="0; url=/curios/" />
+<title>{PAGES.home.title}</title>
+<meta http-equiv="refresh" content={`0; url=${home}`} />
 <meta name="robots" content="noindex" />
-<link rel="canonical" href="https://valmirjunior0088.github.io/curios/" />
+<link rel="canonical" href={canonical} />
 <body>
-  <a href="/curios/">Redirecting to <code>/curios/</code>&hellip;</a>
+  <a href={home}>Redirecting to <code>{home}</code>&hellip;</a>
 </body>

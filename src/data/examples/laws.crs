@@ -1,0 +1,22 @@
+use /std/{Eq, List, Nat, print};
+
+pub let sum(values: List(Nat)) -> Nat =
+    match values | [] => 0 | [head, ..tail] => head + sum(tail) end;
+
+pub let commutes(a: Nat, b: Nat) -> Eq()(a + b, b + a) =
+    Eq/refl();
+
+pub let lengths(
+    @T: Type,
+    xs: List(T),
+    ys: List(T),
+) -> Eq()(List/len([..xs, ..ys]), List/len(xs) + List/len(ys)) =
+    Eq/refl();
+
+pub let sums(xs: List(Nat), ys: List(Nat)) -> Eq()(sum([..xs, ..ys]), sum(xs) + sum(ys)) =
+    match xs
+    | [] => Eq/refl()
+    | [head, ..tail] => Eq/cong((s: Nat) => head + s, sums(tail, ys))
+    end;
+
+print("every proof checked\n")

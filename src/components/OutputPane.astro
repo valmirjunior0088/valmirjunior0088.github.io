@@ -1,5 +1,5 @@
 ---
-// Markup and metrics only, like the editor above it: everything that writes here lives in the playground page. One pane, no header — what the compiler says and what the program prints are the same transcript, and the breadcrumb on the action bar already names which of the two you are looking at.
+// Markup and metrics only, like the editor above it: everything that writes here lives in the playground page, and so does how tall it is. One pane, no header — what the compiler says and what the program prints are the same transcript, and the breadcrumb on the action bar already names which of the two you are looking at.
 interface Props {
   placeholder: string;
 }
@@ -10,10 +10,7 @@ const { placeholder } = Astro.props;
 <pre class="output empty" data-output data-placeholder={placeholder} aria-live="polite">{placeholder}</pre>
 
 <style>
-  /* Takes what the editor leaves and gives it back first when the frame runs short: the editor is the half you are working in. */
   .output {
-    flex: 0 1 260px;
-    min-height: 120px;
     margin: 0;
     padding: 16px;
     overflow: auto;
@@ -31,14 +28,5 @@ const { placeholder } = Astro.props;
 
   .output.error {
     color: var(--err);
-  }
-
-  /* Stacked on a phone, the pane grows to fit its output rather than scrolling inside a box barely taller than a couple of lines. */
-  @media (max-width: 720px) {
-    .output {
-      flex: none;
-      min-height: 96px;
-      overflow: visible;
-    }
   }
 </style>

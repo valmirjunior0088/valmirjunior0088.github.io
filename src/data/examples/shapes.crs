@@ -1,0 +1,18 @@
+use /std/{Fmt, List, Nat, Option, Str};
+
+let combine(a: Option(Nat), b: Option(Nat)) -> Nat =
+    match (a, b)
+    | (some(x), some(y)) => x + y
+    | (some(x), none()) | (none(), some(x)) => x
+    | (none(), none()) => 0
+    end;
+
+let shape(values: List(Nat)) -> Str =
+    match values
+    | [] => "empty"
+    | [_] => "one"
+    | [x, y, .._], x == y => "opens with a pair"
+    | _ => "many"
+    end;
+
+Fmt/print("combine = %, shape = %\n")(combine(Option/some(3), Option/none()))(shape([4, 4, 2]))

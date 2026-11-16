@@ -13,6 +13,22 @@ const {
   description = "The Curios programming language: a dependently typed functional language compiled to WebAssembly-GC",
   bodyClass,
 } = Astro.props;
+
+// Latin subsets of the three variable faces, self-hosted from public/curios/fonts so the page owes nothing to a third-party host. Google serves one file per family across the whole weight axis, so the four Geist weights the design asks for cost one request, not four. Faustina is loaded italic-only, on purpose: every display setting on this site is italic, and the upright face would only ever be a mistake waiting to be made.
+//
+// Left to a stylesheet, a face is found late: the browser reads the CSS, lays out some text that asks for the face, and only then sends for the file — and paints a fallback in the meantime, which is the flash of the wrong font. So each file is preloaded from the head, its fetch starting the moment the HTML arrives, and the faces are declared right here rather than in tokens.css, so the rules do not wait on that file either. Every page uses all three: the playground lays out the cheatsheet's italic heading even while the rail is closed.
+//
+// `block` rather than `swap`: with the fetch begun that early the font is nearly always in hand by first paint, and on the rare slow load a moment of no text is better than a page drawn in a face it is about to throw away. After about three seconds the browser shows the fallback anyway, so a font that never arrives costs the wait and nothing worse.
+const FONTS = [
+  { family: "Geist", style: "normal", weight: "100 900", file: "/curios/fonts/geist.woff2" },
+  { family: "Geist Mono", style: "normal", weight: "100 900", file: "/curios/fonts/geist-mono.woff2" },
+  { family: "Faustina", style: "italic", weight: "300 800", file: "/curios/fonts/faustina-italic.woff2" },
+];
+
+const faces = FONTS.map(
+  ({ family, style, weight, file }) =>
+    `@font-face { font-family: "${family}"; font-style: ${style}; font-weight: ${weight}; font-display: block; src: url("${file}") format("woff2"); }`,
+).join("\n");
 ---
 
 <!doctype html>
@@ -23,6 +39,9 @@ const {
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="icon" href="/curios/brand/curios-mark.svg" type="image/svg+xml" />
+    {/* A font is always fetched in CORS mode, and a preload only counts if it asks the same way — without `crossorigin` the browser would fetch every file twice. */}
+    {FONTS.map(({ file }) => <link rel="preload" href={file} as="font" type="font/woff2" crossorigin />)}
+    <style is:inline set:html={faces} />
   </head>
   <body class={bodyClass}>
     <slot />

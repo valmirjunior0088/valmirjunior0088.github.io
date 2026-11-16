@@ -13,12 +13,13 @@ const { scroll = false, class: className } = Astro.props;
 </div>
 
 <style>
+  /* The vertical padding is a token rather than a figure because the splitter stands in for it above the action bar, and the two have to agree. */
   .toolbar {
     flex: none;
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 20px;
+    padding: var(--toolbar-y) 20px;
     background: var(--band);
     border-bottom: 1px solid var(--line);
   }

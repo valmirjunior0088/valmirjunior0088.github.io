@@ -3,17 +3,18 @@
 import Document from "./Document.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import { PAGES, type PageId } from "../data/site";
 
 interface Props {
-  title: string;
+  page: PageId;
   description?: string;
 }
 
-const { title, description } = Astro.props;
+const { page, description } = Astro.props;
 ---
 
-<Document title={title} description={description}>
-  <Header current="home" sticky />
+<Document title={PAGES[page].title} description={description}>
+  <Header current={page} />
   <main>
     <slot />
   </main>

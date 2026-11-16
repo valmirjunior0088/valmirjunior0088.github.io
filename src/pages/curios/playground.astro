@@ -2,24 +2,24 @@
 import AppShell from "../../layouts/AppShell.astro";
 import Toolbar from "../../components/Toolbar.astro";
 import Editor from "../../components/Editor.astro";
+import Splitter from "../../components/Splitter.astro";
 import OutputPane from "../../components/OutputPane.astro";
 import CheatsheetRail from "../../components/CheatsheetRail.astro";
 import { EXAMPLES } from "../../data/examples";
 
-const keys = Object.keys(EXAMPLES);
-const defaultKey = keys[0];
+const [first] = EXAMPLES;
 
 const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it just might show up here.";
 ---
 
-<AppShell title="Playground · Curios">
+<AppShell page="playground">
   <div class="frame">
     <Toolbar scroll>
       <span class="label">EXAMPLES</span>
       {
-        keys.map((key) => (
-          <button class:list={["chip", key === defaultKey && "chip--on"]} aria-pressed={key === defaultKey} data-example={key}>
-            {EXAMPLES[key].label}
+        EXAMPLES.map(({ name }) => (
+          <button class:list={["chip", name === first.name && "chip--on"]} aria-pressed={name === first.name} data-example={name}>
+            {name}.crs
           </button>
         ))
       }
@@ -27,13 +27,15 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
 
     <Editor />
 
+    <Splitter />
+
     <Toolbar class="actions">
       <button class="btn btn--primary btn--sm run" data-run>Run</button>
       <span class="status">
         <span class="trail" data-trail>ready</span>
         <span class="step" data-step></span>
       </span>
-      <button class="btn btn--sm push toggle" data-rail-toggle aria-label="Cheatsheet">Cheatsheet</button>
+      <button class="btn btn--outline btn--sm push toggle" data-rail-toggle aria-label="Cheatsheet">Cheatsheet</button>
     </Toolbar>
 
     <OutputPane placeholder={OUTPUT_PLACEHOLDER} />
@@ -43,28 +45,53 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
 </AppShell>
 
 <style>
-  /* The frame fills whatever the header leaves and hands its slack to the editor. Nothing here scrolls; the editor and the output pane scroll inside themselves, which is what keeps the toolbars where you left them. */
+  /* The frame fills whatever the header leaves. Nothing here scrolls; the editor and the output pane scroll inside themselves, which is what keeps the toolbars where you left them. */
   .frame {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
+    --peek: 40px;
   }
 
-  /* The trail can run to four steps; on a narrow bar it truncates rather than push the cheatsheet toggle out of the frame — and the buttons on either side hold their width, so it is only ever the numbers that give. Both are built from the one --sm recipe and stand the same height without either being handed one. */
+  /* How the frame shares out its height — all of it here, beside the script that drags it, while the components only draw themselves.
+
+     The editor starts at 340px and the pane at 260px, the split that exactly fills a window about 780px tall. A taller window gives its extra to the editor alone, the half you are working in; a shorter one takes from both in proportion, so neither is squeezed to its floor before anything has been dragged. Once the splitter moves, both heights are its own, and a window that changes size treats them the same way. They arrive through properties rather than inline flex-bases, so the phone layout below still wins when a dragged window narrows into it.
+
+     The floor is the same for both, --peek: one line, which is all it takes to say a pane is there and that dragging brings it back. That is 16px of padding and the line under it — 22.75px in the editor, 21.875px in the pane — rounded up to one figure. On a run, the pane's one line is the headline: "type mismatch", or the first thing the program printed. */
+  .frame :global(.editor) {
+    flex: 1 1 var(--editor-height, 340px);
+    min-height: var(--peek);
+  }
+
+  .frame :global(.output) {
+    flex: 0 1 var(--output-height, 260px);
+    min-height: var(--peek);
+  }
+
+  /* The splitter is the action bar's top edge, made grabbable: it stands in for the top padding the bar gives up, at the same --toolbar-y, so the buttons stay centred in a bar no taller than it was. */
+  .frame :global(.splitter) {
+    height: var(--toolbar-y);
+  }
+
+  .frame :global(.actions) {
+    padding-top: 0;
+  }
+
+  /* The trail can run to four steps; on a narrow bar it truncates rather than push the cheatsheet toggle out of the frame — and the buttons on either side hold their width, so it is only ever the numbers that give. Both are built from the one --sm recipe and stand the same height without either being handed one.
+
+     They share a width too, and a fixed one, so the two read as a pair from opposite ends of the bar. 128px clears the widest label either wears — "‹ Cheatsheet" at 113px, then Run's "Running…" at 86px — which matters for Run, since it swaps its label mid-run: left to size itself it would change width the moment it was clicked and shove the breadcrumb sideways just as the breadcrumb started saying something.
+
+     Inside that width the word and its sigil are pushed to opposite edges: each word keeps to the outside of the bar and each sigil to the inside, pointing in, so the two buttons mirror each other across it. "Running…" has no sigil to push against and keeps to the left, where "Run" was. */
   .frame :global(.actions) .btn {
     flex: none;
+    justify-content: space-between;
+    width: 128px;
   }
 
-  /* Run swaps its label mid-run, so its width is pinned above the longer of the two: "Running…" measures 59px in Geist at this size and weight, plus 40px of padding and the border. Left to size itself the button would more than double the moment it was clicked and shove the breadcrumb sideways just as the breadcrumb started saying something.
+  /* The sigil belongs to the waiting button, not to the running one: a run that is under way is not pointing anywhere. It rides as a pseudo-element so the script that swaps the word never has to carry it around, and it leaves on `:disabled`, which is the exact state a run puts the button in — the label and the sigil change on the same event without either knowing about the other. As a flex item of the button it is also what the rule above can push to the far edge, away from the word.
 
      A play triangle is not what the "›" is standing in for: Geist's latin subset carries no "▸", so a label wearing one would be part fallback face, and a fallback face brings its own metrics — the button lost height when the text swapped to an all-Geist "Running…". The guillemet is in the face, so the label stays one font, one line box, one height. */
-  .run {
-    justify-content: center;
-    min-width: 104px;
-  }
-
-  /* The sigil belongs to the waiting button, not to the running one: a run that is under way is not pointing anywhere. It rides as a pseudo-element so the script that swaps the word never has to carry it around, and it leaves on `:disabled`, which is the exact state a run puts the button in — the label and the sigil change on the same event without either knowing about the other. The 10px between it and the word is the button's own gap, the same one the cheatsheet toggle uses at the far end of the bar. */
   .run::after {
     content: "›";
   }
@@ -73,32 +100,11 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     content: none;
   }
 
-  /* The cheatsheet's own heading, lifted onto the button that opens it: Faustina italic at the 21px the rail's own h2 wears, the same weight, and the same single word. No sigil — the word is doing the work, and the rail's "›" is what sends it back. Opening the rail should feel like the heading grew into a panel rather than like a new thing appeared.
+  /* The cheatsheet toggle is Run's own recipe — Geist, the --sm size, the same height — in outline rather than fill: a button you can see is a button, but there is one call to action on this bar and it is Run. The outline brings the site's hover contract with it, so it goes amber without being told.
 
-     It carries the rail head's surface too, which on this bar is nearly the toolbar's own colour, so what reads is the writing rather than a button. That is the point: there is one call to action here and it is Run.
+     What it adds is its sigil, the mirror of the "›" the rail closes with: that one points at where the panel goes, this one at where it comes from. It is a flex item of the button like the word beside it, which is how the shared rule above puts it at the near edge and the word at the far one — the mirror of Run at the other end of the bar.
 
-     The padding is what keeps the two the same height. Run is 13px of Geist in a 1.3em line box plus 9px either side; this is 21px of Faustina held to a line box of 1, so 7px either side lands both on 37px. The size is the rail heading's own, and a fixed one on purpose: set to the height the bar leaves it, the word came out twice the heading it is quoting.
-
-     The negative margin is optical alignment. Run's fill is visible, so its block edge is what the eye measures against the bar's 20px padding; this button's fill is not, so the eye measures the word — and the word sat 40px in, its own padding on top of the bar's, reading as a wider margin than Run's. Pulling the box out by exactly its own padding puts the word where Run's block edge is, and spends the padding on a click target that reaches into the gutter instead of on empty space. */
-  .toggle {
-    padding: 7px 20px;
-    margin-right: -20px;
-    font-family: var(--display);
-    font-style: italic;
-    font-size: 21px;
-    line-height: 1;
-    background: var(--raise);
-    color: var(--fg);
-  }
-
-  /* The hover contract the whole site keeps: go amber. */
-  .toggle:hover {
-    color: var(--accent);
-  }
-
-  /* The mirror of the "›" the rail closes with: that one points at where the panel goes, this one at where it comes from. It is a flex item of the button like the word beside it, so the 10px between them is the button's own gap — the same one Run keeps to its own sigil at the other end of the bar.
-
-     Faustina carries both guillemets, so this stays in the same face as the word rather than dragging in a fallback for one glyph — the mistake Run's label made with a play triangle.
+     Geist carries both guillemets, so this stays in the same face as the word rather than dragging in a fallback for one glyph — the mistake Run's label made with a play triangle.
 
      The aria-label is what keeps the button's accessible name to the word: generated content counts toward the name, and a screen reader has no use for a piece of punctuation. */
   .toggle::before {
@@ -156,18 +162,29 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     color: var(--fg-faint);
   }
 
-  /* Below the breakpoint AppShell has let the body scroll, so the editor takes a fixed share of the screen and the pane sits under it at whatever height its output wants. The action bar sticks, one bar's height down so it parks under the sticky header rather than sliding beneath it: Run has to stay in reach while you scroll down to read what it produced. */
+  /* Below the breakpoint AppShell has let the body scroll, and the frame stacks like a document. The editor takes a fixed share of the screen; the pane sits under it at whatever height its output wants rather than scrolling inside a box barely taller than a couple of lines; and with nothing left to share out, there is no splitter. The action bar sticks, one bar's height down so it parks under the sticky header rather than sliding beneath it — Run has to stay in reach while you scroll down to read what it produced — and takes back the top padding the splitter was standing in for. */
   @media (max-width: 720px) {
     .frame :global(.editor) {
       flex: none;
       height: 55dvh;
     }
 
+    .frame :global(.splitter) {
+      display: none;
+    }
+
     .frame :global(.actions) {
       position: sticky;
       top: var(--bar);
       z-index: 10;
+      padding-top: var(--toolbar-y);
       background: var(--raise);
+    }
+
+    .frame :global(.output) {
+      flex: none;
+      min-height: 96px;
+      overflow: visible;
     }
 
     /* No room for the timings between two thumb-sized buttons, and no good way to wrap four phases under them either. On a phone the pane carries the outcome by itself — it turns red and says what went wrong — and the numbers are a desktop luxury. */
@@ -177,46 +194,85 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
   }
 </style>
 
-<script is:inline type="module" define:vars={{ EXAMPLES, defaultKey }}>
-  // The compiler is a published asset rather than a source module, so this script stays inline and imports it at runtime. If the bundle was never fetched, the loader reports a load-phase failure and the output pane says so — the page still works, it just cannot compile.
-  import { compileAndReport } from "/curios/loader.js";
+<script>
+  import { EXAMPLES } from "../../data/examples";
 
-  const source = document.querySelector("[data-source]");
-  const gutter = document.querySelector("[data-gutter]");
-  const runButton = document.querySelector("[data-run]");
-  const trail = document.querySelector("[data-trail]");
-  const stepLine = document.querySelector("[data-step]");
-  const chips = [...document.querySelectorAll("[data-example]")];
-  const output = document.querySelector("[data-output]");
+  // What loader.js hands back. It is a published asset rather than a source module, so nothing checks this against it; it is written down here so the rest of the script is checked against something.
+  type Step = "load" | "warm" | "compile" | "run";
+  type PhaseEvent = { phase: "begin"; step: Step } | { phase: "end"; step: Step; ms: number; bytes?: number };
+  type Report =
+    | { ok: true; bytes: Uint8Array<ArrayBuffer>; run: { stdout: string; stderr: string; exitCode: number; trap?: string | null } }
+    | { ok: false; phase: "load" | "compile" | "run" | "internal"; ms?: number; error: string };
+  type Loader = { compileAndReport(source: string, onPhase: (event: PhaseEvent) => void): Promise<Report> };
+
+  // The loader sits beside the compiler bundle scripts/fetch.sh downloads, and is fetched from where the site serves it, the first time Run is pressed. It is named through a variable, so the bundler leaves it alone rather than trying to pull a public file into the build, and imported as a full URL, because the dev server rewrites a root-relative import to ask for a module it will then refuse to serve out of public/. If the bundle was never fetched, the loader reports a load-phase failure and the pane says so: the page still works, it just cannot compile.
+  const LOADER = "/curios/loader.js";
+  let loader: Promise<Loader> | null = null;
+
+  async function compileAndReport(text: string, onPhase: (event: PhaseEvent) => void): Promise<Report> {
+    let module: Loader;
+    try {
+      loader ??= import(/* @vite-ignore */ new URL(LOADER, location.href).href);
+      module = await loader;
+    } catch (error) {
+      loader = null;
+      return { ok: false, phase: "load", error: `Couldn't reach ${LOADER}: ${error instanceof Error ? error.message : error}` };
+    }
+    return module.compileAndReport(text, onPhase);
+  }
+
+  // The examples' text, bundled with this script so a chip swaps its file in without a request — less the newline every file ends with, which would otherwise be a numbered empty line under the program.
+  const SOURCES = import.meta.glob<string>("../../data/examples/*.crs", { query: "?raw", import: "default", eager: true });
+  const sourceOf = (name: string) => (SOURCES[`../../data/examples/${name}.crs`] ?? "").replace(/\n$/, "");
+
+  // Every element this drives is in the template above. One that has gone missing is a template edited out from under the script, and saying so at once beats a TypeError three clicks later.
+  function element<T extends Element>(selector: string): T {
+    const found = document.querySelector<T>(selector);
+    if (!found) throw new Error(`playground: nothing matches ${selector}`);
+    return found;
+  }
+
+  const source = element<HTMLTextAreaElement>("[data-source]");
+  const gutter = element<HTMLElement>("[data-gutter]");
+  const editor = element<HTMLElement>("[data-editor]");
+  const splitter = element<HTMLElement>("[data-splitter]");
+  const runButton = element<HTMLButtonElement>("[data-run]");
+  const trail = element<HTMLElement>("[data-trail]");
+  const stepLine = element<HTMLElement>("[data-step]");
+  const output = element<HTMLElement>("[data-output]");
+  const chips = [...document.querySelectorAll<HTMLButtonElement>("[data-example]")];
 
   let running = false;
+
+  // Every run takes a number, and clearing the line takes the next one. A run that finds the number has moved on was overtaken — an example picked while it was still compiling — and keeps quiet from then on, rather than writing the old program's output under the new program's name. It still finishes, because the compiler cannot be interrupted, and Run waits for it.
+  let current = 0;
 
   function renderGutter() {
     const lines = source.value.split("\n").length;
     gutter.textContent = Array.from({ length: lines }, (_, index) => index + 1).join("\n");
   }
 
-  function setOutput(text, tone) {
+  function setOutput(text: string, tone?: "error") {
     const empty = !text;
-    output.textContent = empty ? output.dataset.placeholder : text;
+    output.textContent = empty ? (output.dataset.placeholder ?? "") : text;
     output.classList.toggle("empty", empty);
     output.classList.toggle("error", !empty && tone === "error");
   }
 
   // Every step the compiler goes through, in the two forms the line needs: the one it wears while it is happening, and the past tense it leaves behind once it has earned it. That past tense is a claim — "compiled" says the program is good — so a step that failed leaves no crumb at all and the verdict speaks for it instead. Each names what it acts on: the first two the compiler, arriving and waking up; the third the source, since by then the object is the program you wrote; and the fourth the WebAssembly that came of it — which is the truth of what happens here and the thing a bare "fetched" or "compiled" left you to guess.
-  const STEPS = {
+  const STEPS: Record<Step, { doing: string; done: (ms: number, bytes?: number) => Node | string }> = {
     load: { doing: "fetching compiler…", done: (ms) => `fetched compiler in ${ms.toFixed(0)}ms` },
     warm: { doing: "warming compiler…", done: (ms) => `warmed compiler in ${ms.toFixed(0)}ms` },
     compile: { doing: "compiling source…", done: (ms) => `compiled source in ${ms.toFixed(1)}ms` },
-    run: { doing: "running…", done: moduleCrumb },
+    run: { doing: "running…", done: (ms, bytes) => moduleCrumb(ms, bytes ?? 0) },
   };
 
   // Whether the compiler is already in the worker, which decides what the first step of the next run will be. The worker's own events settle it either way; this only spares the line from starting blank.
   let loaded = false;
 
   // The module from the last successful run, and the crumb that offers it. The URL lives exactly as long as that crumb is on the line: minted when the bytes arrive, dropped the moment the line is cleared, so a session of runs leaves one blob alive rather than one per run.
-  let moduleUrl = null;
-  let moduleLink = null;
+  let moduleUrl: string | null = null;
+  let moduleLink: HTMLAnchorElement | null = null;
 
   function dropModule() {
     if (moduleUrl) URL.revokeObjectURL(moduleUrl);
@@ -225,7 +281,7 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
   }
 
   // Crumbs rather than a string, because one of them is a link. Both of these clear with an empty `replaceChildren` rather than an empty string: the separator between the trail and the step keys off `:empty`, and an empty text node is still a child.
-  function setTrail(parts) {
+  function setTrail(parts: (Node | string)[]) {
     trail.replaceChildren();
     parts.forEach((part, index) => {
       if (index) trail.append(" · ");
@@ -233,14 +289,14 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     });
   }
 
-  function setStep(content, tone) {
+  function setStep(content: Node | string, tone?: "working" | "ok" | "error") {
     if (content) stepLine.replaceChildren(content);
     else stepLine.replaceChildren();
     stepLine.dataset.tone = tone ?? "";
   }
 
   // "ran 12.4kb of WebAssembly in 0.3ms", with the size standing in for the module it measures. The anchor is minted without an href and kept aside for the result to arm: the bytes only reach the page a moment after this is drawn, and until then there is nothing to hand over — an anchor with no href is inert and unstyled, which is the truth of that moment.
-  function moduleCrumb(ms, bytes) {
+  function moduleCrumb(ms: number, bytes: number) {
     moduleLink = document.createElement("a");
     moduleLink.textContent = `${(bytes / 1024).toFixed(1)}kb of WebAssembly`;
     moduleLink.title = "Download the compiled module";
@@ -251,6 +307,7 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
   }
 
   function clearOutput() {
+    current++;
     dropModule();
     setOutput("");
     setTrail(["ready"]);
@@ -258,15 +315,15 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
   }
 
   // Lit and pressed are the same fact: which example is in the buffer. Colour alone would leave a screen reader with twelve identical buttons.
-  function light(chip, on) {
+  function light(chip: HTMLButtonElement, on: boolean) {
     chip.classList.toggle("chip--on", on);
     chip.setAttribute("aria-pressed", String(on));
   }
 
-  function pick(key) {
-    source.value = EXAMPLES[key].code;
+  function pick(name: string) {
+    source.value = sourceOf(name);
     renderGutter();
-    chips.forEach((chip) => light(chip, chip.dataset.example === key));
+    chips.forEach((chip) => light(chip, chip.dataset.example === name));
     clearOutput();
   }
 
@@ -280,11 +337,71 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     gutter.scrollTop = source.scrollTop;
   });
 
-  chips.forEach((chip) => chip.addEventListener("click", () => pick(chip.dataset.example)));
+  chips.forEach((chip) => chip.addEventListener("click", () => pick(chip.dataset.example ?? "")));
+
+  // How tall the pane is, how much room it shares with the editor, and how far it can go either way: down to its own min-height, up until the editor is at its own. Both floors are read from the styles that set them rather than restated here.
+  type Bounds = { height: number; room: number; min: number; max: number };
+
+  function bounds(): Bounds {
+    const height = output.getBoundingClientRect().height;
+    const room = height + editor.getBoundingClientRect().height;
+    const min = parseFloat(getComputedStyle(output).minHeight);
+    return { height, room, min, max: room - parseFloat(getComputedStyle(editor).minHeight) };
+  }
+
+  // Both heights are set, not just the pane's: the editor's is what a window that changes size afterwards scales in proportion, so it has to be the editor you left rather than the one the page started with.
+  function resize(height: number, { room, min, max }: Bounds) {
+    const pane = Math.min(Math.max(height, min), max);
+    output.style.setProperty("--output-height", `${pane}px`);
+    editor.style.setProperty("--editor-height", `${room - pane}px`);
+  }
+
+  // The bounds are taken once, when the splitter is grabbed, so the pane stops dead at either end and starts moving again the moment the pointer comes back — rather than piling up a height the frame will not give it, to be paid off on the way back before anything moves. Capturing the pointer keeps the drag alive when it outruns the strip, and holding back the press keeps it from selecting the page on the way.
+  let drag: (Bounds & { y: number }) | null = null;
+
+  splitter.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    splitter.setPointerCapture(event.pointerId);
+    splitter.classList.add("dragging");
+    drag = { y: event.clientY, ...bounds() };
+  });
+
+  splitter.addEventListener("pointermove", (event) => {
+    if (drag) resize(drag.height + drag.y - event.clientY, drag);
+  });
+
+  // Releasing the pointer, cancelling it, and losing it all end here: capture is released implicitly on the first two.
+  splitter.addEventListener("lostpointercapture", () => {
+    splitter.classList.remove("dragging");
+    drag = null;
+  });
+
+  // The splitter sits above the pane, Run bar and all, so up is taller. A step is a line of output, give or take.
+  const KEY_STEPS: Record<string, number> = { ArrowUp: 22, ArrowDown: -22 };
+
+  splitter.addEventListener("keydown", (event) => {
+    const step = KEY_STEPS[event.key];
+    if (!step) return;
+    event.preventDefault();
+    const now = bounds();
+    resize(now.height + step, now);
+  });
+
+  // A focusable separator owes a screen reader its position. The window moves the bounds as surely as the splitter does, so the values follow both halves of the frame rather than the splitter's own events.
+  const describe = new ResizeObserver(() => {
+    const { height, min, max } = bounds();
+    splitter.setAttribute("aria-valuemin", String(Math.round(min)));
+    splitter.setAttribute("aria-valuemax", String(Math.round(max)));
+    splitter.setAttribute("aria-valuenow", String(Math.round(height)));
+  });
+  describe.observe(editor);
+  describe.observe(output);
 
   runButton.addEventListener("click", async () => {
     if (running) return;
     running = true;
+    const ticket = ++current;
     runButton.disabled = true;
     runButton.textContent = "Running…";
     // The last run's module goes with the last run's output: its crumb is about to be cleared off the line, and nothing else holds the URL.
@@ -292,25 +409,28 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     setOutput("");
 
     // The line is a breadcrumb: each step names itself as it starts, then settles into a measurement and hands the end of the line to the next one. There is no separate success message at the end because none is needed — a line that reached "ran" is a program that compiled and ran, and it says so in more detail than "accepted" would, so that last crumb simply goes green and stands as the verdict.
-    const done = [];
-    let ran = null;
+    const done: (Node | string)[] = [];
+    let ran: Node | string = "";
     setTrail([]);
 
     // Named here rather than waited for: spawning the worker and fetching its script takes long enough on a cold page to leave the line blank, and the first "begin" from the worker overwrites this the moment it lands, so guessing wrong costs nothing.
     setStep(loaded ? STEPS.compile.doing : STEPS.load.doing, "working");
 
     try {
-      const result = await compileAndReport(source.value, ({ phase, step, ms, bytes }) => {
-        if (phase === "begin") {
-          setStep(STEPS[step].doing, "working");
+      const result = await compileAndReport(source.value, (event) => {
+        // Whether the compiler arrived is the worker's state, not the line's, so it is kept even for a run that has been overtaken.
+        if (event.phase === "end" && event.step === "load") loaded = true;
+        if (ticket !== current) return;
+
+        if (event.phase === "begin") {
+          setStep(STEPS[event.step].doing, "working");
           return;
         }
         // The run step is handed the size of the module it ran alongside its duration: with no second pane to state it, the breadcrumb is the only place the compiler's output gets measured — or offered.
-        const crumb = STEPS[step].done(ms, bytes);
-        if (step === "load") loaded = true;
+        const crumb = STEPS[event.step].done(event.ms, event.bytes);
 
         // The run is the last step there is, so its crumb stays where the outcome goes rather than falling back into the trail: green, unshrinkable, and holding the slot an error would otherwise have taken.
-        if (step === "run") {
+        if (event.step === "run") {
           ran = crumb;
           setStep(crumb, "ok");
           return;
@@ -321,31 +441,33 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
         setStep("");
       });
 
+      // A compiler that never arrived has judged nothing, so the line says as much rather than laying the failure at the program's door.
+      if (!result.ok && result.phase === "load") loaded = false;
+      if (ticket !== current) return;
+
       if (!result.ok) {
         setOutput(result.error, "error");
-        // A compiler that never arrived has judged nothing, so the line says as much rather than laying the failure at the program's door.
-        const unavailable = result.phase === "load";
-        if (unavailable) loaded = false;
 
-        // The step that failed leaves no crumb, because its past tense would claim the one thing that did not happen: "compiled source in 42.1ms · refused source" is a line arguing with itself. The verdict carries the duration instead, which is what that crumb was really for — how long the compiler spent before refusing is worth as much as how long it spends accepting, and the commonest failure there is, a typo on a page already warm, would otherwise put a bare word on an empty line. A compiler that never arrived is the exception: it measured nothing worth reading, and says so without a number.
+        // The step that failed leaves no crumb, because its past tense would claim the one thing that did not happen: "compiled source in 42.1ms · refused source" is a line arguing with itself. The verdict carries the duration instead, which is what that crumb was really for — how long the compiler spent before refusing is worth as much as how long it spends accepting, and the commonest failure there is, a typo on a page already warm, would otherwise put a bare word on an empty line. A compiler that never arrived is the exception: it measured nothing worth reading, and says so without a number — as does a failure of the playground's own, which has no step to time.
+        const took = result.ms === undefined ? "" : ` in ${result.ms.toFixed(1)}ms`;
         setStep(
-          unavailable
-            ? "never arrived"
-            : `${result.phase === "compile" ? "refused source" : "failed"} in ${result.ms.toFixed(1)}ms`,
+          result.phase === "load" ? "never arrived" : `${result.phase === "compile" ? "refused source" : "failed"}${took}`,
           "error",
         );
         return;
       }
 
       // The bytes only travel with the result, so the crumb's link is armed here rather than where it was drawn — a few milliseconds of an anchor that does not lead anywhere, on a line nobody has had time to reach for yet.
-      moduleUrl = URL.createObjectURL(new Blob([result.bytes], { type: "application/wasm" }));
-      moduleLink.href = moduleUrl;
-      moduleLink.download = "program.wasm";
+      if (moduleLink) {
+        moduleUrl = URL.createObjectURL(new Blob([result.bytes], { type: "application/wasm" }));
+        moduleLink.href = moduleUrl;
+        moduleLink.download = "program.wasm";
+      }
 
       // stderr joins stdout, and the way the process ended joins both: the pane holds the transcript of the run, not a feed of one stream.
       const printed = [`${result.run.stdout}${result.run.stderr}`.trimEnd()];
       const trapped = Boolean(result.run.trap);
-      if (trapped) printed.push(result.run.trap);
+      if (result.run.trap) printed.push(result.run.trap);
       else if (result.run.exitCode) printed.push(`Process exited with code ${result.run.exitCode}`);
 
       // A run that trapped is a failed run, and the whole transcript is coloured as one: whatever the program managed to print before it died is part of the failure rather than output standing on its own.
@@ -363,5 +485,5 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     }
   });
 
-  pick(defaultKey);
+  pick(EXAMPLES[0].name);
 </script>

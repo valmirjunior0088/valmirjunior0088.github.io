@@ -4,11 +4,19 @@ let worker = null;
 let nextId = 0;
 const pending = new Map();
 
-function fail(id, error) {
+// How each failure reads in the pane. A refusal is the compiler's own report and passes through untouched; the rest are the playground's trouble rather than the program's, and say which part of it gave out.
+const WORDING = {
+  load: (cause) => `Couldn't load the curios compiler: ${cause}`,
+  run: (cause) => `Couldn't run the program: ${cause}`,
+  internal: (cause) => `The playground failed: ${cause}`,
+};
+
+function settle(id, result) {
   const request = pending.get(id);
   if (!request) return;
   pending.delete(id);
-  request.resolve({ ok: false, phase: "load", ms: 0, error: `Couldn't load the curios compiler: ${error}` });
+  const word = !result.ok && WORDING[result.phase];
+  request.resolve(word ? { ...result, error: word(result.error) } : result);
 }
 
 function getWorker() {
@@ -16,22 +24,16 @@ function getWorker() {
   worker = new Worker("/curios/worker.js", { type: "module" });
 
   worker.addEventListener("message", ({ data }) => {
-    const request = pending.get(data.id);
-    if (!request) return;
-    if (data.kind === "phase") {
-      request.onPhase?.(data.event);
-    } else {
-      pending.delete(data.id);
-      request.resolve(data.result);
-    }
+    if (data.kind === "phase") pending.get(data.id)?.onPhase?.(data.event);
+    else settle(data.id, data.result);
   });
 
-  // An error at this level is the worker itself failing — a script that would not parse, a bundle that never fetched — not a program being refused, which comes back as an ordinary result. Every request in flight gets the same answer, and the worker is dropped so a retry starts clean.
+  // An error at this level is the worker itself failing to start — a script that would not parse, a file that never arrived. Everything after that is caught inside the worker and comes back as an ordinary result, so this is always a failure to load. Every request in flight gets the same answer, and the worker is dropped so a retry starts clean.
   worker.addEventListener("error", (event) => {
     const dead = worker;
     worker = null;
     dead.terminate();
-    for (const id of [...pending.keys()]) fail(id, event.message || "worker error");
+    for (const id of [...pending.keys()]) settle(id, { ok: false, phase: "load", error: event.message || "the worker would not start" });
   });
 
   return worker;
@@ -44,7 +46,7 @@ export function compileAndReport(source, onPhase) {
     try {
       getWorker().postMessage({ id, source });
     } catch (error) {
-      fail(id, error.message || error);
+      settle(id, { ok: false, phase: "load", error: error?.message || String(error) });
     }
   });
 }

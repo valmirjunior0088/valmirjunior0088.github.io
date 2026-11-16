@@ -1,0 +1,19 @@
+use /std/{Bool, Nat, Vec, print};
+use /std/Bool/{False};
+
+pub let broken(@n: Nat) -> Vec(Nat, n) =
+    Vec/cons(0, Vec/nil());
+
+pub let ratio(n: Nat, d: Nat) -> Nat =
+    n / d;
+
+pub let pick(b: Bool) -> Nat =
+    match b | true => 1 end;
+
+pub let absurd(n: Nat) -> False =
+    absurd(n + 1);
+
+pub let total: Natt =
+    3;
+
+print("unreachable\n")

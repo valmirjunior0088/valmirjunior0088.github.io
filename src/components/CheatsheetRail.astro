@@ -56,7 +56,7 @@ import { LANGUAGE_URL } from "../data/site";
     overflow: hidden;
     background: var(--raise);
     border-left: 1px solid var(--edge);
-    box-shadow: -18px 0 40px rgba(0, 0, 0, 0.35);
+    box-shadow: -18px 0 40px var(--shadow);
     transform: translateX(102%);
     transition: transform 240ms cubic-bezier(0.22, 0.7, 0.2, 1);
     pointer-events: none;
@@ -136,13 +136,13 @@ import { LANGUAGE_URL } from "../data/site";
     white-space: nowrap;
   }
 
-  /* 82px of right padding is the corner kept clear for the count, which the text would otherwise scroll under: the longest reading this corpus can produce is "61 of 61", eight characters of Geist Mono at 11px — a 0.6em advance and 0.12em of tracking, so 7.92px each — plus the 10px inset it sits at and 8px of air before the query runs into it. */
+  /* 82px of right padding is the corner kept clear for the count, which the text would otherwise scroll under: the longest reading this corpus can produce is "64 of 64", eight characters of Geist Mono at 11px — a 0.6em advance and 0.12em of tracking, so 7.92px each — plus the 10px inset it sits at and 8px of air before the query runs into it. Any count under a hundred is the same eight characters; the hundredth card is the one that needs this redone. */
   .search {
     width: 100%;
     height: 100%;
     min-width: 0;
     padding: 0 82px 0 10px;
-    background: rgba(0, 0, 0, 0.25);
+    background: var(--well);
     border: 1px solid var(--edge-strong);
     border-radius: var(--r-chip);
     color: var(--fg);
@@ -171,11 +171,11 @@ import { LANGUAGE_URL } from "../data/site";
 
   /* Row-major, so cards read left to right, and every card in a row takes the height of the tallest one in it, which closes the row as a band rather than leaving a hole under whichever card is shortest. Each card centres its own code well in the height it is handed. Column-major would pack them tighter still, but it needs a bounded height this scrolling container does not have.
 
-     455px is the longest line in the corpus plus the card around it: 420px of Geist Mono at 12.5px, 56 characters, and 30px for the padding around an example and the panel's border. Narrower than that and a line breaks, so the count drops as soon as another whole column will not fit rather than squeezing one in — and whatever does fit spreads to fill the rail, which --rail has already sized to hold a round number of them. The min() is what keeps the track from overflowing a screen narrower than a single card, where 455px has stopped being a floor worth holding. */
+     A column is never narrower than --card, the width below which a line breaks (tokens.css works it out), so the count drops as soon as another whole column will not fit rather than squeezing one in — and whatever does fit spreads to fill the rail, which --rail has already sized to hold a round number of them. The min() is what keeps the track from overflowing a screen narrower than a single card, where that width has stopped being a floor worth holding. */
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(455px, 100%), 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(min(var(--card), 100%), 1fr));
+    gap: var(--card-gap);
   }
 
   .empty {
