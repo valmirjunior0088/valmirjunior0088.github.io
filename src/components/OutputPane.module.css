@@ -1,0 +1,19 @@
+.output {
+  margin: 0;
+  padding: 16px;
+  overflow: auto;
+  font-family: var(--mono);
+  font-size: var(--ms-code-sm);
+  line-height: 1.75;
+  white-space: pre-wrap;
+  color: var(--fg-code);
+}
+
+/* The placeholder is prose, not output, and says so by sitting a tier dimmer than anything the compiler actually printed. The page says which it is showing by an attribute, and says by another when what it shows went wrong. */
+.output[data-empty] {
+  color: var(--fg-mute);
+}
+
+.output[data-error] {
+  color: var(--err);
+}

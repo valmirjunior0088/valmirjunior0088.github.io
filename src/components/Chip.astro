@@ -1,0 +1,25 @@
+---
+// A chip: the example picker's, the trial switch's — pressed when it stands for what is chosen, which `pressed` writes as `aria-pressed` and the style reads back, so a script that changes the choice changes one attribute and the look follows. `static` is a badge that only looks like one: the licence.
+import styles from "./Chip.module.css";
+
+interface Props {
+  pressed?: boolean;
+  static?: boolean;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { pressed, static: badge, class: className, ...attrs } = Astro.props;
+---
+
+{
+  badge ? (
+    <span class:list={[styles.chip, styles.static, className]} {...attrs}>
+      <slot />
+    </span>
+  ) : (
+    <button class:list={[styles.chip, className]} aria-pressed={pressed === undefined ? undefined : pressed ? "true" : "false"} {...attrs}>
+      <slot />
+    </button>
+  )
+}

@@ -1,95 +1,29 @@
 ---
 import Section from "./Section.astro";
+import SectionTitle from "./SectionTitle.astro";
+import Chip from "./Chip.astro";
 import { RESOURCES, CLOSING } from "../data/home";
 import { LICENCE } from "../data/site";
+import styles from "./ResourceGrid.module.css";
 ---
 
 <Section>
-  <div class="closing">
+  <div class={styles.closing}>
     <div>
-      <h2 class="section-title">{CLOSING.heading}</h2>
+      <SectionTitle class={styles.heading}>{CLOSING.heading}</SectionTitle>
       <p>{CLOSING.body}</p>
-      <span class="chip chip--static">{LICENCE}</span>
+      <Chip static class={styles.licence}>{LICENCE}</Chip>
     </div>
 
-    <div class="cards">
+    <div class={styles.cards}>
       {
         RESOURCES.map((resource) => (
-          <a class="card" href={resource.href}>
-            <span class="title">{resource.title}</span>
-            <span class="body">{resource.body}</span>
+          <a class={styles.card} href={resource.href}>
+            <span class={styles.title}>{resource.title}</span>
+            <span class={styles.body}>{resource.body}</span>
           </a>
         ))
       }
     </div>
   </div>
 </Section>
-
-<style>
-  .closing {
-    display: grid;
-    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
-    gap: 64px;
-    align-items: start;
-  }
-
-  h2 {
-    margin-bottom: 16px;
-  }
-
-  .closing p {
-    font-size: 16px;
-    line-height: 1.65;
-    color: var(--fg-mute);
-    margin: 0 0 24px;
-    text-wrap: pretty;
-  }
-
-  .chip {
-    display: inline-block;
-  }
-
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
-    gap: 16px;
-  }
-
-  .card {
-    display: block;
-    padding: 20px 20px 24px;
-    border: 1px solid var(--edge);
-    border-radius: var(--r-panel);
-    color: var(--fg);
-    transition:
-      border-color 120ms ease,
-      background 120ms ease;
-  }
-
-  .card:hover {
-    border-color: var(--accent-edge);
-    background: var(--accent-wash);
-    color: var(--fg);
-  }
-
-  .title {
-    display: block;
-    font-size: 17px;
-    font-weight: 400;
-    margin-bottom: 8px;
-  }
-
-  .body {
-    display: block;
-    font-size: 14px;
-    line-height: 1.55;
-    color: var(--fg-mute);
-  }
-
-  @media (max-width: 720px) {
-    .closing {
-      grid-template-columns: 1fr;
-      gap: 32px;
-    }
-  }
-</style>

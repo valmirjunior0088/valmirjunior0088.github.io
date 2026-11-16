@@ -1,5 +1,7 @@
 ---
 // A fixed-height strip across the playground: the example picker, the action bar. Never grows, never scrolls vertically, and separates two flexible regions.
+import styles from "./Toolbar.module.css";
+
 interface Props {
   scroll?: boolean;
   class?: string;
@@ -8,28 +10,6 @@ interface Props {
 const { scroll = false, class: className } = Astro.props;
 ---
 
-<div class:list={["toolbar", scroll && "toolbar--scroll", className]}>
+<div class:list={[styles.toolbar, scroll && styles.scroll, className]}>
   <slot />
 </div>
-
-<style>
-  /* The vertical padding is a token rather than a figure because the splitter stands in for it above the action bar, and the two have to agree. */
-  .toolbar {
-    flex: none;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: var(--toolbar-y) 20px;
-    background: var(--band);
-    border-bottom: 1px solid var(--line);
-  }
-
-  /* The example picker can outgrow the width; it scrolls sideways rather than wrapping into a second row and changing the frame's geometry. */
-  .toolbar--scroll {
-    overflow-x: auto;
-  }
-
-  .toolbar--scroll > :global(*) {
-    flex: none;
-  }
-</style>

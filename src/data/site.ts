@@ -20,7 +20,7 @@ export const PAGES: Record<PageId, { chip: string; label: string; title: string;
   playground: { chip: "PLAYGROUND", label: "Playground", title: "Playground · Curios", href: "/curios/playground/" },
 };
 
-// Labels mark inline code with backticks, as every other string in data/ does; see data/markup.ts.
+// Labels mark inline code with backticks, as every other string in data/ does; see src/lib/inline.ts.
 export const EXTERNAL_NAV = [
   { label: "Rust docs", href: RUST_DOCS_URL },
   { label: "`/std` docs", href: STD_DOCS_URL },

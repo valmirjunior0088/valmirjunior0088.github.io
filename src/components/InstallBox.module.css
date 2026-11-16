@@ -1,0 +1,45 @@
+.install {
+  border-top: 1px solid var(--edge);
+  padding-top: 20px;
+}
+
+.caption {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.well {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--well);
+  border: 1px solid var(--edge);
+  border-radius: var(--r-btn);
+}
+
+/* The command is longer than the box and always will be. Rather than wrap it or shrink it, it scrolls, and the mask tells you so by fading the last stretch out instead of guillotining it at the border. The fade is a promise that there is more to the right, so it lifts once there is not — at the end of the scroll, or on a screen wide enough that the command never had to scroll at all. The script says which by an attribute. */
+.command {
+  flex: 1;
+  min-width: 0;
+  contain: inline-size;
+  font-size: var(--ms-code-sm);
+  color: var(--fg);
+  white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent);
+}
+
+.command[data-ended] {
+  mask-image: none;
+}
+
+.command::-webkit-scrollbar {
+  display: none;
+}
+
+.copy {
+  flex: none;
+  margin-left: auto;
+}

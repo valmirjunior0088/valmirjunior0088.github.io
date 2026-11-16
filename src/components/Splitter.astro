@@ -1,35 +1,12 @@
 ---
 // Markup and metrics only: the drag lives in the playground page, which owns the heights of the editor and the pane, and so does the splitter's own height and where it appears. A separator rather than a bare strip, so the keyboard can move it too — the page keeps its aria values in step with the pane.
+import styles from "./Splitter.module.css";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
 ---
 
-<div class="splitter" data-splitter role="separator" aria-orientation="horizontal" aria-label="Output height" tabindex="0"></div>
-
-<style>
-  /* A strip that wears the action bar's own band, so the two read as one block. The whole strip is the target and the grip in its middle is only the sign of it, which goes amber on the site's hover contract and stays amber while it is held — or while the keyboard has it. */
-  .splitter {
-    flex: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--band);
-    cursor: row-resize;
-    touch-action: none;
-    user-select: none;
-    outline: none;
-  }
-
-  .splitter::before {
-    content: "";
-    width: 36px;
-    height: 4px;
-    border-radius: 2px;
-    background: var(--edge-strong);
-    transition: background 120ms ease;
-  }
-
-  .splitter:hover::before,
-  .splitter:focus-visible::before,
-  .splitter.dragging::before {
-    background: var(--accent);
-  }
-</style>
+<div class:list={[styles.splitter, className]} data-splitter role="separator" aria-orientation="horizontal" aria-label="Output height" tabindex="0"></div>

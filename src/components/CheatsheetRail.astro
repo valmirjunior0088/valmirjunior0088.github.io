@@ -1,230 +1,46 @@
 ---
 import CheatsheetCard from "./CheatsheetCard.astro";
+import Label from "./Label.astro";
+import Button from "./Button.astro";
 import { CHEATSHEET } from "../data/cheatsheet";
 import { LANGUAGE_URL } from "../data/site";
+import styles from "./CheatsheetRail.module.css";
 ---
 
-<div class="backdrop" data-rail-backdrop hidden></div>
+<div class={styles.backdrop} data-rail-backdrop hidden></div>
 
-<aside class="rail" data-rail aria-label="Cheatsheet" aria-hidden="true" inert>
-  <div class="head">
-    <div class="row">
-      <h2>Cheatsheet</h2>
-      <div class="field">
+<aside class={styles.rail} data-rail aria-label="Cheatsheet" aria-hidden="true" inert>
+  <div class={styles.head}>
+    <div class={styles.row}>
+      <h2 class={styles.title}>Cheatsheet</h2>
+      <div class={styles.field}>
         <input
-          class="search"
+          class={styles.search}
           type="search"
           placeholder="Search…"
           aria-label="Search the cheatsheet"
           autocomplete="off"
           data-rail-search
         />
-        <span class="label count" data-rail-count></span>
+        <Label class={styles.count} data-rail-count />
       </div>
-      <button class="btn btn--chip close" data-rail-close title="Close the cheatsheet" aria-label="Close the cheatsheet">
-        ›
-      </button>
+      <Button variant="chip" class={styles.close} data-rail-close title="Close the cheatsheet" aria-label="Close the cheatsheet">›</Button>
     </div>
   </div>
 
-  <div class="body">
-    <div class="cards" data-rail-cards>
+  <div class={styles.body}>
+    <div class={styles.cards} data-rail-cards>
       {CHEATSHEET.map((card) => <CheatsheetCard card={card} />)}
     </div>
 
-    <p class="empty" hidden data-rail-empty>
+    <p class={styles.empty} hidden data-rail-empty>
       no matches for &ldquo;<span data-rail-query></span>&rdquo; &mdash;
-      <button class="reset" data-rail-reset>clear the filter</button>
+      <button class={styles.reset} data-rail-reset>clear the filter</button>
     </p>
 
-    <a class="reference" href={LANGUAGE_URL}>Full language reference →</a>
+    <a class={styles.reference} href={LANGUAGE_URL}>Full language reference →</a>
   </div>
 </aside>
-
-<style>
-  /* Wide enough for two columns of cards, which is what the corpus needs to be read rather than merely searched, and for a third where the screen allows one — --rail carries the arithmetic. It covers most of the editor while open, all of it on a phone, and that is the correct trade: you are reading, not typing. */
-  .rail {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 30;
-    width: var(--rail);
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    overflow: hidden;
-    background: var(--raise);
-    border-left: 1px solid var(--edge);
-    box-shadow: -18px 0 40px var(--shadow);
-    transform: translateX(102%);
-    transition: transform 240ms cubic-bezier(0.22, 0.7, 0.2, 1);
-    pointer-events: none;
-  }
-
-  .rail.open {
-    transform: translateX(0);
-    pointer-events: auto;
-  }
-
-  .backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 29;
-  }
-
-  /* The slide is decoration: the rail is in the same place at the end of it either way. Anyone who has asked their system for less movement gets it arriving instead of travelling. */
-  @media (prefers-reduced-motion: reduce) {
-    .rail {
-      transition: none;
-    }
-  }
-
-  /* Matches the app header exactly, so the rail's title row lands on the same line as the wordmark rather than floating a few pixels off it. */
-  .head {
-    flex: none;
-    display: flex;
-    align-items: center;
-    height: var(--bar);
-    padding: 0 16px;
-    border-bottom: 1px solid var(--line);
-  }
-
-  /* One 28px row: the title and the close chip take exactly their own width, and the search field takes everything left over. Stretching the row rather than centring its parts is what makes them share one box. The way out sits last, on the edge the rail came in from and nearest the thumb that opened it. */
-  .row {
-    flex: 1;
-    display: grid;
-    grid-template-columns: max-content 1fr max-content;
-    gap: 16px;
-    height: 28px;
-    align-items: stretch;
-  }
-
-  /* The count belongs to the field rather than to the row. As a track of its own it was empty until you typed and then suddenly 63px wide, which shoved the input sideways on the first keystroke — the one thing a search field must never do while you are typing into it. Overlaid, it costs the field a constant inset instead of a moving one. */
-  .field {
-    position: relative;
-    min-width: 0;
-  }
-
-  /* The same 10px the text keeps from the left, mirrored. It is a readout, not a control: clicks fall through it to the field underneath. */
-  .count {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 10px;
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-    pointer-events: none;
-  }
-
-  /* Square at whatever height the row is — 28px on a desktop, 40px on a phone — so its width is derived rather than declared twice. The glyph is set well above the chip's own size: it is the whole label, it has a square to fill, and at the micro size the rest of the chips wear it read as a stray piece of punctuation rather than a way out. No letter-spacing, or the tracking after the glyph would push it off the centre it was placed in. */
-  .close {
-    height: 100%;
-    aspect-ratio: 1;
-    padding: 0;
-    letter-spacing: 0;
-    font-size: 18px;
-    justify-content: center;
-  }
-
-  h2 {
-    display: flex;
-    align-items: center;
-    font-size: 21px;
-    line-height: 1;
-    white-space: nowrap;
-  }
-
-  /* 82px of right padding is the corner kept clear for the count, which the text would otherwise scroll under: the longest reading this corpus can produce is "64 of 64", eight characters of Geist Mono at 11px — a 0.6em advance and 0.12em of tracking, so 7.92px each — plus the 10px inset it sits at and 8px of air before the query runs into it. Any count under a hundred is the same eight characters; the hundredth card is the one that needs this redone. */
-  .search {
-    width: 100%;
-    height: 100%;
-    min-width: 0;
-    padding: 0 82px 0 10px;
-    background: var(--well);
-    border: 1px solid var(--edge-strong);
-    border-radius: var(--r-chip);
-    color: var(--fg);
-    font-family: var(--sans);
-    font-size: var(--ms-code-sm);
-    line-height: 1;
-    outline: none;
-  }
-
-  .search:focus {
-    border-color: var(--accent-edge);
-  }
-
-  /* Chrome and Safari park a cancel button in that same corner, and it appears under exactly the condition the count does — a field with something in it. Firefox draws none at all, so the design could never lean on it; the corner goes to the count in every browser instead. */
-  .search::-webkit-search-cancel-button {
-    -webkit-appearance: none;
-    display: none;
-  }
-
-  .body {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 16px;
-  }
-
-  /* Row-major, so cards read left to right, and every card in a row takes the height of the tallest one in it, which closes the row as a band rather than leaving a hole under whichever card is shortest. Each card centres its own code well in the height it is handed. Column-major would pack them tighter still, but it needs a bounded height this scrolling container does not have.
-
-     A column is never narrower than --card, the width below which a line breaks (tokens.css works it out), so the count drops as soon as another whole column will not fit rather than squeezing one in — and whatever does fit spreads to fill the rail, which --rail has already sized to hold a round number of them. The min() is what keeps the track from overflowing a screen narrower than a single card, where that width has stopped being a floor worth holding. */
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(var(--card), 100%), 1fr));
-    gap: var(--card-gap);
-  }
-
-  .empty {
-    font-size: 13px;
-    color: var(--fg-mute);
-    text-align: center;
-    padding: 24px 0;
-  }
-
-  .reset {
-    font: inherit;
-    background: none;
-    border: none;
-    padding: 0;
-    color: var(--accent);
-    cursor: pointer;
-  }
-
-  .reference {
-    display: block;
-    text-align: center;
-    font-size: var(--ms-code-sm);
-    margin-top: 16px;
-    padding: 12px 0 6px;
-    border-top: 1px solid var(--line);
-  }
-
-  /* Under 16px, iOS zooms the page in on focus and leaves it there. The row grows to the 40px the close chip takes at this width, so it stays centred in the bar instead of spilling out the bottom of it. */
-  @media (max-width: 720px) {
-    .row {
-      height: 40px;
-    }
-
-    .search {
-      font-size: 16px;
-    }
-  }
-
-  /* On a phone the title and the search field fight over one row; the search wins, since the heading is repeated on the toggle that opened the rail. Two items left, so two tracks: with the third still declared, the field took the max-content track and the close chip was left holding the flexible one. */
-  @media (max-width: 480px) {
-    .row {
-      grid-template-columns: 1fr max-content;
-    }
-
-    h2 {
-      display: none;
-    }
-  }
-</style>
 
 <script>
   const rail = document.querySelector<HTMLElement>("[data-rail]");
@@ -241,9 +57,8 @@ import { LANGUAGE_URL } from "../data/site";
     // What opened the rail, so closing it can hand the focus back rather than dropping it at the top of the document.
     let opener: HTMLElement | null = null;
 
-    // A closed rail is off-screen, not gone: its field, its buttons, and its link stay in the tab order, and aria-hidden over focusable content is both an ARIA violation and, in practice, a tab that lands somewhere invisible. `inert` is what actually puts them out of reach — and it is on the markup from the start, since a rail nothing has opened cannot be used anyway.
+    // A closed rail is off-screen, not gone: its field, its buttons, and its link stay in the tab order, and aria-hidden over focusable content is both an ARIA violation and, in practice, a tab that lands somewhere invisible. `inert` is what actually puts them out of reach — and it is on the markup from the start, since a rail nothing has opened cannot be used anyway. It is also the one fact the style reads to slide the rail in, so being open and being drawn open cannot disagree.
     const setOpen = (open: boolean) => {
-      rail.classList.toggle("open", open);
       rail.setAttribute("aria-hidden", String(!open));
       rail.inert = !open;
       backdrop.hidden = !open;
@@ -271,14 +86,14 @@ import { LANGUAGE_URL } from "../data/site";
     toggles.forEach((toggle) =>
       toggle.addEventListener("click", () => {
         opener = toggle;
-        setOpen(!rail.classList.contains("open"));
+        setOpen(rail.inert);
       }),
     );
     closers.forEach((closer) => closer.addEventListener("click", () => setOpen(false)));
     backdrop.addEventListener("click", () => setOpen(false));
 
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && rail.classList.contains("open")) setOpen(false);
+      if (event.key === "Escape" && !rail.inert) setOpen(false);
     });
 
     search.addEventListener("input", filter);

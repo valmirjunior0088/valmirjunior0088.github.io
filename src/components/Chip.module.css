@@ -1,0 +1,40 @@
+.chip {
+  font-family: var(--mono);
+  font-size: var(--ms-chip);
+  font-weight: 400;
+  padding: 7px 12px;
+  background: transparent;
+  border: 1px solid var(--edge);
+  border-radius: var(--r-chip);
+  color: var(--fg-body);
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.chip:hover {
+  border-color: var(--accent-edge);
+  color: var(--accent);
+}
+
+/* Lit and pressed are the same fact, so the one is drawn from the other. */
+.chip[aria-pressed="true"] {
+  background: var(--accent-fill);
+  border-color: var(--accent-edge);
+  color: var(--accent);
+}
+
+/* A badge that only looks like a chip — the licence tag in the resources column. */
+.static {
+  cursor: default;
+  border-color: var(--accent-line);
+  color: var(--accent);
+  letter-spacing: 0.12em;
+}
+
+.static:hover {
+  border-color: var(--accent-line);
+  color: var(--accent);
+}

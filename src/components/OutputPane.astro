@@ -1,32 +1,13 @@
 ---
 // Markup and metrics only, like the editor above it: everything that writes here lives in the playground page, and so does how tall it is. One pane, no header — what the compiler says and what the program prints are the same transcript, and the breadcrumb on the action bar already names which of the two you are looking at.
+import styles from "./OutputPane.module.css";
+
 interface Props {
   placeholder: string;
+  class?: string;
 }
 
-const { placeholder } = Astro.props;
+const { placeholder, class: className } = Astro.props;
 ---
 
-<pre class="output empty" data-output data-placeholder={placeholder} aria-live="polite">{placeholder}</pre>
-
-<style>
-  .output {
-    margin: 0;
-    padding: 16px;
-    overflow: auto;
-    font-family: var(--mono);
-    font-size: var(--ms-code-sm);
-    line-height: 1.75;
-    white-space: pre-wrap;
-    color: var(--fg-code);
-  }
-
-  /* The placeholder is prose, not output, and says so by sitting a tier dimmer than anything the compiler actually printed. */
-  .output.empty {
-    color: var(--fg-mute);
-  }
-
-  .output.error {
-    color: var(--err);
-  }
-</style>
+<pre class:list={[styles.output, className]} data-output data-placeholder={placeholder} data-empty aria-live="polite">{placeholder}</pre>

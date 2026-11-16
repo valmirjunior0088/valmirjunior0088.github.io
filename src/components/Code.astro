@@ -1,0 +1,14 @@
+---
+// A block of Curios. The data files hold code as pre-highlighted markup in two classes — `kw` for anything the language reserves, `cm` for a comment — which this sets as given. `size="sm"` is the cheatsheet's step down the scale, which also wraps a long line where a block elsewhere would scroll.
+import styles from "./Code.module.css";
+
+interface Props {
+  html: string;
+  size?: "sm";
+  class?: string;
+}
+
+const { html, size, class: className } = Astro.props;
+---
+
+<pre class:list={[styles.code, size === "sm" && styles.sm, className]} set:html={html} />

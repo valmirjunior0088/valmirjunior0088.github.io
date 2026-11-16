@@ -1,0 +1,92 @@
+/* Every page holds the bar in place and blurs what passes under it. On a wide screen the playground's frame never scrolls, so the stickiness is inert there; on a phone the frame becomes a scrolling document and the bar behaves exactly as it does on the landing page. */
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: var(--bar);
+  padding: 0 28px;
+  border-bottom: 1px solid var(--edge);
+  background: var(--veil);
+  backdrop-filter: blur(14px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+}
+
+.brand .mark {
+  display: none;
+}
+
+.crumb {
+  padding-left: 20px;
+  border-left: 1px solid var(--edge-strong);
+}
+
+.nav {
+  display: flex;
+  gap: 24px;
+  min-width: 0;
+  margin-left: auto;
+  font-size: 14px;
+}
+
+.nav a {
+  flex: none;
+  color: var(--fg-body);
+  white-space: nowrap;
+}
+
+.nav a:hover {
+  color: var(--accent);
+}
+
+/* A label may carry a code span — "/std docs" names a path — and it wears the link's own colour rather than the accent the class would give it: amber is what this bar means by "hovered", and a link that is half amber at rest would be claiming a hover it does not have. The step down in size is the global `code` rule's. */
+.nav a code {
+  color: inherit;
+}
+
+/* The bar keeps its height at every width — the cheatsheet rail's title row is drawn to it — so nothing here may wrap. The crumb goes first: it only restates which page you are on, which the nav already implies by omission. */
+@media (max-width: 720px) {
+  .bar {
+    gap: 16px;
+    padding: 0 var(--pad);
+  }
+
+  .crumb {
+    display: none;
+  }
+
+  /* Four links do not fit beside the mark on the narrowest phones, and the bar may neither wrap nor grow — so the nav scrolls sideways, as the example picker does, with the scrollbar hidden the way the install command hides its own. The row starts flush right, so what a narrow screen loses is the far end of a scroller and never a link you cannot reach. */
+  .nav {
+    gap: 16px;
+    font-size: 13px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Tighter still on the narrowest phones, so that the last link is at least cut at the edge rather than gone from it: a word half shown says there is more, where a bar that ends cleanly on "/std docs" says nothing about GitHub. */
+@media (max-width: 400px) {
+  .nav {
+    gap: 12px;
+    font-size: 12px;
+  }
+
+  /* The wordmark gives way to the mark: the row is short of room, and a monogram beside three links reads as a mobile header rather than a desktop one squeezed. It is drawn at 30×32 rather than the wordmark's 26px of height — a monogram alone in the corner can carry more weight than one standing next to its own name, and the bar has 56px to spend. The box follows the artwork's 18:19, so nothing is stretched to get there. */
+  .brand .wordmark {
+    display: none;
+  }
+
+  .brand .mark {
+    display: block;
+  }
+}

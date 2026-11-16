@@ -1,0 +1,16 @@
+---
+// The mono caption that labels nearly everything on the site — the hero's eyebrow, the cards' tags, the section kickers, the footer. No uppercase transform: the same treatment carries filenames like vector.crs, which must keep their case. Anything else passed lands on the element, which is how a script finds the one it writes into.
+import styles from "./Label.module.css";
+
+interface Props {
+  as?: "span" | "p";
+  size?: "sm";
+  tone?: "accent";
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { as: Tag = "span", size, tone, class: className, ...attrs } = Astro.props;
+---
+
+<Tag class:list={[styles.label, size === "sm" && styles.sm, tone === "accent" && styles.accent, className]} {...attrs}><slot /></Tag>

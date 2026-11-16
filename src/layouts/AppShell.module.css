@@ -1,0 +1,28 @@
+/* The body of an application page: pinned to the viewport, with the frame taking what the header leaves. */
+.app {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* On a phone the frame stops being an application and becomes a document again. A frame pinned to 100dvh fights the on-screen keyboard, which resizes only the visual viewport; a page that scrolls has nothing to fight with. The playground's own styles pick up from here and give the editor a fixed height instead of the slack. */
+@media (max-width: 720px) {
+  .app {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+}
+
+/* Text for the outline rather than for the page: the playground's own heading, which the design has no room for and the document cannot do without. Clipped rather than hidden, because display: none and visibility: hidden would take it out of the accessibility tree along with everything else. */
+.heading {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

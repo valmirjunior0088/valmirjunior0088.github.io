@@ -1,62 +1,15 @@
 ---
 // Markup and metrics only. How tall it is belongs to the playground page, which shares the frame out between it and the output pane; the behaviour lives there too, because the gutter, the example chips, the run button, and the output pane all read and write the same piece of state, and splitting that across component scripts buys nothing but a harder trail to follow.
+import styles from "./Editor.module.css";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
 ---
 
-<div class="editor" data-editor>
-  <div class="gutter" data-gutter aria-hidden="true"></div>
-  <textarea class="input" data-source spellcheck="false" wrap="off" aria-label="Curios source"></textarea>
+<div class:list={[styles.editor, className]} data-editor>
+  <div class={styles.gutter} data-gutter aria-hidden="true"></div>
+  <textarea class={styles.input} data-source spellcheck="false" wrap="off" aria-label="Curios source"></textarea>
 </div>
-
-<style>
-  .editor {
-    display: flex;
-    border-bottom: 1px solid var(--edge);
-  }
-
-  /* The gutter's font size, line height, and top padding have to match the textarea's exactly or the numbers drift out of step with the lines they count. It scrolls only under the textarea's direction — never on its own.
-
-     The bottom padding is the one place it does not match, on purpose. A line wide enough to give the code a horizontal scrollbar gives it that scrollbar's height of extra travel, and a gutter that ran out of room first would leave its numbers sliding off their lines at the bottom of a long file. 24px past the textarea's 16px covers any scrollbar a browser draws; the gutter only ever follows, so the spare room is never seen. */
-  .gutter {
-    flex: none;
-    width: var(--editor-gutter);
-    padding: 16px 8px 40px 0;
-    text-align: right;
-    font-family: var(--mono);
-    font-size: var(--ms-code);
-    line-height: 1.75;
-    color: var(--fg-ghost);
-    background: var(--well);
-    overflow: hidden;
-    user-select: none;
-    white-space: pre;
-  }
-
-  .input {
-    flex: 1;
-    min-width: 0;
-    padding: 16px 20px;
-    border: none;
-    resize: none;
-    outline: none;
-    background: transparent;
-    color: var(--fg);
-    font-family: var(--mono);
-    font-size: var(--ms-code);
-    line-height: 1.75;
-    caret-color: var(--accent);
-    white-space: pre;
-    overflow: auto;
-  }
-
-  /* Same rule for both, and it has to be: under 16px iOS zooms the page in on focus, and the gutter must match the textarea exactly or the numbers drift off their lines. */
-  @media (max-width: 720px) {
-    .gutter,
-    .input {
-      font-size: 16px;
-    }
-
-    .input {
-      padding: 16px 12px;
-    }
-  }
-</style>

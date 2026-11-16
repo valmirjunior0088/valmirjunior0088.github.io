@@ -1,0 +1,149 @@
+/* The frame fills whatever the header leaves. Nothing here scrolls; the editor and the output pane scroll inside themselves, which is what keeps the toolbars where you left them. */
+.frame {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  --peek: 40px;
+}
+
+/* How the frame shares out its height — all of it here, beside the script that drags it, while the components only draw themselves. Each rule for a component the page renders is qualified by the frame, because it restyles that component and the two weigh the same otherwise.
+
+   The editor starts at 340px and the pane at 260px, the split that exactly fills a window about 780px tall. A taller window gives its extra to the editor alone, the half you are working in; a shorter one takes from both in proportion, so neither is squeezed to its floor before anything has been dragged. Once the splitter moves, both heights are its own, and a window that changes size treats them the same way. They arrive through properties rather than inline flex-bases, so the phone layout below still wins when a dragged window narrows into it.
+
+   The floor is the same for both, --peek: one line, which is all it takes to say a pane is there and that dragging brings it back. That is 16px of padding and the line under it — 22.75px in the editor, 21.875px in the pane — rounded up to one figure. On a run, the pane's one line is the headline: "type mismatch", or the first thing the program printed. */
+.frame .editor {
+  flex: 1 1 var(--editor-height, 340px);
+  min-height: var(--peek);
+}
+
+.frame .output {
+  flex: 0 1 var(--output-height, 260px);
+  min-height: var(--peek);
+}
+
+/* The splitter is the action bar's top edge, made grabbable: it stands in for the top padding the bar gives up, at the same --toolbar-y, so the buttons stay centred in a bar no taller than it was. */
+.frame .splitter {
+  height: var(--toolbar-y);
+}
+
+.frame .actions {
+  padding-top: 0;
+}
+
+/* The trail can run to four steps; on a narrow bar it truncates rather than push the cheatsheet toggle out of the frame — and the buttons on either side hold their width, so it is only ever the numbers that give. Both are built from the one --sm recipe and stand the same height without either being handed one.
+
+   They share a width too, and a fixed one, so the two read as a pair from opposite ends of the bar. 128px clears the widest label either wears — "‹ Cheatsheet" at 113px, then Run's "Running…" at 86px — which matters for Run, since it swaps its label mid-run: left to size itself it would change width the moment it was clicked and shove the breadcrumb sideways just as the breadcrumb started saying something.
+
+   Inside that width the word and its sigil are pushed to opposite edges: each word keeps to the outside of the bar and each sigil to the inside, pointing in, so the two buttons mirror each other across it. "Running…" has no sigil to push against and keeps to the left, where "Run" was. */
+.frame .control {
+  flex: none;
+  justify-content: space-between;
+  width: 128px;
+}
+
+/* The sigil belongs to the waiting button, not to the running one: a run that is under way is not pointing anywhere. It rides as a pseudo-element so the script that swaps the word never has to carry it around, and it leaves on `:disabled`, which is the exact state a run puts the button in — the label and the sigil change on the same event without either knowing about the other. As a flex item of the button it is also what the rule above can push to the far edge, away from the word.
+
+   A play triangle is not what the "›" is standing in for: Geist's latin subset carries no "▸", so a label wearing one would be part fallback face, and a fallback face brings its own metrics — the button lost height when the text swapped to an all-Geist "Running…". The guillemet is in the face, so the label stays one font, one line box, one height. */
+.run::after {
+  content: "›";
+}
+
+.run:disabled::after {
+  content: none;
+}
+
+/* The cheatsheet toggle is Run's own recipe — Geist, the --sm size, the same height — in outline rather than fill: a button you can see is a button, but there is one call to action on this bar and it is Run. The outline brings the site's hover contract with it, so it goes amber without being told.
+
+   What it adds is its sigil, the mirror of the "›" the rail closes with: that one points at where the panel goes, this one at where it comes from. It is a flex item of the button like the word beside it, which is how the shared rule above puts it at the near edge and the word at the far one — the mirror of Run at the other end of the bar.
+
+   Geist carries both guillemets, so this stays in the same face as the word rather than dragging in a fallback for one glyph — the mistake Run's label made with a play triangle.
+
+   The aria-label is what keeps the button's accessible name to the word: generated content counts toward the name, and a screen reader has no use for a piece of punctuation. */
+.toggle {
+  margin-left: auto;
+}
+
+.toggle::before {
+  content: "‹";
+}
+
+.status {
+  min-width: 0;
+  display: flex;
+  font-family: var(--mono);
+  font-size: var(--ms-chip);
+}
+
+/* The steps already paid for. These are what gives when the bar runs short — they clip from the right, so a cramped window keeps the waits you have been sitting through and loses the tail of the trail rather than the step in play, which never shrinks. */
+.trail {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--fg-faint);
+}
+
+/* The end of the breadcrumb: whatever is happening now, or — once nothing is — how it went wrong. It never shrinks, and it is empty on a run that worked, because the trail has already said everything there is to say about one of those. */
+.step {
+  flex: none;
+}
+
+.step[data-tone="working"] {
+  color: var(--accent);
+}
+
+/* Green is the whole verdict, now that nothing sits beside the output to give a second one: a line that reached "ran" is a program that compiled, ran, and printed whatever is in the pane below. */
+.step[data-tone="ok"] {
+  color: var(--ok);
+}
+
+.step[data-tone="error"] {
+  color: var(--err);
+}
+
+/* The size doubles as a link to the module itself, and it keeps whatever colour the crumb is wearing rather than taking the site's accent, hover included: the tone of this line is a verdict, and a green "ran" that turned orange halfway through would be reporting something it does not mean. An underline is the whole of what marks it — offset far enough to clear the descenders it runs under. The anchor is reached as an element, because the script mints it. */
+.status a,
+.status a:hover {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* The separator belongs to the step, and only when there is a trail in front of it to be separated from — the first step of a run leads the line rather than trailing a dot. It needs `pre` to keep its own spaces: generated content sits at the start of the step's line box, and a leading space there is collapsible whitespace, which the line box strips. The dot would otherwise arrive wearing only its right-hand space. */
+.trail:not(:empty) + .step:not(:empty)::before {
+  content: " · ";
+  white-space: pre;
+  color: var(--fg-faint);
+}
+
+/* Below the breakpoint AppShell has let the body scroll, and the frame stacks like a document. The editor takes a fixed share of the screen; the pane sits under it at whatever height its output wants rather than scrolling inside a box barely taller than a couple of lines; and with nothing left to share out, there is no splitter. The action bar sticks, one bar's height down so it parks under the sticky header rather than sliding beneath it — Run has to stay in reach while you scroll down to read what it produced — and takes back the top padding the splitter was standing in for. */
+@media (max-width: 720px) {
+  .frame .editor {
+    flex: none;
+    height: 55dvh;
+  }
+
+  .frame .splitter {
+    display: none;
+  }
+
+  .frame .actions {
+    position: sticky;
+    top: var(--bar);
+    z-index: 10;
+    padding-top: var(--toolbar-y);
+    background: var(--raise);
+  }
+
+  .frame .output {
+    flex: none;
+    min-height: 96px;
+    overflow: visible;
+  }
+
+  /* No room for the timings between two thumb-sized buttons, and no good way to wrap four phases under them either. On a phone the pane carries the outcome by itself — it turns red and says what went wrong — and the numbers are a desktop luxury. */
+  .status {
+    display: none;
+  }
+}

@@ -1,5 +1,7 @@
 ---
 // Two boxes, always. The outer one runs edge to edge so a banded section's tint and rules reach the window; the inner one caps the width and holds the gutter. Collapsing them into one box works right up until the first banded section, and then it does not.
+import styles from "./Section.module.css";
+
 interface Props {
   banded?: boolean;
 }
@@ -7,22 +9,8 @@ interface Props {
 const { banded = false } = Astro.props;
 ---
 
-<section class:list={["outer", banded && "outer--banded"]}>
-  <div class="inner">
+<section class:list={[banded && styles.banded]}>
+  <div class={styles.inner}>
     <slot />
   </div>
 </section>
-
-<style>
-  .outer--banded {
-    background: var(--band);
-    border-top: 1px solid var(--edge);
-    border-bottom: 1px solid var(--edge);
-  }
-
-  .inner {
-    max-width: var(--max);
-    margin: 0 auto;
-    padding: var(--sec-y) var(--pad);
-  }
-</style>

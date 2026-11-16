@@ -1,0 +1,27 @@
+/* A strip that wears the action bar's own band, so the two read as one block. The whole strip is the target and the grip in its middle is only the sign of it, which goes amber on the site's hover contract and stays amber while it is held — the page marks that with an attribute — — or while the keyboard has it. */
+.splitter {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--band);
+  cursor: row-resize;
+  touch-action: none;
+  user-select: none;
+  outline: none;
+}
+
+.splitter::before {
+  content: "";
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--edge-strong);
+  transition: background 120ms ease;
+}
+
+.splitter:hover::before,
+.splitter:focus-visible::before,
+.splitter[data-dragging]::before {
+  background: var(--accent);
+}

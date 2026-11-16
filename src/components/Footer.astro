@@ -1,44 +1,11 @@
 ---
+import Label from "./Label.astro";
 import { ISSUES_URL, LICENCE } from "../data/site";
+import styles from "./Footer.module.css";
 ---
 
-<footer>
-  <img src="/curios/brand/curios-mark.svg" alt="" width="18" height="19" />
-  <span class="label">CURIOS · {LICENCE}</span>
-  <a href={ISSUES_URL}>Report something surprising →</a>
+<footer class={styles.footer}>
+  <img class={styles.mark} src="/curios/brand/curios-mark.svg" alt="" width="18" height="19" />
+  <Label>CURIOS · {LICENCE}</Label>
+  <a class={styles.link} href={ISSUES_URL}>Report something surprising →</a>
 </footer>
-
-<style>
-  footer {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 20px;
-    max-width: var(--max);
-    margin: 0 auto;
-    padding: 32px var(--pad);
-    border-top: 1px solid var(--edge);
-  }
-
-  img {
-    display: block;
-  }
-
-  a {
-    margin-left: auto;
-    font-size: 13px;
-  }
-
-  /* Two rows on a phone, both centred: the mark and its label, then the link. */
-  @media (max-width: 720px) {
-    footer {
-      justify-content: center;
-    }
-
-    a {
-      margin-left: 0;
-      flex-basis: 100%;
-      text-align: center;
-    }
-  }
-</style>

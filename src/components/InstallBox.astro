@@ -1,70 +1,26 @@
 ---
+import Button from "./Button.astro";
+import Label from "./Label.astro";
 import { INSTALL_COMMAND } from "../data/site";
+import styles from "./InstallBox.module.css";
 ---
 
-<div class="install">
-  <span class="label">INSTALL THE CLI</span>
-  <div class="well">
-    <code>{INSTALL_COMMAND}</code>
-    <button class="btn btn--chip push" data-install-copy>COPY</button>
+<div class={styles.install}>
+  <Label class={styles.caption}>INSTALL THE CLI</Label>
+  <div class={styles.well}>
+    <code class={styles.command} data-install-command>{INSTALL_COMMAND}</code>
+    <Button variant="chip" class={styles.copy} data-install-copy>COPY</Button>
   </div>
 </div>
 
-<style>
-  .install {
-    border-top: 1px solid var(--edge);
-    padding-top: 20px;
-  }
-
-  .label {
-    display: block;
-    margin-bottom: 12px;
-  }
-
-  .well {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    background: var(--well);
-    border: 1px solid var(--edge);
-    border-radius: var(--r-btn);
-  }
-
-  /* The command is longer than the box and always will be. Rather than wrap it or shrink it, it scrolls, and the mask tells you so by fading the last stretch out instead of guillotining it at the border. The fade is a promise that there is more to the right, so it lifts once there is not — at the end of the scroll, or on a screen wide enough that the command never had to scroll at all. */
-  code {
-    flex: 1;
-    min-width: 0;
-    contain: inline-size;
-    font-size: var(--ms-code-sm);
-    color: var(--fg);
-    white-space: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-    mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent);
-  }
-
-  code.ended {
-    mask-image: none;
-  }
-
-  code::-webkit-scrollbar {
-    display: none;
-  }
-
-  .btn {
-    flex: none;
-  }
-</style>
-
 <script>
   const button = document.querySelector<HTMLButtonElement>("[data-install-copy]");
-  const command = document.querySelector<HTMLElement>(".install code");
+  const command = document.querySelector<HTMLElement>("[data-install-command]");
 
   if (button && command) {
     // A one-pixel slack, because a scroller at its end can land a fraction short of its own scrollWidth.
     const atEnd = () => command.scrollWidth - command.scrollLeft - command.clientWidth <= 1;
-    const syncFade = () => command.classList.toggle("ended", atEnd());
+    const syncFade = () => command.toggleAttribute("data-ended", atEnd());
 
     command.addEventListener("scroll", syncFade, { passive: true });
     window.addEventListener("resize", syncFade);

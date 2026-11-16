@@ -1,0 +1,11 @@
+.banded {
+  background: var(--band);
+  border-top: 1px solid var(--edge);
+  border-bottom: 1px solid var(--edge);
+}
+
+.inner {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: var(--sec-y) var(--pad);
+}

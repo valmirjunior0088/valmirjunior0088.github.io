@@ -8,7 +8,7 @@ export interface CheatsheetCard {
 
 // One flat, searchable list, ordered least to most complex. It used to be two hand-balanced columns of titled sections; the rail lays cards out in a grid now, so balancing is the layout's job and grouping is the search box's, which leaves ordering as the only thing this file still has to get right.
 // Code lines are pre-highlighted markup with two classes: .kw for anything the language reserves, and .cm for a comment, which is prose in a code block and reads a tier down from the code it sits beside. The old four-class scheme collapsed into those on purpose — a block that speaks in one accent reads as one texture rather than a rainbow.
-// Glosses mark inline code with backticks; see data/markup.ts.
+// Glosses mark inline code with backticks; see src/lib/inline.ts.
 export const CHEATSHEET: CheatsheetCard[] = [
   {
     title: "Line comments",

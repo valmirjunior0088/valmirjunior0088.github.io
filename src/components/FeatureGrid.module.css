@@ -1,0 +1,25 @@
+/* Baseline-aligned rather than centred, so the mono kicker sits on the same line the heading's letters stand on. */
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px 20px;
+  margin-bottom: 48px;
+}
+
+.cell {
+  padding: 28px 24px 32px;
+}
+
+.kicker {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.cell p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--fg-code);
+  margin: 0;
+  text-wrap: pretty;
+}

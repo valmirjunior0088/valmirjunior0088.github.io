@@ -1,52 +1,27 @@
 ---
 import Section from "./Section.astro";
+import SectionTitle from "./SectionTitle.astro";
 import HairlineGrid from "./HairlineGrid.astro";
+import Label from "./Label.astro";
 import { FEATURES } from "../data/home";
-import { inlineCode } from "../data/markup";
+import { inlineCode } from "../lib/inline";
+import styles from "./FeatureGrid.module.css";
 ---
 
 <Section banded>
-  <div class="head">
-    <h2 class="section-title">What is actually in the box</h2>
-    <span class="label">SHIPPED, NOT PLANNED</span>
+  <div class={styles.head}>
+    <SectionTitle>What is actually in the box</SectionTitle>
+    <Label>SHIPPED, NOT PLANNED</Label>
   </div>
 
   <HairlineGrid>
     {
       FEATURES.map((feature) => (
-        <div class="cell">
-          <span class="label label--accent kicker">{feature.kicker}</span>
+        <div class={styles.cell}>
+          <Label tone="accent" class={styles.kicker}>{feature.kicker}</Label>
           <p set:html={inlineCode(feature.body)} />
         </div>
       ))
     }
   </HairlineGrid>
 </Section>
-
-<style>
-  /* Baseline-aligned rather than centred, so the mono kicker sits on the same line the heading's letters stand on. */
-  .head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 12px 20px;
-    margin-bottom: 48px;
-  }
-
-  .cell {
-    padding: 28px 24px 32px;
-  }
-
-  .kicker {
-    display: block;
-    margin-bottom: 12px;
-  }
-
-  .cell p {
-    font-size: 16px;
-    line-height: 1.6;
-    color: var(--fg-code);
-    margin: 0;
-    text-wrap: pretty;
-  }
-</style>

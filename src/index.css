@@ -1,4 +1,6 @@
-/* The design system, quantized from the design canvas. The canvas explored roughly forty distinct alpha values; what survives here is the intent behind them — five text tiers, three line weights, three surface depths — because a token that cannot be named is a token nobody can apply consistently. */
+/* The design system's global half: the tokens, the faces' stacks, and what every element starts from. Everything with a class lives in a CSS module beside whatever uses it — a component's own beside the component — so a class is bound to its markup by an import rather than by a name both happen to spell. Two habits keep that robust. A component that a parent restyles takes a `class` prop for its root; and where the parent overrides something the component already sets, the parent's selector is qualified by an ancestor of its own, because two modules' rules of equal weight fall in whichever order the bundle happens to load them. State a script changes is an attribute — `aria-pressed`, `inert`, `data-*` — rather than a class, so a script never needs a module's hashed names to say what happened.
+
+   The design system, quantized from the design canvas. The canvas explored roughly forty distinct alpha values; what survives here is the intent behind them — five text tiers, three line weights, three surface depths — because a token that cannot be named is a token nobody can apply consistently. */
 
 /* The faces themselves are declared in Document.astro rather than here, from the same list that preloads their files, so that their fetch starts with the page instead of waiting for this stylesheet. The stacks that name them are below, with the other tokens. */
 
@@ -130,158 +132,6 @@ h3 {
   margin: 0;
 }
 
-/* The heading that opens a section of the landing page. Display sizes are otherwise one to a place and stay inline; this one is shared, so it lives here once. */
-.section-title {
-  font-size: clamp(28px, 3.4vw, 38px);
-}
-
-/* The mono caption that labels nearly everything on the site — hero eyebrow, panel titles, section kickers, the footer. No uppercase transform: the same treatment carries filenames like vector.crs, which must keep their case. */
-.label {
-  font-family: var(--mono);
-  font-size: var(--ms-label);
-  font-weight: 400;
-  letter-spacing: 0.12em;
-  color: var(--fg-faint);
-}
-
-.label--sm {
-  font-size: var(--ms-micro);
-}
-
-.label--accent {
-  color: var(--accent-mute);
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-family: var(--sans);
-  font-size: 15px;
-  font-weight: 500;
-  padding: 14px 24px;
-  border: 1px solid transparent;
-  border-radius: var(--r-btn);
-  cursor: pointer;
-  transition:
-    background 120ms ease,
-    border-color 120ms ease,
-    color 120ms ease;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
-.btn--primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--ink);
-}
-
-.btn--primary:hover:not(:disabled) {
-  background: var(--accent-hi);
-  border-color: var(--accent-hi);
-  color: var(--ink);
-}
-
-.btn--outline {
-  background: none;
-  border-color: var(--edge-strong);
-  color: var(--fg-body);
-}
-
-.btn--outline:hover:not(:disabled) {
-  border-color: var(--accent-edge);
-  color: var(--accent);
-}
-
-/* The sides are wider than the top and bottom on purpose. Padding is measured to the line box, not to the letters, and the line box Geist builds at 13px carries 4px of empty ascender room above the capitals and 4px of descender room below the baseline, while the letters run almost to the edges of their own advances. So 9px reads as 14px above and below, and 13px is what it takes to put the letters the same 14px from the sides. */
-.btn--sm {
-  font-size: 13px;
-  padding: 9px 13px;
-}
-
-/* The small mono control: COPY and the rail's close button. Same hover contract as everything else — go amber. */
-.btn--chip {
-  font-family: var(--mono);
-  font-size: var(--ms-micro);
-  font-weight: 400;
-  letter-spacing: 0.12em;
-  padding: 6px 10px;
-  border-radius: var(--r-chip);
-  background: none;
-  border-color: var(--edge-strong);
-  color: var(--fg-body);
-}
-
-.btn--chip:hover:not(:disabled) {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.chip {
-  font-family: var(--mono);
-  font-size: var(--ms-chip);
-  font-weight: 400;
-  padding: 7px 12px;
-  background: transparent;
-  border: 1px solid var(--edge);
-  border-radius: var(--r-chip);
-  color: var(--fg-body);
-  cursor: pointer;
-  transition:
-    background 120ms ease,
-    border-color 120ms ease,
-    color 120ms ease;
-}
-
-.chip:hover {
-  border-color: var(--accent-edge);
-  color: var(--accent);
-}
-
-.chip--on {
-  background: var(--accent-fill);
-  border-color: var(--accent-edge);
-  color: var(--accent);
-}
-
-/* A badge that only looks like a chip — the licence tag in the resources column. */
-.chip--static {
-  cursor: default;
-  border-color: var(--accent-line);
-  color: var(--accent);
-  letter-spacing: 0.12em;
-}
-
-.chip--static:hover {
-  border-color: var(--accent-line);
-  color: var(--accent);
-}
-
-/* A code block scrolls sideways rather than dictating the width of whatever holds it. The containment is what makes that true on a phone: mobile Chrome sizes its layout viewport to the page's min-content width, and without it a long line is a long page. */
-.code {
-  margin: 0;
-  font-family: var(--mono);
-  font-size: var(--ms-code);
-  line-height: 1.85;
-  color: var(--fg-code);
-  overflow-x: auto;
-  contain: inline-size;
-}
-
-/* Highlighting is two classes and no more. The canvas collapsed keywords, types, and strings into a single amber, and holding to that keeps a code block reading as one texture instead of a rainbow — the compiler's own voice in the hero's diagnostic included. */
-.kw {
-  color: var(--accent);
-}
-
-/* The other one: a comment, which is prose sitting in a code block and reads a tier down from the code it is explaining. */
-.cm {
-  color: var(--fg-mute);
-}
-
 /* The mono face runs larger than Geist at the same size, so an inline code span steps down a notch to sit on the
    line the prose around it stands on rather than bulging out of it. Components that set their own code size — the
    install box, the editor, a `.code` block — outrank this and are unaffected. */
@@ -290,41 +140,12 @@ code {
   font-size: 0.92em;
 }
 
-/* Each word of an inline code span, as inlineCode wraps it: a line may break between words but never inside one. */
-code .word {
-  white-space: nowrap;
-}
-
-/* Text for the outline rather than for the page: the playground's own heading, which the design has no room for and the document cannot do without. Clipped rather than hidden, because display: none and visibility: hidden would take it out of the accessibility tree along with everything else. */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-/* Panel heads and toolbars are flex rows filled by slotted content, and scoped styles cannot reach across a slot boundary to push one child to the right. This is the one utility that earns its keep. */
-.push {
-  margin-left: auto;
-}
-
 /* The breakpoints. A media query cannot read a custom property, so each component writes its own as a figure; these are the only figures there are, and what each one means.
 
      720px — the phone. Below it the playground stops being a fixed frame and becomes a scrolling document (AppShell), and everything that lays out for a pointer — the header, the hero, the footer, the frame — lays out for a thumb instead.
      960px — the hero's two columns stack (961px is the same line, seen from above).
      480px and 400px — the narrowest phones, where a row has to give something up.
      972px and 1439px — the cheatsheet rail's steps, below. */
-
-/* Fingers, not pointers: the mono chips compute to a 24px target, which is fine under a mouse and hopeless under a thumb. */
-@media (max-width: 720px) {
-  .btn--chip {
-    min-height: 40px;
-  }
-}
 
 /* The rail's two steps up, each the exact width of the columns it is about to show. The queries sit at those same widths, so the step happens the moment the screen can hold it and never before — one pixel under, the rail is still the whole screen and already that wide. The widths are computed from --card; the queries cannot be, so they are the two figures that have to be redone by hand if a card's width ever changes: 2 × 455 + 12 + 50 = 972, and 3 × 455 + 2 × 12 + 50 = 1439. */
 @media (min-width: 972px) {

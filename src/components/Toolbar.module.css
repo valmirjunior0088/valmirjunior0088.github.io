@@ -1,0 +1,19 @@
+/* The vertical padding is a token rather than a figure because the splitter stands in for it above the action bar, and the two have to agree. */
+.toolbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: var(--toolbar-y) 20px;
+  background: var(--band);
+  border-bottom: 1px solid var(--line);
+}
+
+/* The example picker can outgrow the width; it scrolls sideways rather than wrapping into a second row and changing the frame's geometry. */
+.scroll {
+  overflow-x: auto;
+}
+
+.scroll > * {
+  flex: none;
+}

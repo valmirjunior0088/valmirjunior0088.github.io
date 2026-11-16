@@ -1,183 +1,44 @@
 ---
 import Section from "./Section.astro";
 import Panel from "./Panel.astro";
+import Label from "./Label.astro";
+import Button from "./Button.astro";
+import Code from "./Code.astro";
 import InstallBox from "./InstallBox.astro";
 import Wordmark from "./Wordmark.astro";
 import { HERO } from "../data/home";
 import { PAGES, BUILD_URL } from "../data/site";
+import styles from "./Hero.module.css";
 ---
 
 <Section>
-  <div class="hero">
-    <div class="col">
-      <div class="lockup">
+  <div class={styles.hero}>
+    <div class={styles.col}>
+      <div class={styles.lockup}>
         <Wordmark width={198} />
       </div>
-      <p class="label eyebrow">{HERO.eyebrow}</p>
-      <h1 set:html={HERO.heading.join("<br>")} />
-      <p class="lead">{HERO.lead}</p>
-      <div class="actions">
-        <a class="btn btn--primary" href={PAGES.playground.href}>Argue with it in a browser tab</a>
-        <a class="btn btn--outline" href={BUILD_URL}>Build it yourself</a>
+      <Label as="p" class={styles.eyebrow}>{HERO.eyebrow}</Label>
+      <h1 class={styles.heading} set:html={HERO.heading.join("<br>")} />
+      <p class={styles.lead}>{HERO.lead}</p>
+      <div class={styles.actions}>
+        <Button variant="primary" href={PAGES.playground.href} class={styles.primary}>Argue with it in a browser tab</Button>
+        <Button variant="outline" href={BUILD_URL} class={styles.secondary}>Build it yourself</Button>
       </div>
       <InstallBox />
     </div>
 
-    <div class="col col--panels">
+    <div class:list={[styles.col, styles.panels]}>
       <Panel>
-        <pre class="code file" set:html={HERO.declaration.join("\n")} />
+        <Code html={HERO.declaration.join("\n")} class={styles.file} />
       </Panel>
 
       <Panel>
-        <pre class="code file" set:html={HERO.usage.join("\n")} />
+        <Code html={HERO.usage.join("\n")} class={styles.file} />
       </Panel>
 
       <Panel tone="accent">
-        <pre class="code diagnostic" set:html={HERO.diagnostic.join("\n")} />
+        <Code html={HERO.diagnostic.join("\n")} class={styles.diagnostic} />
       </Panel>
     </div>
   </div>
 </Section>
-
-<style>
-  /* The two columns are stretched to a common height and each distributes its own slack, which is what lines the install box up with the last panel. It only holds between the 1440 cap and the 960 breakpoint — inside that band the slack stays small enough to read as alignment rather than drift; below it the columns stack and the trick is switched off. No pixel floors on the tracks: mobile Chrome sizes its layout viewport to the page's min-content width before it evaluates a single media query, so a floor wide enough to matter here is a floor that keeps the breakpoint from ever firing. */
-  .hero {
-    display: grid;
-    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-    gap: 64px;
-    align-items: stretch;
-  }
-
-  /* Both columns distribute their own slack so the install box lands level with the last panel. The left column spaces itself with margins between blocks of prose; only the right one, a stack of peer panels, wants a uniform gap. */
-  .col {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  .col--panels {
-    gap: 16px;
-  }
-
-  /* The wordmark opens the page only on a phone, where the header has given it up for the mark; on a wider screen it is already in the bar, and repeating it a few pixels lower would say the name twice. Same breakpoint as the header's swap, so exactly one wordmark is on screen at every width. */
-  .lockup {
-    display: none;
-  }
-
-  .eyebrow {
-    margin: 0 0 24px;
-  }
-
-  /* Four lines at every width, which is the whole point of breaking them by hand — so the size is chosen against the longest of them, "Strong feelings about", which renders 7.86× the font size. */
-  h1 {
-    font-size: clamp(40px, 7.2vw, 76px);
-    line-height: 1;
-    letter-spacing: -0.02em;
-    margin: 0 0 24px;
-    text-wrap: balance;
-  }
-
-  /* Emphasis by dimming everything else: the heading steps down to the tier body text is set in and the two words keep the full foreground, so they stand out with no second weight and no second colour — and no line changes width, so the sizes below hold as fitted. Global because the heading's markup arrives as a string, which never carries the scope attribute a scoped selector would look for. */
-  h1 {
-    color: var(--fg-body);
-  }
-
-  h1 :global(em) {
-    color: var(--fg);
-  }
-
-  .lead {
-    font-size: 19px;
-    font-weight: 300;
-    line-height: 1.6;
-    color: var(--fg-body);
-    max-width: 44ch;
-    margin: 0 0 32px;
-  }
-
-  .actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 32px;
-  }
-
-  /* The primary takes whatever the row has left over and the secondary keeps the width of its own words, so the pair reaches both edges of the column instead of trailing off mid-line. The label is held on one line: a growing button whose floor is its longest word would rather wrap its text than send its neighbour to the next row, and a two-line button in a row of one-line buttons is the wrong kind of surprise. */
-  .actions .btn--primary {
-    flex: 1;
-    justify-content: center;
-    white-space: nowrap;
-  }
-
-  /* Two blocks, because they are two files: the standard library's declaration and the program that imports it. Each can grow its own scrollbar on a phone, which is the cost — and worth paying here, where the seam between them is the point being made. Neither carries a head strip; the comment that opens each one says what it is, and a label above it would say it twice. */
-  .file {
-    padding: 20px 24px;
-  }
-
-  .diagnostic {
-    padding: 20px 24px;
-    font-size: var(--ms-code-sm);
-    line-height: 1.8;
-  }
-
-  /* Two columns, and the heading now belongs to a box rather than to the window: sized in vw it tracks a width it does not live in, and between 960 and 1200 that puts "Strong feelings about" wider than the column holding it — a fifth line, which is the one thing the hand-placed breaks exist to prevent. 11.7cqi is 11.7% of the column itself, and the longest line renders 7.86× the font size, so it lands at 92% of the room it has at every width in this range. The column stops growing at the 1440 cap, so the heading does too, with no ceiling needed to say so.
-
-     The lead loses its 44ch cap here for the same reason: the column is the measure now, and at full width it holds the sentence in two lines instead of three. */
-  @media (min-width: 961px) {
-    .col {
-      container-type: inline-size;
-    }
-
-    h1 {
-      font-size: 11.7cqi;
-    }
-
-    .lead {
-      max-width: none;
-    }
-  }
-
-  @media (max-width: 960px) {
-    .hero {
-      grid-template-columns: 1fr;
-      gap: 32px;
-    }
-
-    .col {
-      justify-content: flex-start;
-    }
-
-    .col--panels {
-      gap: 12px;
-    }
-  }
-
-  /* A phone's gutters are a flat 40px whatever the screen, so no fixed size holds four lines across the range: what fits a 430px screen wraps on a 320px one, and a wrapped line is a fifth line the hand-placed breaks were meant to rule out. Sizing by the viewport keeps the ratio instead.
-
-     10.7vw is the arithmetic: "Strong feelings about" renders 7.86× the font size — measured, not computed, because letter-spacing and kerning put the pen-and-paper figure 2% under — and it has to clear the viewport less 40px of gutters and 10px for a scrollbar, which is tightest at 320px. The 52px ceiling is where 7.2vw arrives at 720px, so the two curves meet at the breakpoint rather than stepping. */
-  @media (max-width: 720px) {
-    h1 {
-      font-size: min(10.7vw, 52px);
-    }
-
-    /* The section's own top padding is a document's worth of air, too much for a logo that is meant to sit just under the bar. Pulling it back to the same 32px that sits below gives the wordmark equal room on both sides. The padding is Section's, scoped to Section, and every other section keeps it, so the lockup takes the air back from inside rather than Section growing an option for the one box that wants less. The wordmark's own optical lift happens inside this box. */
-    .lockup {
-      display: block;
-      width: 198px;
-      margin: calc(32px - var(--sec-y)) auto 32px;
-    }
-
-    /* Centred under the centred wordmark, so the two read as one lockup before the left-set heading begins. */
-    .eyebrow {
-      text-align: center;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .actions .btn {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-</style>

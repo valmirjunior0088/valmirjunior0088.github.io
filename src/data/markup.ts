@@ -1,7 +1,4 @@
-// Prose in the data files marks inline code with backticks, because writing <code> tags by hand inside a sentence makes the sentence unreadable in source and easy to get wrong. This turns them into elements at render time. A browser will break a line after a hyphen, which tears a flag like `--server` in two, so each word inside the span is held together and only the spaces between words are left to break at.
-export function inlineCode(text: string): string {
-  return text.replace(/`([^`]+)`/g, (_, code: string) => `<code class="kw">${code.replace(/\S+/g, '<span class="word">$&</span>')}</code>`);
-}
+// Plain text out of the data files' markup. Nothing here touches the page, so scripts/check.mjs can read it with Node directly; turning backticks into inline code is src/lib/inline.ts's, which brings its own styles.
 
 const ENTITIES: Record<string, string> = {
   "&lt;": "<",

@@ -1,0 +1,12 @@
+---
+// The heading that opens a section of the landing page — the one display size the site shares between places, so it is a component rather than a figure written twice.
+import styles from "./SectionTitle.module.css";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<h2 class:list={[styles.title, className]}><slot /></h2>

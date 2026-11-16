@@ -1,0 +1,32 @@
+.footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 32px var(--pad);
+  border-top: 1px solid var(--edge);
+}
+
+.mark {
+  display: block;
+}
+
+.link {
+  margin-left: auto;
+  font-size: 13px;
+}
+
+/* Two rows on a phone, both centred: the mark and its label, then the link. */
+@media (max-width: 720px) {
+  .footer {
+    justify-content: center;
+  }
+
+  .link {
+    margin-left: 0;
+    flex-basis: 100%;
+    text-align: center;
+  }
+}

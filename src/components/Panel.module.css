@@ -1,0 +1,25 @@
+.panel {
+  border: 1px solid var(--edge);
+  border-radius: var(--r-panel);
+  background: var(--well);
+  overflow: hidden;
+}
+
+/* The one variant: a panel that is itself the bad news, used for the compiler diagnostic in the hero. */
+.accent {
+  border-color: var(--accent-line);
+  background: var(--accent-wash);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.foot {
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+}

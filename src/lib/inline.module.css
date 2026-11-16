@@ -1,0 +1,9 @@
+/* Inline code in prose wears the accent; its size is the global `code` default's. */
+.code {
+  color: var(--accent);
+}
+
+/* Each word of an inline code span: a line may break between words but never inside one. */
+.word {
+  white-space: nowrap;
+}

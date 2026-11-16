@@ -1,0 +1,75 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 14px 24px;
+  border: 1px solid transparent;
+  border-radius: var(--r-btn);
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--accent-hi);
+  border-color: var(--accent-hi);
+  color: var(--ink);
+}
+
+.outline {
+  background: none;
+  border-color: var(--edge-strong);
+  color: var(--fg-body);
+}
+
+.outline:hover:not(:disabled) {
+  border-color: var(--accent-edge);
+  color: var(--accent);
+}
+
+/* The sides are wider than the top and bottom on purpose. Padding is measured to the line box, not to the letters, and the line box Geist builds at 13px carries 4px of empty ascender room above the capitals and 4px of descender room below the baseline, while the letters run almost to the edges of their own advances. So 9px reads as 14px above and below, and 13px is what it takes to put the letters the same 14px from the sides. */
+.sm {
+  font-size: 13px;
+  padding: 9px 13px;
+}
+
+/* The small mono control: COPY and the rail's close button. Same hover contract as everything else — go amber. */
+.chip {
+  font-family: var(--mono);
+  font-size: var(--ms-micro);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  padding: 6px 10px;
+  border-radius: var(--r-chip);
+  background: none;
+  border-color: var(--edge-strong);
+  color: var(--fg-body);
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Fingers, not pointers: the mono chip-buttons compute to a 24px target, which is fine under a mouse and hopeless under a thumb. */
+@media (max-width: 720px) {
+  .chip {
+    min-height: 40px;
+  }
+}

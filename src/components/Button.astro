@@ -1,0 +1,28 @@
+---
+// The site's buttons, and its links that look like one: a filled primary, an outlined secondary, and the small mono chip-button — COPY, the rail's way out. `href` makes it a link. Anything else passed — data attributes, aria, a title — lands on the element.
+import styles from "./Button.module.css";
+
+interface Props {
+  variant: "primary" | "outline" | "chip";
+  size?: "sm";
+  href?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { variant, size, href, class: className, ...attrs } = Astro.props;
+
+const classes = [styles.button, styles[variant], size === "sm" && styles.sm, className];
+---
+
+{
+  href ? (
+    <a href={href} class:list={classes} {...attrs}>
+      <slot />
+    </a>
+  ) : (
+    <button class:list={classes} {...attrs}>
+      <slot />
+    </button>
+  )
+}
