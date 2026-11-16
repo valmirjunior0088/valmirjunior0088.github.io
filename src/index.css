@@ -153,6 +153,8 @@ h3 {
   --term-dim: rgba(207, 214, 214, 0.5);
   --term-red: #ef6b6b;
   --term-yellow: #e5c07b;
+  /* A ground raised off the terminal's own, for a terminal window's status bar. */
+  --term-raised: rgba(207, 214, 214, 0.08);
 }
 
 /* The mono face runs larger than Geist at the same size, so an inline code span steps down a notch to sit on the

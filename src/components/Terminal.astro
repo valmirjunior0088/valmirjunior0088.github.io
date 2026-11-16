@@ -1,6 +1,6 @@
 ---
-// A terminal window, for something the compiler printed — the command that was run, after a dim prompt, and what came back, already in the terminal's roles (src/lib/terminal.ts).
-import { terminal, escape } from "../lib/terminal";
+// Something the compiler printed, set as a terminal would show it — terminal-like rather than a working terminal. The command that produced it rides in a status bar across the top, the way the playground's action bar sits over its output pane, and the output below is in the terminal's roles (src/lib/terminal.ts), with nothing after it.
+import { terminal } from "../lib/terminal";
 import styles from "./Terminal.module.css";
 
 interface Props {
@@ -9,8 +9,9 @@ interface Props {
 }
 
 const { command, output } = Astro.props;
-
-const html = `<span class="${terminal.dim}">$</span> ${escape(command)}\n${output}`;
 ---
 
-<pre class:list={[terminal.terminal, styles.window]} set:html={html} />
+<figure class:list={[terminal.terminal, styles.window]}>
+  <figcaption class={styles.status}>{command}</figcaption>
+  <pre class={styles.output} set:html={output} />
+</figure>

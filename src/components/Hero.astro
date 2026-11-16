@@ -33,11 +33,7 @@ import styles from "./Hero.module.css";
 
     <div class:list={[styles.col, styles.panels]}>
       <Panel>
-        <Code code={HERO.declaration.join("\n")} class={styles.file} />
-      </Panel>
-
-      <Panel>
-        <Code code={HERO.usage.join("\n")} class={styles.file} />
+        <Code code={HERO.program.join("\n")} class={styles.file} />
       </Panel>
 
       <Terminal command="curios run vector.crs" output={ansiToHtml(diagnostic)} />

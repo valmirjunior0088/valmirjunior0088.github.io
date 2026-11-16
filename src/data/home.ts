@@ -11,22 +11,11 @@ export const HERO = {
     "your <em>arithmetic</em>.",
   ],
   lead: "Types can depend on values, proofs live beside ordinary code, and the compiler is happy to double-check your math homework.",
-  // Two files, not one read top to bottom: the first quotes the standard library's own Vec so the length in the type is on the page, the second is the program that imports it. Both are true of the shipped compiler — /std/Vec really is a list beside a proof that counts it, and the declarations below compile as written.
-  declaration: [
-    "-- This is how Vec is represented in the /std...",
-    "pub let Counted(@T: Type, l: List(T), n: Nat) -> Prop =",
-    "    Eq()(List/len(l), n);",
-    "",
-    "pub struct Vec(T: Type, n: Nat): pub Type {",
-    "    list: List(T),",
-    "    counted: Counted(list, n),",
-    "}",
-  ],
-  // A program rather than a module, so the terminal beside it can show the command a reader would type to see the refusal: `curios run`. The last line is never reached, which is the point.
-  usage: [
+  // The program the terminal below it runs. A program rather than a module, so the terminal can show the command a reader would type to see the refusal: `curios run`. The last line is never reached, which is the point.
+  program: [
     "use /std/{Nat, Vec, print};",
     "",
-    "-- ...and this is what happens when you get the length wrong",
+    "-- This is what happens when you get the length wrong",
     "let empty: Vec(Nat, 0) =",
     "    Vec/nil();",
     "",

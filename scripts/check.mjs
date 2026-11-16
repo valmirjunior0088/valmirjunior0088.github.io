@@ -3,7 +3,7 @@
 // What it holds them to:
 //   - the fetched compiler is the pinned one — a checkout that moved the pin without fetching again would otherwise check, and serve, the old release;
 //   - the examples in src/data/examples are exactly the ones src/data/examples.ts lists, every one is formatted the way `curios format` would write it and lints clean, and each runs or is refused exactly as listed;
-//   - the home page's two snippets are formatted as `curios format` would write them;
+//   - the home page's program is formatted as `curios format` would write it;
 //   - the terminal on the home page shows what `curios run` prints for the snippet above it, character for character and colour for colour.
 import { registerHooks } from "node:module";
 import { spawnSync } from "node:child_process";
@@ -100,15 +100,12 @@ const HERO_CAPTURE = join(ROOT, "src/data/hero-diagnostic.ansi");
 const { HERO } = await import("../src/data/home.ts");
 const captured = readFileSync(HERO_CAPTURE, "utf8");
 
-// Both snippets on the home page are written as the formatter writes them, like every example: the declaration and the program beside it.
+// The program on the home page is written as the formatter writes it, like every example.
 const snippets = mkdtempSync(join(tmpdir(), "curios-check-"));
 try {
-  const files = ["declaration", "usage"].map((part) => {
-    const file = join(snippets, `${part}.crs`);
-    writeFileSync(file, `${HERO[part].join("\n")}\n`);
-    return file;
-  });
-  const formatted = curios(["format", "--check", ...files]);
+  const file = join(snippets, "program.crs");
+  writeFileSync(file, `${HERO.program.join("\n")}\n`);
+  const formatted = curios(["format", "--check", file]);
   if (formatted.status === 0) pass("the home page's code is formatted as `curios format` would write it");
   else fail("the home page's code is not formatted as `curios format` would write it", formatted.output);
 } finally {
@@ -118,7 +115,7 @@ try {
 const name = captured.replace(/\x1b\[[0-9;]*m/g, "").split("\n")[0].trim();
 const dir = mkdtempSync(join(tmpdir(), "curios-check-"));
 try {
-  writeFileSync(join(dir, name), `${HERO.usage.join("\n")}\n`);
+  writeFileSync(join(dir, name), `${HERO.program.join("\n")}\n`);
   const run = curios(["run", "--color", "always", name], { cwd: dir });
   const steady = (text) => text.replace(/\d+\.\d+s\b/g, "0.0s");
   if (process.argv.includes("--update")) {
