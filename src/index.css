@@ -11,6 +11,8 @@
   --band: rgba(0, 0, 0, 0.12);
   --well: rgba(0, 0, 0, 0.2);
   --well-deep: rgba(0, 0, 0, 0.34);
+  /* The one surface lighter than what holds it: a white wash, for a status bar heading a window, so it lifts off whichever ground it sits on — a panel's or the terminal's. */
+  --lift: rgba(222, 233, 233, 0.08);
 
   /* Text, five tiers. --fg-ghost exists solely for the editor's line numbers, which need to sit below every other dim thing without dragging the whole scale down with them. */
   --fg: #dee9e9;
@@ -153,8 +155,6 @@ h3 {
   --term-dim: rgba(207, 214, 214, 0.5);
   --term-red: #ef6b6b;
   --term-yellow: #e5c07b;
-  /* A ground raised off the terminal's own, for a terminal window's status bar. */
-  --term-raised: rgba(207, 214, 214, 0.08);
 }
 
 /* The mono face runs larger than Geist at the same size, so an inline code span steps down a notch to sit on the

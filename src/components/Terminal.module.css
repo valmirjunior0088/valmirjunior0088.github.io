@@ -6,19 +6,6 @@
   overflow: hidden;
 }
 
-/* The command, in a bar of its own: a ground raised off the terminal's and a divider under it, the way a panel's head strip sits over its body. It is set in the playground's status-bar size, and its text keeps the output's column. */
-.status {
-  padding: 10px 24px;
-  border-bottom: 1px solid var(--line);
-  background: var(--term-raised);
-  color: var(--term-bold);
-  font-size: var(--ms-chip);
-  line-height: 1.6;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 /* The output scrolls sideways rather than wrapping, as a terminal would. */
 .output {
   margin: 0;

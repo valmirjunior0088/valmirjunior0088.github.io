@@ -1,0 +1,13 @@
+---
+// The bar across the top of a window that says what it holds: the file a code panel is, or the command a terminal ran. The hero's two windows share it, so they wear the same bar by construction. It renders as whatever element its container needs — a figure's caption, in a terminal.
+import styles from "./StatusBar.module.css";
+
+interface Props {
+  as?: "div" | "figcaption";
+  class?: string;
+}
+
+const { as: Tag = "div", class: className } = Astro.props;
+---
+
+<Tag class:list={[styles.bar, className]}><slot /></Tag>

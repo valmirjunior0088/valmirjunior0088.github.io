@@ -1,5 +1,6 @@
 ---
-// Something the compiler printed, set as a terminal would show it — terminal-like rather than a working terminal. The command that produced it rides in a status bar across the top, the way the playground's action bar sits over its output pane, and the output below is in the terminal's roles (src/lib/terminal.ts), with nothing after it.
+// Something the compiler printed, set as a terminal would show it — terminal-like rather than a working terminal. The command that produced it rides in a status bar across the top, like the file name over the code panel beside it, and the output below is in the terminal's roles (src/lib/terminal.ts), with nothing after it.
+import StatusBar from "./StatusBar.astro";
 import { terminal } from "../lib/terminal";
 import styles from "./Terminal.module.css";
 
@@ -12,6 +13,6 @@ const { command, output } = Astro.props;
 ---
 
 <figure class:list={[terminal.terminal, styles.window]}>
-  <figcaption class={styles.status}>{command}</figcaption>
+  <StatusBar as="figcaption">{command}</StatusBar>
   <pre class={styles.output} set:html={output} />
 </figure>

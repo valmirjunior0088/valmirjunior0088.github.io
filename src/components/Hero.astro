@@ -7,6 +7,7 @@ import Code from "./Code.astro";
 import InstallBox from "./InstallBox.astro";
 import Wordmark from "./Wordmark.astro";
 import Terminal from "./Terminal.astro";
+import StatusBar from "./StatusBar.astro";
 import { HERO } from "../data/home";
 import { PAGES, BUILD_URL } from "../data/site";
 import { ansiToHtml } from "../lib/terminal";
@@ -33,10 +34,11 @@ import styles from "./Hero.module.css";
 
     <div class:list={[styles.col, styles.panels]}>
       <Panel>
+        <StatusBar>{HERO.file}</StatusBar>
         <Code code={HERO.program.join("\n")} class={styles.file} />
       </Panel>
 
-      <Terminal command="curios run vector.crs" output={ansiToHtml(diagnostic)} />
+      <Terminal command={`curios run ${HERO.file}`} output={ansiToHtml(diagnostic)} />
     </div>
   </div>
 </Section>

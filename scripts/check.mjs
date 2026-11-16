@@ -95,7 +95,7 @@ for (const example of EXAMPLES.filter((example) => onDisk.includes(example.name)
   else pass(`${file} reports ${describe(want)}`);
 }
 
-// The home page's terminal shows what `curios run --color always` printed for the snippet above it, captured whole, colours included — src/data/hero-diagnostic.ansi. The file it ran is named on the capture's first line, which is part of what the page quotes, so the snippet is run under that name. Step times are the one thing a second run need not repeat, so a time compares equal to any other. `--update` captures it again, which is what a pin bump that changes a report asks for.
+// The home page's terminal shows what `curios run --color always` printed for the snippet above it, captured whole, colours included — src/data/hero-diagnostic.ansi. The snippet is run under the file name the page gives it, which the capture names on its first line. Step times are the one thing a second run need not repeat, so a time compares equal to any other. `--update` captures it again, which is what a pin bump that changes a report asks for.
 const HERO_CAPTURE = join(ROOT, "src/data/hero-diagnostic.ansi");
 const { HERO } = await import("../src/data/home.ts");
 const captured = readFileSync(HERO_CAPTURE, "utf8");
@@ -112,7 +112,7 @@ try {
   rmSync(snippets, { recursive: true, force: true });
 }
 
-const name = captured.replace(/\x1b\[[0-9;]*m/g, "").split("\n")[0].trim();
+const name = HERO.file;
 const dir = mkdtempSync(join(tmpdir(), "curios-check-"));
 try {
   writeFileSync(join(dir, name), `${HERO.program.join("\n")}\n`);

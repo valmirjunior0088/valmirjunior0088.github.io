@@ -1,0 +1,13 @@
+/* A strip a step lighter than whatever it heads, with a divider under it, in the playground's status-bar size. Its side padding is the windows' 24px, so the text in the bar keeps the column of the text below it. Too long a name is cut short rather than wrapped: a bar is one line. */
+.bar {
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--line);
+  background: var(--lift);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: var(--ms-chip);
+  line-height: 1.6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

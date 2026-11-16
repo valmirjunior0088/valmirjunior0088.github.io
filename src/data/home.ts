@@ -11,6 +11,8 @@ export const HERO = {
     "your <em>arithmetic</em>.",
   ],
   lead: "Types can depend on values, proofs live beside ordinary code, and the compiler is happy to double-check your math homework.",
+  // The file the program is, named in the bar over it, and run by the terminal below it under that name — the name is also on the output's first line, which `npm run check` holds to what the compiler prints.
+  file: "vector.crs",
   // The program the terminal below it runs. A program rather than a module, so the terminal can show the command a reader would type to see the refusal: `curios run`. The last line is never reached, which is the point.
   program: [
     "use /std/{Nat, Vec, print};",

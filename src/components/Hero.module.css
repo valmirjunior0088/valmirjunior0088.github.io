@@ -68,7 +68,7 @@
   white-space: nowrap;
 }
 
-/* The program's block carries no head strip: the terminal under it already names the file, in its status bar and on the output's first line, and a label here would say it a third time. On a phone it grows its own scrollbar rather than wrapping a line of code. */
+/* The program's block, under the status bar that names its file. On a phone it grows its own scrollbar rather than wrapping a line of code. */
 .file {
   padding: 20px 24px;
 }
