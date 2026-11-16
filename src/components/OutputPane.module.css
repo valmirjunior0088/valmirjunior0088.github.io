@@ -1,5 +1,7 @@
+/* The pane sits on the terminal's ground, the near-black the home page's terminal is drawn on: what the compiler says reads on the same ground wherever the site shows it. Only the ground is borrowed — what the pane prints keeps the site's own text colours. */
 .output {
   margin: 0;
+  background: var(--term-ground);
   padding: 16px;
   overflow: auto;
   font-family: var(--mono);
