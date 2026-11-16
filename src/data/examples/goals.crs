@@ -1,0 +1,6 @@
+use /std/{Nat, Vec, print};
+
+pub let rotate(@T: Type, @n: Nat, v: Vec(T, n + 1)) -> Vec(T, n + 1) =
+    Vec/append(Vec/rest(v), Vec/cons(?, ?));
+
+print("unreachable\n")

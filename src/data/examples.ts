@@ -20,6 +20,6 @@ export const EXAMPLES: Example[] = [
   { name: "points" },
   { name: "nonempty" },
   { name: "laws" },
-  { name: "holes", goals: 2 },
+  { name: "goals", goals: 2 },
   { name: "mistakes", errors: 5 },
 ];
