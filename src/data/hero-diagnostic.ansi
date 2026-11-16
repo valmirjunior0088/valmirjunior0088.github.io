@@ -5,7 +5,7 @@
 [2m│[0m  inferred: Vec(Nat, 0)
 [2m│[0m  expected: Vec(Nat, 1)
 [2m│[0m
-[2m│[0m  [2m8 │[0m     empty;
+[2m│[0m  [2m7 │[0m     empty;
 [2m│[0m  [2m  │[0m     [31m^^^^^[0m
 [2m│[0m
-[2m└─[0m [31m[error][0m vector.crs:8:5
+[2m└─[0m [31m[error][0m vector.crs:7:5

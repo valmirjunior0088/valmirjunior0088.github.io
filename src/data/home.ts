@@ -15,7 +15,6 @@ export const HERO = {
   program: [
     "use /std/{Nat, Vec, print};",
     "",
-    "-- This is what happens when you get the length wrong",
     "let empty: Vec(Nat, 0) =",
     "    Vec/nil();",
     "",
