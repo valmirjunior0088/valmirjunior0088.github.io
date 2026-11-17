@@ -50,16 +50,17 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
 
 <script>
   import { EXAMPLES } from "../../data/examples";
+  import { runsToHtml, type Run } from "../../lib/terminal";
 
   // What loader.js hands back. It is a published asset rather than a source module, so nothing checks this against it; it is written down here so the rest of the script is checked against something.
   type Step = "load" | "warm" | "compile" | "run";
   type PhaseEvent = { phase: "begin"; step: Step } | { phase: "end"; step: Step; ms: number; bytes?: number };
   type Report =
     | { ok: true; bytes: Uint8Array<ArrayBuffer>; run: { stdout: string; stderr: string; exitCode: number; trap?: string | null } }
-    | { ok: false; phase: "load" | "compile" | "run" | "internal"; ms?: number; error: string };
+    | { ok: false; phase: "load" | "compile" | "run" | "internal"; ms?: number; error: string; runs?: Run[] };
   type Loader = { compileAndReport(source: string, onPhase: (event: PhaseEvent) => void): Promise<Report> };
 
-  // The loader sits beside the compiler bundle scripts/fetch.sh downloads, and is fetched from where the site serves it, the first time Run is pressed. It is named through a variable, so the bundler leaves it alone rather than trying to pull a public file into the build, and imported as a full URL, because the dev server rewrites a root-relative import to ask for a module it will then refuse to serve out of public/. If the bundle was never fetched, the loader reports a load-phase failure and the pane says so: the page still works, it just cannot compile.
+  // The loader sits beside the compiler bundle scripts/fetch.mjs downloads, and is fetched from where the site serves it, the first time Run is pressed. It is named through a variable, so the bundler leaves it alone rather than trying to pull a public file into the build, and imported as a full URL, because the dev server rewrites a root-relative import to ask for a module it will then refuse to serve out of public/. If the bundle was never fetched, the loader reports a load-phase failure and the pane says so: the page still works, it just cannot compile.
   const LOADER = "/curios/loader.js";
   let loader: Promise<Loader> | null = null;
 
@@ -128,6 +129,13 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
     output.textContent = empty ? (output.dataset.placeholder ?? "") : text;
     output.toggleAttribute("data-empty", empty);
     output.toggleAttribute("data-error", !empty && tone === "error");
+  }
+
+  // A refusal, painted in the roles its report's runs carry — the terminal's, as the home page's terminal paints one — so the pane is not tinted as a failure of its own: the report says where it went wrong, in red where it did.
+  function setReport(runs: Run[]) {
+    output.innerHTML = runsToHtml(runs);
+    output.toggleAttribute("data-empty", false);
+    output.toggleAttribute("data-error", false);
   }
 
   // Every step the compiler goes through, in the two forms the line needs: the one it wears while it is happening, and the past tense it leaves behind once it has earned it. That past tense is a claim — "compiled" says the program is good — so a step that failed leaves no crumb at all and the verdict speaks for it instead. Each names what it acts on: the first two the compiler, arriving and waking up; the third the source, since by then the object is the program you wrote; and the fourth the WebAssembly that came of it — which is the truth of what happens here and the thing a bare "fetched" or "compiled" left you to guess.
@@ -320,7 +328,8 @@ const OUTPUT_PLACEHOLDER = "Nothing has been printed. Go break something — it 
       if (ticket !== current) return;
 
       if (!result.ok) {
-        setOutput(result.error, "error");
+        if (result.runs) setReport(result.runs);
+        else setOutput(result.error, "error");
 
         // The step that failed leaves no crumb, because its past tense would claim the one thing that did not happen: "compiled source in 42.1ms · refused source" is a line arguing with itself. The verdict carries the duration instead, which is what that crumb was really for — how long the compiler spent before refusing is worth as much as how long it spends accepting, and the commonest failure there is, a typo on a page already warm, would otherwise put a bare word on an empty line. A compiler that never arrived is the exception: it measured nothing worth reading, and says so without a number — as does a failure of the playground's own, which has no step to time.
         const took = result.ms === undefined ? "" : ` in ${result.ms.toFixed(1)}ms`;

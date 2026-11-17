@@ -147,7 +147,7 @@ export const CHEATSHEET: CheatsheetCard[] = [
     title: "Whole-term forms need parentheses",
     tag: "OPERATORS",
     code: [
-      ["1 + (let n = 2; n * n)"],
+      ["12345 + 54321", "    + (", "        let n = 2;", "        n * n)"],
       ["1 + match flag | true => 1 | false => 0 end"],
     ],
     gloss:

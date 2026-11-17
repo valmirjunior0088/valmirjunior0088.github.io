@@ -7,7 +7,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "fetch": "./scripts/fetch.sh",
+    "fetch": "node scripts/fetch.mjs",
     "check": "astro check && node scripts/check.mjs"
   },
   "dependencies": {
@@ -15,7 +15,7 @@
   },
   "releaseArtifacts": {
     "repo": "valmirjunior0088/curios",
-    "tag": "release/0.16.24"
+    "tag": "release/0.16.25"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",

@@ -142,7 +142,7 @@
     overflow: visible;
   }
 
-  /* No room for the timings between two thumb-sized buttons, and no good way to wrap four phases under them either. On a phone the pane carries the outcome by itself — it turns red and says what went wrong — and the numbers are a desktop luxury. */
+  /* No room for the timings between two thumb-sized buttons, and no good way to wrap four phases under them either. On a phone the pane carries the outcome by itself — a refusal's report marks what went wrong in red, and any other failure turns the pane red — and the numbers are a desktop luxury. */
   .status {
     display: none;
   }

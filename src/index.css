@@ -134,7 +134,7 @@ h3 {
   margin: 0;
 }
 
-/* The code palette: Curios highlighted by the compiler's own grammar (src/lib/highlight.ts, with highlight.module.css beside it), one colour per kind of token. Brightness and one hue: keywords keep the site's amber; types stand out by being brighter rather than by being another colour; strings take a sand that sits beside the amber; numbers, escapes and the sorts take the amber's paler step; punctuation steps back and comments read a tier down, as prose sitting in code. `currentColor` is a kind left the colour of the code around it. */
+/* The code palette: Curios highlighted by the compiler's own grammar (src/lib/highlight.ts, with highlight.module.css beside it), one colour per class of token, as the compiler names its classes. Brightness and one hue: keywords keep the site's amber; types stand out by being brighter rather than by being another colour; strings take a sand that sits beside the amber; numbers, escapes and the sorts take the amber's paler step; punctuation steps back and comments read a tier down, as prose sitting in code. `currentColor` is a kind left the colour of the code around it. */
 :root {
   --code-keyword: var(--accent);
   --code-sort: var(--accent-hi);

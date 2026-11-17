@@ -1,4 +1,4 @@
-/* The pane sits on the terminal's ground, the near-black the home page's terminal is drawn on: what the compiler says reads on the same ground wherever the site shows it. Only the ground is borrowed — what the pane prints keeps the site's own text colours. */
+/* The pane sits on the terminal's ground, the near-black the home page's terminal is drawn on: what the compiler says reads on the same ground wherever the site shows it. A refusal brings the terminal's roles with it, as the runs the compiler paints its report in (src/lib/terminal.ts); everything else the pane prints keeps the site's own text colours. */
 .output {
   margin: 0;
   background: var(--term-ground);
@@ -11,7 +11,7 @@
   color: var(--fg-code);
 }
 
-/* The placeholder is prose, not output, and says so by sitting a tier dimmer than anything the compiler actually printed. The page says which it is showing by an attribute, and says by another when what it shows went wrong. */
+/* The placeholder is prose, not output, and says so by sitting a tier dimmer than anything the compiler actually printed. The page says which it is showing by an attribute, and says by another when what it shows went wrong without a report to say so in its own colours — a compiler that never arrived, a program that trapped. */
 .output[data-empty] {
   color: var(--fg-mute);
 }

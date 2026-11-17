@@ -53,7 +53,10 @@ async function compileAndReport(source, onPhase) {
   try {
     compiled = mod.compile(source);
   } catch (error) {
-    return { ok: false, phase: "compile", ms: performance.now() - t1, error: String(error) };
+    const ms = performance.now() - t1;
+    // A refusal is thrown as its report's runs, `{ text, role }` each, `role` the name of the role the terminal paints the text in: they go to the page as they came, for the pane to paint, and joined as the report's plain text. Anything else thrown is the compiler failing rather than refusing, and reads as itself.
+    if (Array.isArray(error)) return { ok: false, phase: "compile", ms, runs: error, error: error.map(({ text }) => text).join("") };
+    return { ok: false, phase: "compile", ms, error: String(error) };
   }
   const bytes = compiled.program;
   onPhase({ phase: "end", step: "compile", ms: performance.now() - t1 });

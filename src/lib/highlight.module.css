@@ -1,13 +1,18 @@
-/* One class per kind of token the grammar tells apart, as src/lib/highlight.ts names them — that module imports this one, so the names it writes into the markup are these and no others. The colours are the code palette's tokens in index.css. */
-.keyword {
+/* What the code palette paints each of the compiler's classes as, by the name the compiler gives the class — the names the release's classes.json maps a grammar's scopes to, and src/lib/highlight.ts writes into the markup. The colours are the palette's tokens in index.css. A class with no rule here is drawn plain: a module, a value, a field, and the names a grammar cannot tell apart until the compiler does.
+
+   Where two classes share a colour they are one thing to a reader of code: a goal is a word of the language as a keyword is, a boolean a constant of the language as a sort is, a concept a type, a character a string, a documentation comment a comment, and an operator punctuation. */
+.keyword,
+.goal {
   color: var(--code-keyword);
 }
 
-.sort {
+.sort,
+.boolean {
   color: var(--code-sort);
 }
 
-.type {
+.type,
+.concept {
   color: var(--code-type);
 }
 
@@ -15,7 +20,8 @@
   color: var(--code-function);
 }
 
-.string {
+.string,
+.character {
   color: var(--code-string);
 }
 
@@ -27,10 +33,12 @@
   color: var(--code-number);
 }
 
-.comment {
+.comment,
+.documentation-comment {
   color: var(--code-comment);
 }
 
-.punct {
+.operator,
+.punctuation {
   color: var(--code-punct);
 }

@@ -1,4 +1,4 @@
-// Holds everything on the site that makes a claim about the compiler to the release package.json pins, using the compiler scripts/fetch.sh downloaded for that release. Run it after `npm run fetch`; the deploy workflow runs it before every build, so a pin that moves past an example breaks the deploy rather than the playground.
+// Holds everything on the site that makes a claim about the compiler to the release package.json pins, using the compiler scripts/fetch.mjs downloaded for that release. Run it after `npm run fetch`; the deploy workflow runs it before every build, so a pin that moves past an example breaks the deploy rather than the playground.
 //
 // What it holds them to:
 //   - the fetched compiler is the pinned one — a checkout that moved the pin without fetching again would otherwise check, and serve, the old release;
