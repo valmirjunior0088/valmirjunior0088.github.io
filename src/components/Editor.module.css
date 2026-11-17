@@ -1,5 +1,7 @@
+/* The gutter and the paint can never be shorter than their padding — 16px above, 40px below, 56px in all — so at the playground's one-line floor they stand taller than the editor, and a second line would hang out over the bar beneath it. The editor clips them at its own edge, inside the border. `clip` rather than `hidden`, so the editor never becomes a scroll container that focus could move. */
 .editor {
   display: flex;
+  overflow: clip;
   border-bottom: 1px solid var(--edge);
 }
 
